@@ -1,0 +1,10 @@
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\bin\Debug\TileRPG.exe.config
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\bin\Debug\TileRPG.exe
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\bin\Debug\TileRPG.pdb
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.csprojAssemblyReference.cache
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.Game.resources
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.Properties.Resources.resources
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.csproj.GenerateResource.cache
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.csproj.CoreCompileInputs.cache
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.exe
+C:\Users\olive\OneDrive\Desktop\Compy\TileRPG\TileRPG\obj\Debug\TileRPG.pdb
