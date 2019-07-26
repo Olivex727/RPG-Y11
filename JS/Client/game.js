@@ -1,5 +1,9 @@
-var playerpos = [0,0]
+// config variables
+var globalpos = [0,0]
 var map = {};
+var size = 700
+var sps = 9
+var playerpos = [(sps-1)/2, (sps-1)/2]
 var maptext = $.ajax({
     type: "GET",
     url: "/maptest.txt",
@@ -19,18 +23,62 @@ var colours = {
     "forest": "#666633",
     "player": "#0d0d0d"
 };
+var terrain = [
+    ["grass", True],
+    ["mountain", True],
+    ["water", False],
+    ["lava", False],
+    ["forest", True]
+    ]
 
 window.onload = function() {
     window.addEventListener("keypress", update);
-    for (y = 0; y < 10; y++){
-        for (x = 0; x < 10; x++){ // draw map
-            ctx.fillStyle = colours[map[x+","+y]['type']];
-            ctx.fillRect(x*64, y*64, 64, 64);
+    drawscreen()
+};
+
+//drawing the screen
+var drawscreen = () => {
+    var draw = (x,y) => {
+        ctx.fillStyle = colours[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']];
+        ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
+    };
+
+    for (y = 0; y < sps; y++){
+        for (x = 0; x < sps; x++){ // draw map
+            try {
+                draw(x,y)
+            } catch (e) { // if the tile dosent exist yet
+                if (e instanceof TypeError ){
+
+                    if(Math.random() <= 0.6){ // terrain
+                        type = "grass"
+                        stand = True
+                    }else{
+                        z = Math.floor(Math.random() * terrain.length) + 1
+                        type = terrain[z][0]
+                        stand = terrain[z][1]
+                    }
+                    if(Math.random() <= 0.1){ // terrain
+                        type = "grass"
+                        stand = True
+                    }else{
+                        z = Math.floor(Math.random() * terrain.length) + 1
+                        type = terrain[z][0]
+                        stand = terrain[z][1]
+                    }
+
+
+                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":"grass", "stand":"True", "special": "none"}
+                    draw(x,y)
+                }else{
+                    console.log(e)
+                }
+            }
         };
     };
     ctx.fillStyle = colours["player"]
-    ctx.fillRect(playerpos[0]*64+16, playerpos[1]*64+16, 32, 32);
-};
+    ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+}
 
 function update(key) { //keys
     var movex = 0;
@@ -47,17 +95,18 @@ function update(key) { //keys
     else if (key["code"] == "KeyD"){
         movex = 1;
     }
-    if (movex+movey != 0 && playerpos[0] + movex >=0 && playerpos[0] + movex <10 && playerpos[1] + movey >=0 && playerpos[1] + movey <10){
-
-        if (map[(playerpos[0]+movex)+","+(playerpos[1]+movey)]['stand'] == "True"){
-            ctx.fillStyle = colours[map[playerpos[0]+","+playerpos[1]]['type']];
-            ctx.fillRect(playerpos[0]*64+16, playerpos[1]*64+16, 32, 32);
-            playerpos[0] += movex;
-            playerpos[1] += movey;
-            ctx.fillStyle = colours["player"]
-            ctx.fillRect(playerpos[0]*64+16, playerpos[1]*64+16, 32, 32);
-        }
-
+    if (movex+movey != 0 && playerpos[0] + movex >=0){// && playerpos[0] + movex <sps && playerpos[1] + movey >=0 && playerpos[1] + movey <sps){
+    //
+    //     if (map[(playerpos[0]+movex)+","+(playerpos[1]+movey)]['stand'] == "True"){
+    //         ctx.fillStyle = colours[map[playerpos[0]+","+playerpos[1]]['type']];
+    //         ctx.fillRect(playerpos[0]*(size/sps)+16, playerpos[1]*(size/sps)+16, 32, 32);
+    //         playerpos[0] += movex;
+    //         playerpos[1] += movey;
+    //         ctx.fillStyle = colours["player"]
+    //         ctx.fillRect(playerpos[0]*(size/sps)+16, playerpos[1]*(size/sps)+16, 32, 32);
+    //     }
+        globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+        drawscreen();
     }
 
 
