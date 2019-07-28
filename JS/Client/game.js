@@ -1,9 +1,10 @@
 // config variables
 var globalpos = [0,0]
 var map = {};
-var size = 700
-var sps = 9
+var size = 704
+var sps = 11
 var playerpos = [(sps-1)/2, (sps-1)/2]
+map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
 var maptext = $.ajax({
     type: "GET",
     url: "/maptest.txt",
@@ -11,25 +12,12 @@ var maptext = $.ajax({
 }).responseText.split("\n");
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4]}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": "none"}
 };
 var canvas = document.getElementById("screen");
 var ctx = canvas.getContext("2d");
-var colours = {
-    "grass": "#33cc33",
-    "water": "#0033cc",
-    "mountain": "#999966",
-    "lava": "#cc6600",
-    "forest": "#666633",
-    "player": "#0d0d0d"
-};
-var terrain = [
-    ["grass", True],
-    ["mountain", True],
-    ["water", False],
-    ["lava", False],
-    ["forest", True]
-    ]
+
+
 
 window.onload = function() {
     window.addEventListener("keypress", update);
@@ -38,9 +26,25 @@ window.onload = function() {
 
 //drawing the screen
 var drawscreen = () => {
+    var terrain = {
+        "grass": {"colour":"#33cc33", "stand":"True"},
+        "water": {"colour":"#0033cc", "stand":"False"},
+        "mountain": {"colour":"#999966", "stand":"True"},
+        "lava": {"colour":"#cc6600", "stand":"False"},
+        "forest": {"colour":"#666633", "stand":"True"},
+    };
+    var entities = {
+        "player": {"colour":"#0d0d0d"},
+        "goblin": {"colour":"#ff0000"}
+    }
+    var interest = ["fountain", "dungeon", "monster", "teleport"]
     var draw = (x,y) => {
-        ctx.fillStyle = colours[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']];
+        ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
         ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
+        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
+            ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
+            ctx.fillRect((x)*(size/sps)+(size/sps)/4, (y)*(size/sps)+(size/sps)/4, (size/sps)/2, (size/sps)/2)
+        }
     };
 
     for (y = 0; y < sps; y++){
@@ -52,23 +56,26 @@ var drawscreen = () => {
 
                     if(Math.random() <= 0.6){ // terrain
                         type = "grass"
-                        stand = True
+                        stand = "True"
+                        if(Math.random() <= 0.01){ // enemies
+                            enemy = "goblin"
+                        } else {
+                            enemy = "none"
+                        }
                     }else{
-                        z = Math.floor(Math.random() * terrain.length) + 1
-                        type = terrain[z][0]
-                        stand = terrain[z][1]
+                        type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
+                        stand = terrain[type]["stand"]
+                        enemy = "none"
                     }
                     if(Math.random() <= 0.1){ // terrain
-                        type = "grass"
-                        stand = True
-                    }else{
-                        z = Math.floor(Math.random() * terrain.length) + 1
-                        type = terrain[z][0]
-                        stand = terrain[z][1]
+                        z = Math.floor(Math.random() * Object.keys(terrain).length) + 1
+                        special = interest[z]
+                    } else {
+                        special = "none"
                     }
 
 
-                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":"grass", "stand":"True", "special": "none"}
+                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy}
                     draw(x,y)
                 }else{
                     console.log(e)
@@ -76,7 +83,7 @@ var drawscreen = () => {
             }
         };
     };
-    ctx.fillStyle = colours["player"]
+    ctx.fillStyle = entities["player"]["colour"]
     ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
 }
 
@@ -95,18 +102,20 @@ function update(key) { //keys
     else if (key["code"] == "KeyD"){
         movex = 1;
     }
-    if (movex+movey != 0 && playerpos[0] + movex >=0){// && playerpos[0] + movex <sps && playerpos[1] + movey >=0 && playerpos[1] + movey <sps){
+    if (movex+movey != 0){// && playerpos[0] + movex >=0 && playerpos[0] + movex <sps && playerpos[1] + movey >=0 && playerpos[1] + movey <sps){
     //
     //     if (map[(playerpos[0]+movex)+","+(playerpos[1]+movey)]['stand'] == "True"){
-    //         ctx.fillStyle = colours[map[playerpos[0]+","+playerpos[1]]['type']];
+    //         ctx.fillStyle = terrain[map[playerpos[0]+","+playerpos[1]]['type']];
     //         ctx.fillRect(playerpos[0]*(size/sps)+16, playerpos[1]*(size/sps)+16, 32, 32);
     //         playerpos[0] += movex;
     //         playerpos[1] += movey;
-    //         ctx.fillStyle = colours["player"]
+    //         ctx.fillStyle = terrain["player"]
     //         ctx.fillRect(playerpos[0]*(size/sps)+16, playerpos[1]*(size/sps)+16, 32, 32);
     //     }
-        globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-        drawscreen();
+        if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+            globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+            drawscreen();
+        }
     }
 
 
