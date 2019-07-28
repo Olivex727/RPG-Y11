@@ -25,7 +25,7 @@ window.onload = function() {
 };
 
 //drawing the screen
-var drawscreen = () => {
+var drawscreen = (movex,movey) => {
     var terrain = {
         "grass": {"colour":"#33cc33", "stand":"True"},
         "water": {"colour":"#0033cc", "stand":"False"},
@@ -39,8 +39,10 @@ var drawscreen = () => {
     }
     var interest = ["fountain", "dungeon", "monster", "teleport"]
     var draw = (x,y) => {
-        ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
-        ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
+        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()]){
+            ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
+            ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
+        }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
             ctx.fillRect((x)*(size/sps)+(size/sps)/4, (y)*(size/sps)+(size/sps)/4, (size/sps)/2, (size/sps)/2)
@@ -59,6 +61,7 @@ var drawscreen = () => {
                         stand = "True"
                         if(Math.random() <= 0.01){ // enemies
                             enemy = "goblin"
+                            stand = "False"
                         } else {
                             enemy = "none"
                         }
@@ -114,7 +117,7 @@ function update(key) { //keys
     //     }
         if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
             globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-            drawscreen();
+            drawscreen(movex,movey);
         }
     }
 
