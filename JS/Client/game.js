@@ -21,7 +21,7 @@ var ctx = canvas.getContext("2d");
 
 window.onload = function() {
     window.addEventListener("keypress", update);
-    drawscreen()
+    drawscreen(0,0)
 };
 
 //drawing the screen
@@ -39,7 +39,8 @@ var drawscreen = (movex,movey) => {
     }
     var interest = ["fountain", "dungeon", "monster", "teleport"]
     var draw = (x,y) => {
-        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()]){
+        // check to see if the tile changes (although redraws if different interest currently)
+        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
             ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
             ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
         }
