@@ -42,7 +42,7 @@ var drawscreen = (movex,movey) => {
         // check to see if the tile changes (although redraws if different interest currently)
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
             ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
-            ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
+            ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
