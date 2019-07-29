@@ -29,9 +29,9 @@ var drawscreen = (movex,movey) => {
     var terrain = {
         "grass": {"colour":"#33cc33", "stand":"True"},
         "water": {"colour":"#0033cc", "stand":"False"},
-        "mountain": {"colour":"#999966", "stand":"True"},
+        "mountain": {"colour":"#666633", "stand":"True"},
         "lava": {"colour":"#cc6600", "stand":"False"},
-        "forest": {"colour":"#666633", "stand":"True"},
+        "forest": {"colour":"#336600", "stand":"True"},
     };
     var entities = {
         "player": {"colour":"#0d0d0d"},
