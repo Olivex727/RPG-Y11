@@ -1,7 +1,7 @@
 // config variables
 var globalpos = [0,0]
 var map = {};
-var size = 704
+var size = 512
 var sps = 11
 var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
@@ -12,7 +12,7 @@ var maptext = $.ajax({
 }).responseText.split("\n");
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": "none"}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5]}
 };
 var canvas = document.getElementById("screen");
 var ctx = canvas.getContext("2d");

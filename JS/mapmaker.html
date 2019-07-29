@@ -10,12 +10,15 @@
 
             }
             button {
-                width: 141.2px;
+                width: 100px;
                 height: 50px;
 
             }
             canvas{
                 display: inline;
+            }
+            input {
+                width: 30px;
             }
         </style>
 
@@ -23,9 +26,19 @@
     <body>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <div id="butons"></div>
-        <canvas id="screen" width="704" height="704" onkeypress="test">
+        <canvas id="screen" width="576" height="576">
             <p>No display</p>
         </canvas>
+        special
+        <select id="special">
+          <option value="none">none</option>
+          <option value="fountain">fountain</option>
+          <option value="dungeon">dungeon</option>
+          <option value="teleport">teleport</option>
+        </select>
+        <br />
+        Top-Left-Location:(<input type="text" value="0" name="posx" id="posx"></input>,<input type="text"value="0" name="posy" id="posy"></input>)
+        <button type="button" name="export" onclick="download()">export</button>
         <script src="mapmaker.js"></script>
 
         <!--<p>Loll</p>-->
