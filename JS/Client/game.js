@@ -1,7 +1,7 @@
 // config variables
 var globalpos = [0,0]
 var map = {};
-var size = 704
+var size = 512
 var sps = 11
 var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
@@ -12,7 +12,7 @@ var maptext = $.ajax({
 }).responseText.split("\n");
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": "none"}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5]}
 };
 var canvas = document.getElementById("screen");
 var ctx = canvas.getContext("2d");
@@ -29,9 +29,9 @@ var drawscreen = (movex,movey) => {
     var terrain = {
         "grass": {"colour":"#33cc33", "stand":"True"},
         "water": {"colour":"#0033cc", "stand":"False"},
-        "mountain": {"colour":"#999966", "stand":"True"},
+        "mountain": {"colour":"#666633", "stand":"True"},
         "lava": {"colour":"#cc6600", "stand":"False"},
-        "forest": {"colour":"#666633", "stand":"True"},
+        "forest": {"colour":"#336600", "stand":"True"},
     };
     var entities = {
         "player": {"colour":"#0d0d0d"},
@@ -42,7 +42,7 @@ var drawscreen = (movex,movey) => {
         // check to see if the tile changes (although redraws if different interest currently)
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
             ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
-            ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps)+1, (size/sps)+1)
+            ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
