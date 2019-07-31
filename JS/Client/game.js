@@ -27,11 +27,11 @@ window.onload = function() {
 //drawing the screen
 var drawscreen = (movex,movey) => {
     var terrain = {
-        "grass": {"colour":"#33cc33", "stand":"True"},
-        "water": {"colour":"#0033cc", "stand":"False"},
-        "mountain": {"colour":"#666633", "stand":"True"},
-        "lava": {"colour":"#cc6600", "stand":"False"},
-        "forest": {"colour":"#336600", "stand":"True"},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":"True"},
+        "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
+        "mountain": {"colour":"#666633", "stand":"True", "image":"False"},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":"True"},
+        "forest": {"colour":"#336600", "stand":"True", "image":"False"},
     };
     var entities = {
         "player": {"colour":"#0d0d0d"},
@@ -41,8 +41,14 @@ var drawscreen = (movex,movey) => {
     var draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
-            ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
-            ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
+            if(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"]=="False") {
+                ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
+                ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
+            } else {
+                var img = document.getElementById(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']);
+                ctx.drawImage(img, (x)*(size/sps), (y)*(size/sps));
+            }
+
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
