@@ -57,7 +57,7 @@ function download() {
       stand = map[Object.keys(map)[i]]["stand"]
       special = map[Object.keys(map)[i]]["special"]
       enemy = map[Object.keys(map)[i]]["enemy"]
-      var str2 = (coord[0]-$('#posx').val())+"|"+(coord[0]-$('#posy').val())+"|"+type+"|"+stand+"|"+special+"|"+enemy+"\n"
+      var str2 = (coord[0]-$('#posx').val())+"|"+(coord[1]-$('#posy').val())+"|"+type+"|"+stand+"|"+special+"|"+enemy+"\n"
       text = text.concat(str2)
 
   };
