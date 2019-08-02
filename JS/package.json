@@ -1,0 +1,24 @@
+{
+  "name": "RPG-Y11",
+  "version": "1.0.0",
+  "description": "All of the Tile-Based RPG in Y11",
+  "main": "game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Olivex727/RPG-Y11.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Olivex727/RPG-Y11/issues"
+  },
+  "homepage": "https://github.com/Olivex727/RPG-Y11#readme",
+  "dependencies": {
+    "request": "^2.88.0"
+  }
+}

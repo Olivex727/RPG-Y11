@@ -27,11 +27,11 @@ window.onload = function() {
 //drawing the screen
 var drawscreen = (movex,movey) => {
     var terrain = {
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"True"},
-        "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
-        "mountain": {"colour":"#666633", "stand":"True", "image":"False"},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"True"},
-        "forest": {"colour":"#336600", "stand":"True", "image":"False"},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":"True", "height":"1"},
+        "water": {"colour":"#0033cc", "stand":"False", "image":"False", "height":"3"},
+        "mountain": {"colour":"#666633", "stand":"True", "image":"False", "height":"4"},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":"True", "height":"5"},
+        "forest": {"colour":"#336600", "stand":"True", "image":"False", "height":"2"},
     };
     var entities = {
         "player": {"colour":"#0d0d0d"},
@@ -124,6 +124,7 @@ function update(key) { //keys
     //     }
         if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
             globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+            console.log(globalpos);
             drawscreen(movex,movey);
         }
     }

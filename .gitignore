@@ -1,4 +1,2 @@
 **/JS/node_modules
-**/JS/package.json
 *.DS_Store
-package-lock.json
