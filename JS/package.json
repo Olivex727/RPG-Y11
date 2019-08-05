@@ -1,5 +1,5 @@
 {
-  "name": "RPG-Y11",
+  "name": "rpg-y11",
   "version": "1.0.0",
   "description": "All of the Tile-Based RPG in Y11",
   "main": "game.js",
