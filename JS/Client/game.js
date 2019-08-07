@@ -17,20 +17,103 @@ for (i = 0; i < maptext.length; i++){
 var canvas = document.getElementById("screen");
 var ctx = canvas.getContext("2d");
 
+var scrollnum = 0;
+var inventstage = "inventory"
+
+//Item management
+var inventory = [
+    {
+        "name":"Rock",
+        "color": "#666633",
+        "amount": "0",
+        "image": "False",
+        "cost": "100"
+    },
+    {
+        "name": "Water",
+        "color": "#0033cc",
+        "amount": "10",
+        "image": "False",
+        "cost": "120"
+    },
+    {
+        "name": "Wood",
+        "color": "#550011",
+        "amount": "0",
+        "image": "False",
+        "cost": "1000"
+    },
+    {
+        "name": "Lava",
+        "color": "#cc6600",
+        "amount": "0",
+        "image": "False",
+        "cost": "3200"
+    }
+];
+
 
 
 window.onload = function() {
     window.addEventListener("keypress", update);
+    updateInvent(null);
     drawscreen(0,0)
 };
+
+//Update the selections on the inventory
+function updateInvent(scroll, change=null)
+{
+
+    //Change what tab the inventory is on
+    if(change != null){
+        inventstage = change;
+        scrollnum = 0;
+    }
+
+    if (scroll != null) {
+        //alert((inventory.length - 3).toString() + " " + scrollnum);
+        if ((scrollnum < inventory.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+            scrollnum += scroll;
+        }
+    }
+    var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
+    
+    //Update and output information of items and such (Crafting involved)
+    if(inventstage === "inventory") {
+        title.textContent = "INVENTORY:";
+        slot1.textContent = inventory[scrollnum].name + ": " + inventory[scrollnum].amount + " units, $" + inventory[scrollnum].cost;
+        slot2.textContent = inventory[scrollnum + 1].name + ": " + inventory[scrollnum + 1].amount + " units, $" + inventory[scrollnum +1].cost;
+        slot3.textContent = inventory[scrollnum + 2].name + ": " + inventory[scrollnum + 2].amount + " units, $" + inventory[scrollnum +2].cost;
+    }
+    //Section that contains the apparel, weapons and tools 
+    if (inventstage === "toolbelt") {
+        title.textContent = "TOOLBELT:";
+        slot1.textContent = "";
+        slot2.textContent = "";
+        slot3.textContent = "";
+    }
+    if (inventstage === "quests") {
+        title.textContent = "QUESTS:";
+        slot1.textContent = "";
+        slot2.textContent = "";
+        slot3.textContent = "";
+    }
+    if (inventstage === "market") {
+        title.textContent = "MARKET:";
+        slot1.textContent = "";
+        slot2.textContent = "";
+        slot3.textContent = "";
+    }
+
+}
 
 //drawing the screen
 var drawscreen = (movex,movey) => {
     var terrain = {
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"True", "height":"1"},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":"False", "height":"1"},
         "water": {"colour":"#0033cc", "stand":"False", "image":"False", "height":"3"},
         "mountain": {"colour":"#666633", "stand":"True", "image":"False", "height":"4"},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"True", "height":"5"},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":"False", "height":"5"},
         "forest": {"colour":"#336600", "stand":"True", "image":"False", "height":"2"},
     };
     var entities = {
