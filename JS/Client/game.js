@@ -20,37 +20,127 @@ var ctx = canvas.getContext("2d");
 var scrollnum = 0;
 var inventstage = "inventory"
 
+//NOTE: All zero level values mean that the object has not been picked up/crafted
+
+var toolbelt = {
+    weapons: [
+        {
+            "name": "Sword",
+            "color": "#000000",
+            "damage": [10, 1.2],
+            "speed": [2, 0.1],
+            "level": 1,
+            "image": "False"
+        },
+        {
+            "name": "Bow",
+            "color": "#000000",
+            "damage": [6, 0.8],
+            "speed": [8, 0.2],
+            "level": 0,
+            "image": "False"
+        }
+    ],
+    tools: [
+        {
+            "name": "Sickle",
+            "color": "#000000",
+            "tilebase": "earth",
+            "efficiency": [4, 0.4],
+            "level": 1,
+            "image": "False"
+        },
+        {
+            "name": "Pickaxe",
+            "color": "#000000",
+            "tilebase": "earth",
+            "efficiency": [3, 0.7],
+            "level": 0,
+            "image": "False"
+        }
+
+    ],
+    apparel: [
+        {
+            "name": "Chainmail",
+            "color": "#000000",
+            "strength": [9, 0.8],
+            "level": 0,
+            "image": "False"
+        },
+        {
+            "name": "Clothes",
+            "color": "#000000",
+            "strength": [1, 0.1],
+            "level": 1,
+            "image": "False"
+        }
+    ]
+};
+
 //Item management
 var inventory = [
     {
-        "name":"Rock",
+        "name": "Rock",
         "color": "#666633",
-        "amount": "0",
+        "amount": 0,
         "image": "False",
-        "cost": "100"
+        "cost": 100
     },
     {
         "name": "Water",
         "color": "#0033cc",
-        "amount": "10",
+        "amount": 10,
         "image": "False",
-        "cost": "120"
+        "cost": 120
     },
     {
         "name": "Wood",
         "color": "#550011",
-        "amount": "0",
+        "amount": 0,
         "image": "False",
-        "cost": "1000"
+        "cost": 1000
     },
     {
         "name": "Lava",
         "color": "#cc6600",
-        "amount": "0",
+        "amount": 0,
         "image": "False",
-        "cost": "3200"
+        "cost": 3200
     }
 ];
+
+var ButtonPresets = {
+    "toolbelt": [
+        {
+            onclick: "updateInvent(0, 'toolbelt_weapons');",
+            text: "Weapons"
+        },
+        {
+            onclick: "updateInvent(0, 'toolbelt_tools');",
+            text: "Tools"
+        },
+        {
+            onclick: "updateInvent(0, 'toolbelt_apparel');",
+            text: "Apparel"
+        }
+    ],
+    "inventory": [
+        {
+            onclick: "",
+            text: "Put in Table"
+        },
+        {
+            onclick: "",
+            text: "Craft"
+        },
+        {
+            onclick: "",
+            text: "Sell"
+        }
+    ]
+};
+
 
 
 
@@ -61,11 +151,10 @@ window.onload = function() {
 };
 
 //Update the selections on the inventory
-function updateInvent(scroll, change=null)
-{
+function updateInvent(scroll, change = null) {
 
     //Change what tab the inventory is on
-    if(change != null){
+    if (change != null) {
         inventstage = change;
         scrollnum = 0;
     }
@@ -78,33 +167,54 @@ function updateInvent(scroll, change=null)
     }
     var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
     
+
+    title.textContent = inventstage.toUpperCase();
+
+    b1.textContent = ButtonPresets[inventstage.split("_")[0]][0].text; b1.onclick = ButtonPresets[inventstage.split("_")[0]][0].onclick; alert(b1.onclick + ", " + ButtonPresets[inventstage.split("_")[0]][0].onclick);
+
+
     //Update and output information of items and such (Crafting involved)
-    if(inventstage === "inventory") {
-        title.textContent = "INVENTORY:";
+    if (inventstage === "inventory") {
         slot1.textContent = inventory[scrollnum].name + ": " + inventory[scrollnum].amount + " units, $" + inventory[scrollnum].cost;
-        slot2.textContent = inventory[scrollnum + 1].name + ": " + inventory[scrollnum + 1].amount + " units, $" + inventory[scrollnum +1].cost;
-        slot3.textContent = inventory[scrollnum + 2].name + ": " + inventory[scrollnum + 2].amount + " units, $" + inventory[scrollnum +2].cost;
+        slot2.textContent = inventory[scrollnum + 1].name + ": " + inventory[scrollnum + 1].amount + " units, $" + inventory[scrollnum + 1].cost;
+        slot3.textContent = inventory[scrollnum + 2].name + ": " + inventory[scrollnum + 2].amount + " units, $" + inventory[scrollnum + 2].cost;
     }
     //Section that contains the apparel, weapons and tools 
-    if (inventstage === "toolbelt") {
-        title.textContent = "TOOLBELT:";
+    if (inventstage.split("_")[0] === "toolbelt") {
+        if (inventstage.split("_")[1] === "weapons") {
+
+        }
+        if (inventstage.split("_")[1] === "tools") {
+
+        }
+        if (inventstage.split("_")[1] === "apparel") {
+
+        }
         slot1.textContent = "";
         slot2.textContent = "";
         slot3.textContent = "";
     }
     if (inventstage === "quests") {
-        title.textContent = "QUESTS:";
         slot1.textContent = "";
         slot2.textContent = "";
         slot3.textContent = "";
     }
     if (inventstage === "market") {
-        title.textContent = "MARKET:";
         slot1.textContent = "";
         slot2.textContent = "";
         slot3.textContent = "";
     }
 
+}
+
+function ComPress(scroll, button, change=null){
+
+    var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
+    
+    if (inventstage.split("_")[0] === "inventory")
+    {
+        
+    }
 }
 
 //drawing the screen
