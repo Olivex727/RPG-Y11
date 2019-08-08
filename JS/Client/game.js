@@ -20,130 +20,6 @@ var ctx = canvas.getContext("2d");
 var scrollnum = 0;
 var inventstage = "inventory"
 
-//NOTE: All zero level values mean that the object has not been picked up/crafted
-
-var toolbelt = {
-    weapons: [
-        {
-            "name": "Sword",
-            "color": "#000000",
-            "damage": [10, 1.2],
-            "speed": [2, 0.1],
-            "level": 1,
-            "image": "False"
-        },
-        {
-            "name": "Bow",
-            "color": "#000000",
-            "damage": [6, 0.8],
-            "speed": [8, 0.2],
-            "level": 0,
-            "image": "False"
-        }
-    ],
-    tools: [
-        {
-            "name": "Sickle",
-            "color": "#000000",
-            "tilebase": "earth",
-            "efficiency": [4, 0.4],
-            "level": 1,
-            "image": "False"
-        },
-        {
-            "name": "Pickaxe",
-            "color": "#000000",
-            "tilebase": "earth",
-            "efficiency": [3, 0.7],
-            "level": 0,
-            "image": "False"
-        }
-
-    ],
-    apparel: [
-        {
-            "name": "Chainmail",
-            "color": "#000000",
-            "strength": [9, 0.8],
-            "level": 0,
-            "image": "False"
-        },
-        {
-            "name": "Clothes",
-            "color": "#000000",
-            "strength": [1, 0.1],
-            "level": 1,
-            "image": "False"
-        }
-    ]
-};
-
-//Item management
-var inventory = [
-    {
-        "name": "Rock",
-        "color": "#666633",
-        "amount": 0,
-        "image": "False",
-        "cost": 100
-    },
-    {
-        "name": "Water",
-        "color": "#0033cc",
-        "amount": 10,
-        "image": "False",
-        "cost": 120
-    },
-    {
-        "name": "Wood",
-        "color": "#550011",
-        "amount": 0,
-        "image": "False",
-        "cost": 1000
-    },
-    {
-        "name": "Lava",
-        "color": "#cc6600",
-        "amount": 0,
-        "image": "False",
-        "cost": 3200
-    }
-];
-
-var ButtonPresets = {
-    "toolbelt": [
-        {
-            onclick: "updateInvent(0, 'toolbelt_weapons');",
-            text: "Weapons"
-        },
-        {
-            onclick: "updateInvent(0, 'toolbelt_tools');",
-            text: "Tools"
-        },
-        {
-            onclick: "updateInvent(0, 'toolbelt_apparel');",
-            text: "Apparel"
-        }
-    ],
-    "inventory": [
-        {
-            onclick: "",
-            text: "Put in Table"
-        },
-        {
-            onclick: "",
-            text: "Craft"
-        },
-        {
-            onclick: "",
-            text: "Sell"
-        }
-    ]
-};
-
-
-
-
 window.onload = function() {
     window.addEventListener("keypress", update);
     updateInvent(null);
@@ -152,68 +28,110 @@ window.onload = function() {
 
 //Update the selections on the inventory
 function updateInvent(scroll, change = null) {
-
+    console.log("updateInvent: "+inventstage+" -> " + change);
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
         scrollnum = 0;
     }
+    
+    
+    var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
+    title.textContent = inventstage.toUpperCase();
+    var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
 
-    if (scroll != null) {
-        //alert((inventory.length - 3).toString() + " " + scrollnum);
-        if ((scrollnum < inventory.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+    b2.textContent = ButtonPresets[inventstage.split("_")[0]][1].text; b3.textContent = ButtonPresets[inventstage.split("_")[0]][2].text; b1.textContent = ButtonPresets[inventstage.split("_")[0]][0].text;
+
+    //INVENTORY
+    //Update and output information of items and such (Crafting involved)
+    if (inventstage.split("_")[0] === "inventory") {
+        if (scroll != null && (scrollnum < inventory.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
-    }
-    var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
-    
-
-    title.textContent = inventstage.toUpperCase();
-
-    b1.textContent = ButtonPresets[inventstage.split("_")[0]][0].text; b1.onclick = ButtonPresets[inventstage.split("_")[0]][0].onclick; alert(b1.onclick + ", " + ButtonPresets[inventstage.split("_")[0]][0].onclick);
-
-
-    //Update and output information of items and such (Crafting involved)
-    if (inventstage === "inventory") {
         slot1.textContent = inventory[scrollnum].name + ": " + inventory[scrollnum].amount + " units, $" + inventory[scrollnum].cost;
         slot2.textContent = inventory[scrollnum + 1].name + ": " + inventory[scrollnum + 1].amount + " units, $" + inventory[scrollnum + 1].cost;
         slot3.textContent = inventory[scrollnum + 2].name + ": " + inventory[scrollnum + 2].amount + " units, $" + inventory[scrollnum + 2].cost;
     }
+
+    //TOOLBELT
     //Section that contains the apparel, weapons and tools 
     if (inventstage.split("_")[0] === "toolbelt") {
+
+        //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-
+            if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+                scrollnum += scroll;
+            }
+            slot1.textContent = toolbelt.weapons[scrollnum].name + ": Dmg: " + toolbelt.weapons[scrollnum].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum].level;
+            slot2.textContent = toolbelt.weapons[scrollnum+1].name + ": Dmg: " + toolbelt.weapons[scrollnum+1].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum+1].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum+1].level;
+            slot3.textContent = "";//toolbelt.weapons[scrollnum+2].name + ": Dmg: " + toolbelt.weapons[scrollnum+2].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum+2].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum+2].level;
         }
+
+        //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-
+            if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+                scrollnum += scroll;
+            }
+            slot1.textContent = toolbelt.tools[scrollnum].name + ": Spd: " + toolbelt.tools[scrollnum].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum].level;
+            slot2.textContent = toolbelt.tools[scrollnum + 1].name + ": Spd: " + toolbelt.tools[scrollnum + 1].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum + 1].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum + 1].level;
+            slot3.textContent = "";//toolbelt.tools[scrollnum+2].name + ": Spd:" + toolbelt.tools[scrollnum+2].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum+2].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum+2].level;
         }
+
+        //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-
+            if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+                scrollnum += scroll;
+            }
+            slot1.textContent = toolbelt.apparel[scrollnum].name + ": Str: " + toolbelt.apparel[scrollnum].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level;
+            slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Str: " + toolbelt.apparel[scrollnum + 1].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level;
+            slot3.textContent = "";//toolbelt.apparel[scrollnum+2].name + ": Str:" + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level;
         }
-        slot1.textContent = "";
-        slot2.textContent = "";
-        slot3.textContent = "";
     }
-    if (inventstage === "quests") {
-        slot1.textContent = "";
-        slot2.textContent = "";
-        slot3.textContent = "";
+
+    //QUESTS
+    if (inventstage.split("_")[0] === "quests") {
+        //alert("quest: " + quests[0].name);
+        if (scroll != null && (scrollnum < quests.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+            scrollnum += scroll;
+        }
+        if (quests[scrollnum] != null) {
+            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + ", reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
+        } else {slot1.textContent = "";}
+        if (quests[scrollnum + 1] != null) {
+            slot2.textContent = quests[scrollnum+1].name;
+        } else {slot2.textContent = "";}
+        if (quests[scrollnum+2] != null){
+            slot3.textContent = quests[scrollnum+2].name;
+        } else {slot3.textContent = "";}
     }
-    if (inventstage === "market") {
-        slot1.textContent = "";
-        slot2.textContent = "";
-        slot3.textContent = "";
+
+    //MARKET
+    if (inventstage.split("_")[0] === "market") {
+        if (scroll != null && (scrollnum < inventory.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+            scrollnum += scroll;
+        }
+        slot1.textContent = inventory[scrollnum].name + ": " + inventory[scrollnum].stock + " units, $" + inventory[scrollnum].cost;
+        slot2.textContent = inventory[scrollnum + 1].name + ": " + inventory[scrollnum + 1].stock + " units, $" + inventory[scrollnum + 1].cost;
+        slot3.textContent = inventory[scrollnum + 2].name + ": " + inventory[scrollnum + 2].stock + " units, $" + inventory[scrollnum + 2].cost;
     }
 
 }
 
 function ComPress(scroll, button, change=null){
 
-    var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
-    
-    if (inventstage.split("_")[0] === "inventory")
-    {
+    if (inventstage.split("_")[0] === "inventory"){
         
+    }
+    if (inventstage.split("_")[0] === "quests") {
+        
+    }
+    if (inventstage.split("_")[0] === "toolbelt") {
+        if (button == 1) { updateInvent(0, 'toolbelt_weapons'); }
+        if (button == 2) { updateInvent(0, 'toolbelt_tools'); }
+        if (button == 3) { updateInvent(0, 'toolbelt_apparel'); }
+    }
+    if (inventstage.split("_")[0] === "inventory") {
+
     }
 }
 
