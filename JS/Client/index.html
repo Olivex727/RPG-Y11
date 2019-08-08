@@ -30,10 +30,15 @@
             </canvas>
             <div id="inventory">
                 <button onclick="updateInvent(0, 'inventory');">Inventory</button>
-                <button onclick="updateInvent(0, 'toolbelt');">Toolbelt</button>
+                <button onclick="updateInvent(0, 'toolbelt_weapons');">Toolbelt</button>
                 <button onclick="updateInvent(0, 'quests');">Quests</button>
                 <button onclick="updateInvent(0, 'market');">Market</button>
                 <p id ="inv"></p>
+                <div id = "command">
+                    <button id = "command_1" onclick="updateInvent(0, 'toolbelt_weapons');">Weapons</button>
+                    <button id = "command_2" onclick="updateInvent(0, 'toolbelt_tools');">Tools</button>
+                    <button id = "command_3" onclick="updateInvent(0, 'toolbelt_apparel');">Apparel</button>
+                </div>
                 <span id="item1"></span><br>
                 <span id="item2"></span><br>
                 <span id="item3"></span><br>
