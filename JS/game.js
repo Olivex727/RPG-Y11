@@ -7,7 +7,7 @@ var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
 var maptext = $.ajax({
     type: "GET",
-    url: "/maptest.txt",
+    url: "/map",
     async: false
 }).responseText.split("\n");
 for (i = 0; i < maptext.length; i++){
@@ -27,10 +27,10 @@ window.onload = function() {
 //drawing the screen
 var drawscreen = (movex,movey) => {
     var terrain = {
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"True", "height":"1"},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":"False", "height":"1"},
         "water": {"colour":"#0033cc", "stand":"False", "image":"False", "height":"3"},
         "mountain": {"colour":"#666633", "stand":"True", "image":"False", "height":"4"},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"True", "height":"5"},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":"False", "height":"5"},
         "forest": {"colour":"#336600", "stand":"True", "image":"False", "height":"2"},
     };
     var entities = {

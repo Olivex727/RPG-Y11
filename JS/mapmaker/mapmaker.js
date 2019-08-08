@@ -1,18 +1,18 @@
-var canvas = document.getElementById("screen");
+const canvas = document.getElementById("screen");
 canvas.addEventListener("mousemove", mouseclick);
 canvas.addEventListener("mousedown", mouseclick);
-var map = {}
-var currentType = "grass"
-var mouseDown = 0;
+let map = {}
+let currentType = "grass"
+let mouseDown = 0;
 window.onmousedown = function() {
   ++mouseDown;
 }
 window.onmouseup = function() {
   --mouseDown;
 }
-var ctx = canvas.getContext("2d");
-var size = 576
-var sps = 11
+const ctx = canvas.getContext("2d");
+const size = 576
+const sps = 11
 
 for(i = 0; i<sps-1;i++){
     ctx.fillStyle = "#000000"
