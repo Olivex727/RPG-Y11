@@ -28,7 +28,7 @@ app.get('/noisejs', function(req, res) {
 app.get('/snoise', function(req, res) {
     let size = req.query.size;
     let img3 = []
-    for(i = 0; i < size*size/50; ++i){
+    for(i = 0; i < size/50; ++i){
         gen = new SimplexNoise()
         const img = genee(size/50, size/50)
         const img2 = map(img,(cur, px,py,ix,iy)=>{
