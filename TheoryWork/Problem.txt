@@ -1,0 +1,24 @@
+Definition of Problem:
+
+PROBLEM:
+
+- The problem of the Tile-Based RPG concerns how a modular design can be created that instructs the comuter to generate a randomised/predefined world that the player can freely move in and interact with (e.g. collecting items, combat, barriers to movement). It should create an interesting experience with extra features associated with these games like styling, combat, inventory, stories/quests and trading.
+- It is also important to create a module-based design so the development team can use each other's functions without having to modify them for their purposes. Thus it is best to use classes, modules and functions as well as a git repository to keep the information available to all members of the team
+
+OBJECTIVES:
+
+- Modular design that involves the creation of classes and fuctions to aid in the implementation of the RPG
+
+- Methods and processes that involve: Map generation, Movement of the player, Interaction events, Combat events, Map display, Inventory system management, Saving/Loading files.
+
+- A complex procedural generation algorithim that allows for the development of natural-looking terrain.
+
+- A system of leveling, upgrading and trading that creates a fun experience for the player
+
+NEEDS:
+
+- A language (Javascript) that can be used to develop methods at ease but also being able to communicate well with othe aspects and documents within the project directory
+
+- A Structure/Text type (HTML/CSS) that can be used to style and develop a world without major speed concerns (and communication with other documents)
+
+- A user interface software or an ability to output information to the user via visual elements on the screen, who will then implement their own inputs via a select range of keys and buttons
