@@ -30,6 +30,13 @@ window.onload = function() {
     }).responseJSON
     console.log(genmap);
     drawscreen(0,0)
+    for(y = 0; y < genmap.length; ++y){
+        for(x = 0; x < genmap[y].length; ++x){
+            colour = "rgb("+(genmap[y][x]*255).toString()+","+(genmap[y][x]*255).toString()+","+(genmap[y][x]*255).toString()+")";
+            ctx2.fillStyle = colour;
+            ctx2.fillRect( x, y, 1, 1 );
+        }
+    }
 
 };
 
@@ -71,8 +78,9 @@ const drawscreen = (movex,movey) => {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError ){
-                    console.log(x+globalpos[0]+500, y+globalpos[1]+500)
-                    console.log(genmap[x+globalpos[0]+500][y+globalpos[1]+500]);
+                    // console.log(genmap);
+                    // console.log(x+globalpos[0]+500, y+globalpos[1]+500)
+                    // console.log(genmap[x+globalpos[0]+500][y+globalpos[1]+500]);
                     // chances of different tiles
                     if(genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] <= 0.6 && genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] >= 0.4){ // terrain
                         type = "grass"

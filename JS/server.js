@@ -26,19 +26,28 @@ app.get('/noisejs', function(req, res) {
 
 
 app.get('/snoise', function(req, res) {
-    let size = req.query.size;
+    const size = req.query.size;
+    const sizeOfChuncks = 20
+    const squares = (size*size)/(sizeOfChuncks*sizeOfChuncks)
     let img3 = []
-    for(i = 0; i < size/50; ++i){
+    for(num=0; num < size; ++num){
+        img3.push([])
+    }
+    for(i = 0; i < squares; ++i){
+        //console.log(i);
         gen = new SimplexNoise()
-        const img = genee(size/50, size/50)
+        const img = genee(sizeOfChuncks, sizeOfChuncks)
         const img2 = map(img,(cur, px,py,ix,iy)=>{
                 let v = octave_noise(ix,iy,8)
                 return v
         })
         for(lis = 0; lis < img2.length; ++lis){
-            img3.push(img2[lis])
+            y = parseInt(size/(lis*i))
+            let row = (parseInt(i/(size/sizeOfChuncks))*(sizeOfChuncks-1))+lis;
+            for(value = 0; value<img2[lis].length; ++value){
+                img3[row].push(img2[lis][value])
+            }
         }
-        console.log(img3);
     }
 
     function genee(width, height) {
