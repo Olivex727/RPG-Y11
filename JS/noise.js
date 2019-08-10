@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 
     let img2 = $.ajax({
         type: "GET",
-        url: "/snoise",
+        url: "/oldnoise?size2=500",
         async: false
     }).responseJSON
     for(y = 0; y < img2.length; ++y){

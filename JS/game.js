@@ -18,9 +18,6 @@ for (i = 0; i < maptext.length; i++){
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
-const canvas2 = document.getElementById("screen2");
-const ctx2 = canvas2.getContext("2d");
-
 window.onload = function() {
     window.addEventListener("keypress", update);
     genmap = $.ajax({
@@ -30,14 +27,6 @@ window.onload = function() {
     }).responseJSON
     console.log(genmap);
     drawscreen(0,0)
-    for(y = 0; y < genmap.length; ++y){
-        for(x = 0; x < genmap[y].length; ++x){
-            colour = "rgb("+(genmap[y][x]*255).toString()+","+(genmap[y][x]*255).toString()+","+(genmap[y][x]*255).toString()+")";
-            ctx2.fillStyle = colour;
-            ctx2.fillRect( x, y, 1, 1 );
-        }
-    }
-
 };
 
 //drawing the screen

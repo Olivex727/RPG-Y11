@@ -24,10 +24,10 @@ app.get('/noisejs', function(req, res) {
     res.send(page);
 });
 
-
+//mapconstructor
 app.get('/snoise', function(req, res) {
     const size = req.query.size;
-    const sizeOfChuncks = 20
+    const sizeOfChuncks = 25
     const squares = (size*size)/(sizeOfChuncks*sizeOfChuncks)
     let img3 = []
     for(num=0; num < size; ++num){
@@ -43,12 +43,13 @@ app.get('/snoise', function(req, res) {
         })
         for(lis = 0; lis < img2.length; ++lis){
             y = parseInt(size/(lis*i))
-            let row = (parseInt(i/(size/sizeOfChuncks))*(sizeOfChuncks-1))+lis;
+            let row = (parseInt(i/(size/sizeOfChuncks))*(sizeOfChuncks))+lis;
             for(value = 0; value<img2[lis].length; ++value){
                 img3[row].push(img2[lis][value])
             }
         }
     }
+    img3 = averageOut(img3, 2, size, 5)
 
     function genee(width, height) {
             const rows = [];
@@ -86,6 +87,27 @@ app.get('/snoise', function(req, res) {
                 return cb(val,px,py,nx,ny);
             })
         });
+    }
+    function averageOut(img, times, size, radii){
+        for(i = 0;i<times; ++i){
+            for(y = 0;y<img.length; ++y){
+                for(x = 0;x<img[y].length; ++x){
+                    let total = 0;
+                    let values = 0;
+                    for(y1 = -1*radii;y1<radii+1; ++y1){
+                        for(x1 = -1*radii;x1<radii+1; ++x1){
+                            if (x+x1 >= 0 && x+x1 < size && y+y1 >= 0 && y+y1 < size){
+                                total += img[x+x1][y+y1]
+                                values +=1
+                            }
+                        }
+                    }
+                    img[y][x] = total/values
+                }
+            }
+        }
+
+        return img;
     }
     res.json(img3);
 });
