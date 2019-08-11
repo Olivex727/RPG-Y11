@@ -19,7 +19,7 @@ const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
 window.onload = function() {
-    window.addEventListener("keypress", update);
+    window.addEventListener("keydown", update);
     genmap = $.ajax({
         type: "GET",
         url: "/snoise?size=1000",
@@ -32,11 +32,13 @@ window.onload = function() {
 //drawing the screen
 const drawscreen = (movex,movey) => {
     const terrain = {
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"False", "height":"1"},
-        "water": {"colour":"#0033cc", "stand":"False", "image":"False", "height":"3"},
-        "mountain": {"colour":"#666633", "stand":"True", "image":"False", "height":"4"},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"False", "height":"5"},
-        "forest": {"colour":"#336600", "stand":"True", "image":"False", "height":"2"},
+        "sand": {"colour":"##ffff4d", "stand":"True", "image":"False"},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":"False"},
+        "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
+        "mountain": {"colour":"#666633", "stand":"True", "image":"False"},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":"False"},
+        "forest": {"colour":"#336600", "stand":"True", "image":"False"},
+        "snow": {"colour":"#b3ffff", "stand":"True", "image":"False"}
     };
     const entities = {
         "player": {"colour":"#0d0d0d"},
@@ -71,7 +73,8 @@ const drawscreen = (movex,movey) => {
                     // console.log(x+globalpos[0]+500, y+globalpos[1]+500)
                     // console.log(genmap[x+globalpos[0]+500][y+globalpos[1]+500]);
                     // chances of different tiles
-                    if(genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] <= 0.6 && genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] >= 0.4){ // terrain
+                    pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
+                    if((pos <= 0.4 && pos >= 0.28)||(pos <= 0.68 && pos >= 0.54)){ // terrain
                         type = "grass"
                         stand = "True"
                         if(Math.random() <= 0.01){ // enemies
@@ -81,22 +84,32 @@ const drawscreen = (movex,movey) => {
                             enemy = "none"
                         }
                     }
-                    else if (genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] < 0.4 && genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] >= 0.2) {
+                    else if (pos < 0.54 && pos > 0.4) {
                         type = "forest"
                         stand = "True"
                         enemy = "none"
                     }
-                    else if (genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] > 0.6 && genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] <= 0.8) {
+                    else if (pos < 0.28 && pos >= 0.14) {
+                        type = "sand"
+                        stand = "True"
+                        enemy = "none"
+                    }
+                    else if (pos >= 0.91) {
+                        type = "snow"
+                        stand = "True"
+                        enemy = "none"
+                    }
+                    else if (pos >= 0.76 && pos < 0.91) {
                         type = "mountain"
                         stand = "True"
                         enemy = "none"
                     }
-                    else if (genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] < 0.2) {
+                    else if (pos <= 0.14) {
                         type = "water"
                         stand = "False"
                         enemy = "none"
                     }
-                    else if (genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)] > 0.8) {
+                    else if (pos < 0.68 && pos > 0.76) {
                         type = "lava"
                         stand = "False"
                         enemy = "none"
@@ -132,13 +145,13 @@ function update(key) { //keys
     if(key["code"] == "KeyW"){
         movey = -1;
     }
-    else if (key["code"] == "KeyA"){
+    if (key["code"] == "KeyA"){
         movex = -1;
     }
-    else if (key["code"] == "KeyS"){
+    if (key["code"] == "KeyS"){
         movey = 1;
     }
-    else if (key["code"] == "KeyD"){
+    if (key["code"] == "KeyD"){
         movex = 1;
     }
     if (movex+movey != 0){
