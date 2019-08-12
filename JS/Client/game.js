@@ -20,10 +20,16 @@ var ctx = canvas.getContext("2d");
 var scrollnum = 0;
 var inventstage = "inventory"
 
+var lastmove = 'w';
+var facing;
+var distance = 0;
+
 window.onload = function() {
     window.addEventListener("keypress", update);
     updateInvent(null);
     drawscreen(0,0)
+    facing = map["0,0"];
+    //alert(map["0,0"]);
 };
 
 //Update the selections on the inventory
@@ -211,34 +217,55 @@ var drawscreen = (movex,movey) => {
 function update(key) { //keys
     var movex = 0;
     var movey = 0;
+
     if(key["code"] == "KeyW"){
         movey = -1;
+        lastmove = "w";
+
     }
     else if (key["code"] == "KeyA"){
         movex = -1;
+        lastmove = "a";
     }
     else if (key["code"] == "KeyS"){
         movey = 1;
+        lastmove = "s";
     }
     else if (key["code"] == "KeyD"){
         movex = 1;
+        lastmove = "d";
     }
-    if (movex+movey != 0){// && playerpos[0] + movex >=0 && playerpos[0] + movex <sps && playerpos[1] + movey >=0 && playerpos[1] + movey <sps){
-    //
-    //     if (map[(playerpos[0]+movex)+","+(playerpos[1]+movey)]['stand'] == "True"){
-    //         ctx.fillStyle = terrain[map[playerpos[0]+","+playerpos[1]]['type']];
-    //         ctx.fillRect(playerpos[0]*(size/sps)+16, playerpos[1]*(size/sps)+16, 32, 32);
-    //         playerpos[0] += movex;
-    //         playerpos[1] += movey;
-    //         ctx.fillStyle = terrain["player"]
-    //         ctx.fillRect(playerpos[0]*(size/sps)+16, playerpos[1]*(size/sps)+16, 32, 32);
-    //     }
+    else if (key["code"] == "KeyE")
+    {
+        interact();
+    }
+    
+    if (movex+movey != 0){
+        infotxt = document.getElementById("info");
+        facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
+        //console.log(map["0,0"])
+        //map[globalpos[0], globalpos[1]]['type'].toString();
         if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+            
             globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-            console.log(globalpos);
+            //console.log(globalpos);
+
             drawscreen(movex,movey);
+            distance++;
+            info3txt = document.getElementById("info2");
+            info3txt.textContent = "Distance: " + distance.toString();
+            
+            //alert(map["0,-1"]);
+            infotxt.textContent = "Globalpos: [" + globalpos.toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
+            
         }
+        info2txt = document.getElementById("info1");
+        info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
     }
 
 
 };
+
+function interact() {
+    //facing['type']
+}
