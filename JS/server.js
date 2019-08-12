@@ -28,6 +28,13 @@ app.get('/noisejs', function(req, res) {
     const page = fs.readFileSync("noise.js", 'utf8');
     res.send(page);
 });
+app.get('/mapmaker', function(req, res) {
+    res.sendfile("mapmaker/mapmaker.html");
+});
+app.get('/mapmakerjs', function(req, res) {
+    const page = fs.readFileSync("mapmaker/mapmaker.js", 'utf8');
+    res.send(page);
+});
 
 //mapconstructor
 app.get('/snoise', function(req, res) {

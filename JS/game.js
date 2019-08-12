@@ -44,7 +44,13 @@ const drawscreen = (movex,movey) => {
         "mountain": {"colour":"#666633", "stand":"True", "image":tileImage("mountain")},
         "lava": {"colour":"#cc6600", "stand":"False", "image":"False"},
         "forest": {"colour":"#336600", "stand":"True", "image":tileImage("forest")},
-        "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")}
+        "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")},
+        "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage("houseWall")},
+        "bridge": {"colour":"#000000", "stand":"True", "image":tileImage("bridge")},
+        "roof1": {"colour":"#000000", "stand":"False", "image":tileImage("roof1")},
+        "roof2": {"colour":"#000000", "stand":"False", "image":tileImage("roof2")},
+        "roof3": {"colour":"#000000", "stand":"False", "image":tileImage("roof3")},
+        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
     };
     const entities = {
         "player": {"colour":"#0d0d0d", "image":tileImage("player")},
@@ -166,6 +172,7 @@ function update(key) { //keys
         if (movex != 0 || movey != 0){
             if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
                 globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                console.log(globalpos);
                 drawscreen(movex,movey);
             }
         }
