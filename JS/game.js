@@ -32,7 +32,7 @@ window.onload = function() {
 //drawing the screen
 const drawscreen = (movex,movey) => {
     const terrain = {
-        "sand": {"colour":"##ffff4d", "stand":"True", "image":"False"},
+        "sand": {"colour":"#ffff4d", "stand":"True", "image":"False"},
         "grass": {"colour":"#33cc33", "stand":"True", "image":"False"},
         "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
         "mountain": {"colour":"#666633", "stand":"True", "image":"False"},
@@ -74,50 +74,38 @@ const drawscreen = (movex,movey) => {
                     // console.log(genmap[x+globalpos[0]+500][y+globalpos[1]+500]);
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
-                    if((pos <= 0.4 && pos >= 0.28)||(pos <= 0.68 && pos >= 0.54)){ // terrain
+                    let stand = "True";
+                    let enemy = "none";
+                    if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
-                        stand = "True"
                         if(Math.random() <= 0.01){ // enemies
                             enemy = "goblin"
                             stand = "False"
-                        } else {
-                            enemy = "none"
-                        }
                     }
-                    else if (pos < 0.54 && pos > 0.4) {
+                }
+                    else if (pos < 0.49 && pos > 0.375) {
                         type = "forest"
-                        stand = "True"
-                        enemy = "none"
                     }
-                    else if (pos < 0.28 && pos >= 0.14) {
+                    else if (pos < 0.28 && pos >= 0.175) {
                         type = "sand"
-                        stand = "True"
-                        enemy = "none"
                     }
-                    else if (pos >= 0.91) {
+                    else if (pos >= 0.725 && pos < 0.85) {
                         type = "snow"
-                        stand = "True"
-                        enemy = "none"
                     }
-                    else if (pos >= 0.76 && pos < 0.91) {
+                    else if (pos > 0.56 && pos < 0.725) {
                         type = "mountain"
-                        stand = "True"
-                        enemy = "none"
                     }
-                    else if (pos <= 0.14) {
+                    else if (pos <= 0.175) {
                         type = "water"
                         stand = "False"
-                        enemy = "none"
                     }
-                    else if (pos < 0.68 && pos > 0.76) {
+                    else if (pos >= 0.85) {
                         type = "lava"
                         stand = "False"
-                        enemy = "none"
                     }
                     else{
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
-                        enemy = "none"
                     }
                     if(Math.random() <= 0.1){ // terrain
                         z = Math.floor(Math.random() * Object.keys(terrain).length) + 1
