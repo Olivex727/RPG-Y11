@@ -15,17 +15,18 @@ for (i = 0; i < maptext.length; i++){
     let tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5]}
 };
+let keysdown = []
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
 window.onload = function() {
     window.addEventListener("keydown", update);
+    window.addEventListener("keyup", update);
     genmap = $.ajax({
         type: "GET",
         url: "/snoise?size=1000",
         async: false
     }).responseJSON
-    console.log(genmap);
     drawscreen(0,0)
 };
 
@@ -128,26 +129,41 @@ const drawscreen = (movex,movey) => {
 }
 
 function update(key) { //keys
+    function arrayRemove(arr, value) {
+
+       return arr.filter(function(ele){
+           return ele != value;
+       });
+
+    }
     let movex = 0;
     let movey = 0;
-    if(key["code"] == "KeyW"){
-        movey = -1;
-    }
-    if (key["code"] == "KeyA"){
-        movex = -1;
-    }
-    if (key["code"] == "KeyS"){
-        movey = 1;
-    }
-    if (key["code"] == "KeyD"){
-        movex = 1;
-    }
-    if (movex+movey != 0){
-        if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-            globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-            drawscreen(movex,movey);
+    if (key["type"] == "keydown"){
+        if(keysdown.indexOf(key["key"]) == -1){
+            keysdown.push(key["key"])
+        }
+        if(keysdown.indexOf("w") >= 0){
+            movey = -1;
+        }
+        else if (keysdown.indexOf("s") >= 0){
+            movey = 1;
+        }
+        if (keysdown.indexOf("a") >= 0){
+            movex = -1;
+        }
+        else if (keysdown.indexOf("d")>= 0){
+            movex = 1;
+        }
+        if (movex != 0 || movey != 0){
+            if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+                globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                drawscreen(movex,movey);
+            }
         }
     }
-
-
+    else{
+        if(keysdown.indexOf(key["key"]) != -1){
+            keysdown = arrayRemove(keysdown, key["key"]);
+        }
+    }
 };
