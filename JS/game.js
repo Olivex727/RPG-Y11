@@ -172,7 +172,7 @@ function update(key) { //keys
         if (movex != 0 || movey != 0){
             if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
                 globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-                console.log(globalpos);
+                console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
                 drawscreen(movex,movey);
             }
         }
