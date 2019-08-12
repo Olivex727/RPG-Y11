@@ -142,7 +142,6 @@ function update(key) { //keys
         if(keysdown.indexOf(key["key"]) == -1){
             keysdown.push(key["key"])
         }
-        console.log(keysdown);
         if(keysdown.indexOf("w") >= 0){
             movey = -1;
         }
@@ -165,7 +164,6 @@ function update(key) { //keys
     else{
         if(keysdown.indexOf(key["key"]) != -1){
             keysdown = arrayRemove(keysdown, key["key"]);
-            console.log(keysdown);
         }
     }
 };
