@@ -50,8 +50,8 @@ app.get('/snoise', function(req, res) {
         }
     }
 
-    img3 = deviate(img3, 10)
-    img3 = averageOut(img3, 2, size, 2)
+    img3 = deviate(img3, 20)
+    img3 = averageOut(img3, 1, size, 2)
 
     function genee(width, height) {
             const rows = [];
@@ -116,7 +116,7 @@ app.get('/snoise', function(req, res) {
         for(i = 0;i<times; ++i){
             for(y = 0;y<img.length; ++y){
                 for(x = 0;x<img[y].length; ++x){
-                    img[y][x] = img[y][x] + ((Math.random()-0.5)/20)
+                    img[y][x] = img[y][x] + ((Math.random()-0.5)/20)*1.5
                 }
             }
         }
