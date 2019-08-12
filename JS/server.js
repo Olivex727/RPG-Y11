@@ -1,8 +1,12 @@
+var path = require('path');
 const express = require('express');
 const fs = require("fs");
 const SimplexNoise = require('simplex-noise');
 const app = express();
+const dir = path.join(__dirname, 'public');
 let cashedmap = []
+
+app.use(express.static(dir));
 
 app.get('/map', function(req, res) {
     const map = fs.readFileSync("maptest.txt", 'utf8');

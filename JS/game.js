@@ -32,17 +32,22 @@ window.onload = function() {
 
 //drawing the screen
 const drawscreen = (movex,movey) => {
+    tileImage = (image) => {
+        var img = new Image();
+        img.src = "/Images/"+image+".png"
+        return img
+    }
     const terrain = {
-        "sand": {"colour":"#ffff4d", "stand":"True", "image":"False"},
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"False"},
+        "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
         "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
-        "mountain": {"colour":"#666633", "stand":"True", "image":"False"},
+        "mountain": {"colour":"#666633", "stand":"True", "image":tileImage("mountain")},
         "lava": {"colour":"#cc6600", "stand":"False", "image":"False"},
-        "forest": {"colour":"#336600", "stand":"True", "image":"False"},
-        "snow": {"colour":"#b3ffff", "stand":"True", "image":"False"}
+        "forest": {"colour":"#336600", "stand":"True", "image":tileImage("forest")},
+        "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")}
     };
     const entities = {
-        "player": {"colour":"#0d0d0d"},
+        "player": {"colour":"#0d0d0d", "image":tileImage("player")},
         "goblin": {"colour":"#ff0000"}
     }
     const interest = ["fountain", "dungeon", "monster", "teleport"]
@@ -53,8 +58,7 @@ const drawscreen = (movex,movey) => {
                 ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
                 ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
             } else {
-                let img = document.getElementById(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']);
-                ctx.drawImage(img, (x)*(size/sps), (y)*(size/sps));
+                ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"], (x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps));
             }
 
         }
@@ -124,8 +128,13 @@ const drawscreen = (movex,movey) => {
             }
         };
     };
-    ctx.fillStyle = entities["player"]["colour"]
-    ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    if(entities["player"]["colour"] == "False"){
+        ctx.fillStyle = entities["player"]["colour"]
+        ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    } else {
+        ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    }
+
 }
 
 function update(key) { //keys
