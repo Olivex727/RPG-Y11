@@ -13,7 +13,7 @@ window.onmouseup = function() {
 }
 const ctx = canvas.getContext("2d");
 const size = 576
-const sps = 11
+const sps = 50
 
 for(i = 0; i<sps-1;i++){
     ctx.fillStyle = "#000000"
@@ -52,6 +52,7 @@ const terrain = {
     "roof5": {"colour":"#000000", "stand":"False", "image":tileImage()},
     "roof6": {"colour":"#000000", "stand":"False", "image":tileImage()},
     "roof7": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "chimney": {"colour":"#000000", "stand":"False", "image":tileImage()},
     "door": {"colour":"#000000", "stand":"False", "image":tileImage()}
 
 };

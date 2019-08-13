@@ -27,6 +27,7 @@ window.onload = function() {
         url: "/snoise?size=1000",
         async: false
     }).responseJSON
+    $(".output").html("press s to start");
     drawscreen(0,0)
 };
 
@@ -54,6 +55,7 @@ const drawscreen = (movex,movey) => {
         "roof5": {"colour":"#000000", "stand":"False", "image":tileImage("roof5")},
         "roof6": {"colour":"#000000", "stand":"False", "image":tileImage("roof6")},
         "roof7": {"colour":"#000000", "stand":"False", "image":tileImage("roof7")},
+        "chimney": {"colour":"#000000", "stand":"False", "image":tileImage("chimney")},
         "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
 
     };
@@ -149,6 +151,7 @@ const drawscreen = (movex,movey) => {
 }
 
 function update(key) { //keys
+
     function arrayRemove(arr, value) {
 
        return arr.filter(function(ele){
@@ -156,6 +159,10 @@ function update(key) { //keys
        });
 
     }
+    if($(".output").html() == "press s to start"){
+        $(".output").html("")
+    }
+
     let movex = 0;
     let movey = 0;
     if (key["type"] == "keydown"){
