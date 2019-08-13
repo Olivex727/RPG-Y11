@@ -12,7 +12,7 @@ var maptext = $.ajax({
 }).responseText.split("\n");
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5]}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
 };
 var canvas = document.getElementById("screen");
 var ctx = canvas.getContext("2d");
@@ -23,6 +23,7 @@ var inventstage = "inventory"
 var lastmove = 'w';
 var facing;
 var distance = 0;
+var traveled = 0;
 
 window.onload = function() {
     window.addEventListener("keypress", update);
@@ -152,7 +153,9 @@ var drawscreen = (movex,movey) => {
     };
     var entities = {
         "player": {"colour":"#0d0d0d"},
-        "goblin": {"colour":"#ff0000"}
+        "goblin": {"colour":"#11aa00"},
+        "villager": {"colour":"#995500"},
+        "salesman": {"colour":"#dddd55"}
     }
     var interest = ["fountain", "dungeon", "monster", "teleport"]
     var draw = (x,y) => {
@@ -172,7 +175,6 @@ var drawscreen = (movex,movey) => {
             ctx.fillRect((x)*(size/sps)+(size/sps)/4, (y)*(size/sps)+(size/sps)/4, (size/sps)/2, (size/sps)/2)
         }
     };
-
     for (y = 0; y < sps; y++){
         for (x = 0; x < sps; x++){ // draw map
             try {
@@ -186,7 +188,16 @@ var drawscreen = (movex,movey) => {
                         if(Math.random() <= 0.01){ // enemies
                             enemy = "goblin"
                             stand = "False"
-                        } else {
+                        }
+                        else if (Math.random() <= 0.011) {
+                            enemy = "villager"
+                            stand = "False"
+                        }
+                        else if (Math.random() <= 0.012) {
+                            enemy = "salesman"
+                            stand = "False"
+                        }
+                        else {
                             enemy = "none"
                         }
                     }else{
@@ -202,21 +213,25 @@ var drawscreen = (movex,movey) => {
                     }
 
 
-                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy}
+                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har":0, "load":true}
                     draw(x,y)
                 }else{
                     console.log(e)
                 }
             }
+            map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['har'] += -1;
         };
     };
     ctx.fillStyle = entities["player"]["colour"]
     ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
 }
 
+var facod = "";
+
 function update(key) { //keys
     var movex = 0;
     var movey = 0;
+    var inter = false;
 
     if(key["code"] == "KeyW"){
         movey = -1;
@@ -235,14 +250,14 @@ function update(key) { //keys
         movex = 1;
         lastmove = "d";
     }
-    else if (key["code"] == "KeyE")
+    else if (key["code"] == "KeyE" && facod !== "")
     {
         interact();
     }
+    //alert(inter);
     
     if (movex+movey != 0){
         infotxt = document.getElementById("info");
-        facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
         //console.log(map["0,0"])
         //map[globalpos[0], globalpos[1]]['type'].toString();
         if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
@@ -251,14 +266,18 @@ function update(key) { //keys
             //console.log(globalpos);
 
             drawscreen(movex,movey);
-            distance++;
+            traveled++;
+            distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
             info3txt = document.getElementById("info2");
-            info3txt.textContent = "Distance: " + distance.toString();
+            info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
             
             //alert(map["0,-1"]);
-            infotxt.textContent = "Globalpos: [" + globalpos.toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
+            infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
             
         }
+        facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
+        facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
+        console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
         info2txt = document.getElementById("info1");
         info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
     }
@@ -267,5 +286,25 @@ function update(key) { //keys
 };
 
 function interact() {
-    //facing['type']
+    //var yeild = Math.random()*Math.pow(distance, 1/2);
+    var desc = document.getElementById("desc");
+    for(i = 0; i < inventory.length; i++)
+    {
+        if (facing['type'] === inventory[i]['tile']) {
+            if (map[facod]['har'] <= 0){
+                var x = Math.round(Math.random() * (distance + 1));
+                inventory[i]['amount'] += x;
+                updateInvent(null);
+                var y = Math.round(Math.random() * (distance+2));
+                map[facod]['har'] = y;
+                console.log("Harvested: "+y);
+                desc.textContent = "Picked up " + x + " " + inventory[i]['name'];
+            }
+            else
+            {
+                desc.textContent = "Sorry, the tile has already been harvested. Come back later. Harvest = " + map[facod]['har'];
+            }
+        }
+    }
+    
 }

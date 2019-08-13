@@ -62,7 +62,8 @@ var inventory = [{
         "amount": 0,
         "image": "False",
         "cost": 100,
-        "stock": 35
+        "stock": 35,
+        "tile": "mountain"
     },
     {
         "name": "Water",
@@ -70,7 +71,8 @@ var inventory = [{
         "amount": 10,
         "image": "False",
         "cost": 120,
-        "stock": 110
+        "stock": 110,
+        "tile": "water"
     },
     {
         "name": "Wood",
@@ -78,7 +80,8 @@ var inventory = [{
         "amount": 0,
         "image": "False",
         "cost": 1000,
-        "stock": 0
+        "stock": 0,
+        "tile": "forest"
     },
     {
         "name": "Lava",
@@ -86,7 +89,8 @@ var inventory = [{
         "amount": 0,
         "image": "False",
         "cost": 3200,
-        "stock": 92
+        "stock": 92,
+        "tile": "lava"
     },
     {
         "name": "Grass",
@@ -94,7 +98,8 @@ var inventory = [{
         "amount": 0,
         "image": "False",
         "cost": 25,
-        "stock": 9
+        "stock": 9,
+        "tile": "grass"
     }
 ];
 
