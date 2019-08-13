@@ -33,16 +33,16 @@ window.onload = function() {
 //drawing the screen
 const drawscreen = (movex,movey) => {
     tileImage = (image) => {
-        var img = new Image();
+        let img = new Image();
         img.src = "/Images/"+image+".png"
         return img
     }
     const terrain = {
         "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
         "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
-        "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
+        "water": {"colour":"#0033cc", "stand":"False", "image":tileImage("water")},
         "mountain": {"colour":"#666633", "stand":"True", "image":tileImage("mountain")},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"False"},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":tileImage("lava")},
         "forest": {"colour":"#336600", "stand":"True", "image":tileImage("forest")},
         "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")},
         "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage("houseWall")},
@@ -50,7 +50,12 @@ const drawscreen = (movex,movey) => {
         "roof1": {"colour":"#000000", "stand":"False", "image":tileImage("roof1")},
         "roof2": {"colour":"#000000", "stand":"False", "image":tileImage("roof2")},
         "roof3": {"colour":"#000000", "stand":"False", "image":tileImage("roof3")},
+        "roof4": {"colour":"#000000", "stand":"False", "image":tileImage("roof4")},
+        "roof5": {"colour":"#000000", "stand":"False", "image":tileImage("roof5")},
+        "roof6": {"colour":"#000000", "stand":"False", "image":tileImage("roof6")},
+        "roof7": {"colour":"#000000", "stand":"False", "image":tileImage("roof7")},
         "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
+
     };
     const entities = {
         "player": {"colour":"#0d0d0d", "image":tileImage("player")},

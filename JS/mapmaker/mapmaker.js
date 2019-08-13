@@ -36,19 +36,23 @@ tileImage = (image) => {
     return img
 }
 const terrain = {
-    "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
-    "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
-    "water": {"colour":"#0033cc", "stand":"False", "image":tileImage("water")},
-    "mountain": {"colour":"#666633", "stand":"True", "image":tileImage("mountain")},
-    "lava": {"colour":"#cc6600", "stand":"False", "image":tileImage("lava")},
-    "forest": {"colour":"#336600", "stand":"True", "image":tileImage("forest")},
-    "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")},
-    "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage("houseWall")},
-    "bridge": {"colour":"#000000", "stand":"True", "image":tileImage("bridge")},
-    "roof1": {"colour":"#000000", "stand":"False", "image":tileImage("roof1")},
-    "roof2": {"colour":"#000000", "stand":"False", "image":tileImage("roof2")},
-    "roof3": {"colour":"#000000", "stand":"False", "image":tileImage("roof3")},
-    "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
+    "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage()},
+    "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage()},
+    "water": {"colour":"#0033cc", "stand":"False", "image":tileImage()},
+    "mountain": {"colour":"#666633", "stand":"True", "image":tileImage()},
+    "lava": {"colour":"#cc6600", "stand":"False", "image":tileImage()},
+    "forest": {"colour":"#336600", "stand":"True", "image":tileImage()},
+    "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage()},
+    "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage()},
+    "bridge": {"colour":"#000000", "stand":"True", "image":tileImage()},
+    "roof1": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof2": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof3": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof4": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof5": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof6": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof7": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "door": {"colour":"#000000", "stand":"False", "image":tileImage()}
 
 };
 function changeColour(type){
