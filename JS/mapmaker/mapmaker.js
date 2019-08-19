@@ -4,6 +4,7 @@ canvas.addEventListener("mousedown", mouseclick);
 let map = {}
 let currentType = "grass"
 let mouseDown = 0;
+let currentImage = new Image()
 window.onmousedown = function() {
   ++mouseDown;
 }
@@ -12,31 +13,55 @@ window.onmouseup = function() {
 }
 const ctx = canvas.getContext("2d");
 const size = 576
-const sps = 11
+const sps = 15
 
 for(i = 0; i<sps-1;i++){
     ctx.fillStyle = "#000000"
-    ctx.fillRect((i)*(size/sps)+(size/sps), 0, 1, 704)
-    ctx.fillRect(0, (i)*(size/sps)+(size/sps), 704, 1)
+    ctx.fillRect((i)*(size/sps)+(size/sps), 0, 1, size)
+    ctx.fillRect(0, (i)*(size/sps)+(size/sps), size, 1)
 }
 function mouseclick(click) {
     if (mouseDown || click['type']=="mousedown"){
     var x = parseInt(click["layerX"]/(size/sps));
     var y = parseInt(click["layerY"]/(size/sps));
-    ctx.fillRect(x*(size/sps)+1, y*(size/sps)+1, (size/sps)-1, (size/sps)-1)
+    ctx.drawImage(currentImage, x*(size/sps), y*(size/sps), (size/sps), (size/sps))
+    //ctx.fillRect(x*(size/sps)+1, y*(size/sps)+1, (size/sps)-1, (size/sps)-1)
     map[x+","+y] = {"type":currentType, "stand":terrain[currentType]["stand"], "special": $('#special').val(), "enemy": "none"}
     }
 }
 
-var terrain = {
-    "grass": {"colour":"#33cc33", "stand":"True"},
-    "water": {"colour":"#0033cc", "stand":"False"},
-    "mountain": {"colour":"#666633", "stand":"True"},
-    "lava": {"colour":"#cc6600", "stand":"False"},
-    "forest": {"colour":"#336600", "stand":"True"},
+tileImage = (image) => {
+    let img = new Image();
+    img.src = "/Images/"+image+".png"
+    return img
+}
+const terrain = {
+    "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage()},
+    "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage()},
+    "water": {"colour":"#0033cc", "stand":"False", "image":tileImage()},
+    "mountain": {"colour":"#666633", "stand":"True", "image":tileImage()},
+    "lava": {"colour":"#cc6600", "stand":"False", "image":tileImage()},
+    "forest": {"colour":"#336600", "stand":"True", "image":tileImage()},
+    "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage()},
+    "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage()},
+    "path": {"colour":"#00000", "stand":"False", "image":tileImage()},
+    "bridge": {"colour":"#000000", "stand":"True", "image":tileImage()},
+    "roof1": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof2": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof3": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof4": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof5": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof6": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "roof7": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "chimney": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "door": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "floor": {"colour":"#00000", "stand":"False", "image":tileImage()},
+    "wall": {"colour":"#000000", "stand":"False", "image":tileImage()}
+
 };
 function changeColour(type){
     currentType = type["target"]["innerHTML"]
+    currentImage = tileImage(type["target"]["innerHTML"])
     ctx.fillStyle = terrain[type["target"]["innerHTML"]]["colour"]
 }
 ctx.fillStyle = "#33cc33"

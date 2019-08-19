@@ -1,8 +1,12 @@
+var path = require('path');
 const express = require('express');
 const fs = require("fs");
 const SimplexNoise = require('simplex-noise');
 const app = express();
+const dir = path.join(__dirname, 'public');
 let cashedmap = []
+
+app.use(express.static(dir));
 
 app.get('/map', function(req, res) {
     const map = fs.readFileSync("maptest.txt", 'utf8');
@@ -22,6 +26,13 @@ app.get('/noise', function(req, res) {
 });
 app.get('/noisejs', function(req, res) {
     const page = fs.readFileSync("noise.js", 'utf8');
+    res.send(page);
+});
+app.get('/mapmaker', function(req, res) {
+    res.sendfile("mapmaker/mapmaker.html");
+});
+app.get('/mapmakerjs', function(req, res) {
+    const page = fs.readFileSync("mapmaker/mapmaker.js", 'utf8');
     res.send(page);
 });
 

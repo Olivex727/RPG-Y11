@@ -3,7 +3,7 @@ let globalpos = [0,0]
 const map = {};
 const size = 512
 let genmap;
-const sps = 11
+const sps = 15
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
 const maptext = $.ajax({
@@ -27,23 +27,41 @@ window.onload = function() {
         url: "/snoise?size=1000",
         async: false
     }).responseJSON
+    $(".output").html("press s to start");
     drawscreen(0,0)
 };
 
 //drawing the screen
 const drawscreen = (movex,movey) => {
+    tileImage = (image) => {
+        let img = new Image();
+        img.src = "/Images/"+image+".png"
+        return img
+    }
     const terrain = {
-        "sand": {"colour":"#ffff4d", "stand":"True", "image":"False"},
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"False"},
-        "water": {"colour":"#0033cc", "stand":"False", "image":"False"},
-        "mountain": {"colour":"#666633", "stand":"True", "image":"False"},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"False"},
-        "forest": {"colour":"#336600", "stand":"True", "image":"False"},
-        "snow": {"colour":"#b3ffff", "stand":"True", "image":"False"}
+        "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
+        "water": {"colour":"#0033cc", "stand":"False", "image":tileImage("water")},
+        "mountain": {"colour":"#666633", "stand":"True", "image":tileImage("mountain")},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":tileImage("lava")},
+        "forest": {"colour":"#336600", "stand":"True", "image":tileImage("forest")},
+        "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")},
+        "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage("houseWall")},
+        "bridge": {"colour":"#000000", "stand":"True", "image":tileImage("bridge")},
+        "roof1": {"colour":"#000000", "stand":"False", "image":tileImage("roof1")},
+        "roof2": {"colour":"#000000", "stand":"False", "image":tileImage("roof2")},
+        "roof3": {"colour":"#000000", "stand":"False", "image":tileImage("roof3")},
+        "roof4": {"colour":"#000000", "stand":"False", "image":tileImage("roof4")},
+        "roof5": {"colour":"#000000", "stand":"False", "image":tileImage("roof5")},
+        "roof6": {"colour":"#000000", "stand":"False", "image":tileImage("roof6")},
+        "roof7": {"colour":"#000000", "stand":"False", "image":tileImage("roof7")},
+        "chimney": {"colour":"#000000", "stand":"False", "image":tileImage("chimney")},
+        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
+
     };
     const entities = {
-        "player": {"colour":"#0d0d0d"},
-        "goblin": {"colour":"#ff0000"}
+        "player": {"colour":"#0d0d0d", "image":tileImage("player")},
+        "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
     }
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
@@ -53,14 +71,15 @@ const drawscreen = (movex,movey) => {
                 ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
                 ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
             } else {
-                let img = document.getElementById(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']);
-                ctx.drawImage(img, (x)*(size/sps), (y)*(size/sps));
+                ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"], (x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps));
             }
 
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
-            ctx.fillRect((x)*(size/sps)+(size/sps)/4, (y)*(size/sps)+(size/sps)/4, (size/sps)/2, (size/sps)/2)
+            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            if(x == playerpos[0] || y == playerpos[1]){
+                console.log("battle start")
+            }
         }
     };
 
@@ -124,11 +143,17 @@ const drawscreen = (movex,movey) => {
             }
         };
     };
-    ctx.fillStyle = entities["player"]["colour"]
-    ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    if(entities["player"]["colour"] == "False"){
+        ctx.fillStyle = entities["player"]["colour"]
+        ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    } else {
+        ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
+    }
+
 }
 
 function update(key) { //keys
+
     function arrayRemove(arr, value) {
 
        return arr.filter(function(ele){
@@ -136,6 +161,10 @@ function update(key) { //keys
        });
 
     }
+    if($(".output").html() == "press s to start"){
+        $(".output").html("")
+    }
+
     let movex = 0;
     let movey = 0;
     if (key["type"] == "keydown"){
@@ -157,6 +186,7 @@ function update(key) { //keys
         if (movex != 0 || movey != 0){
             if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
                 globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
                 drawscreen(movex,movey);
             }
         }
