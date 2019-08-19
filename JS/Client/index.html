@@ -46,11 +46,13 @@
                         "updateInvent(0, 'toolbelt_apparel');"
                     -->
                 </div><br>
-                <ls id="item1"></ls><br>
-                <ls id="item2"></ls><br>
-                <ls id="item3"></ls><br>
+                <button id="sel_0" onclick="selectItem(0);"></button> <ls id="item1"></ls><br>
+                <button id="sel_1" onclick="selectItem(1);"></button> <ls id="item2"></ls><br>
+                <button id="sel_2" onclick="selectItem(2);"></button> <ls id="item3"></ls><br>
                 <button id="uscrl" onclick="updateInvent(-1);">/\</button>
                 <button id="dscrl" onclick="updateInvent(1);">\/</button><br>
+                <p id="crafting">Crafting Table: [ , ] Result: [ ]</p><br>
+                <p id="money"></p>Money: 0<br>
             </div>
 
             <div id="output"></div>

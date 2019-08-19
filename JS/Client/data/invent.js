@@ -1,56 +1,62 @@
 //NOTE: All zero level values mean that the object has not been picked up/crafted
 
-var money = 0; //The player's money that can be used to buy/sell items on market
+var money = 10000; //The player's money that can be used to buy/sell items on market
 
 var toolbelt = {
     weapons: [{
             "name": "Sword",
             "color": "#000000",
-            "damage": [10, 1.2],
-            "speed": [2, 0.1],
+            "damage": [100, 12],
+            "speed": [20, 1],
             "level": 1,
-            "image": "False"
+            "image": "False",
+            "cost":[200, 5]
         },
         {
             "name": "Bow",
             "color": "#000000",
-            "damage": [6, 0.8],
-            "speed": [8, 0.2],
+            "damage": [60, 8],
+            "speed": [80, 2],
             "level": 0,
-            "image": "False"
+            "image": "False",
+            "cost": [230, 4]
         }
     ],
     tools: [{
             "name": "Sickle",
             "color": "#000000",
             "tilebase": "earth",
-            "efficiency": [4, 0.4],
+            "efficiency": [40, 4],
             "level": 1,
-            "image": "False"
+            "image": "False",
+            "cost": [110, 8]
         },
         {
             "name": "Pickaxe",
             "color": "#000000",
             "tilebase": "rock",
-            "efficiency": [3, 0.7],
+            "efficiency": [30, 7],
             "level": 0,
-            "image": "False"
+            "image": "False",
+            "cost": [290, 2]
         }
 
     ],
     apparel: [{
             "name": "Chainmail",
             "color": "#000000",
-            "strength": [9, 0.8],
+            "strength": [90, 8],
             "level": 0,
-            "image": "False"
+            "image": "False",
+            "cost": [340, 2]
         },
         {
             "name": "Clothes",
             "color": "#000000",
-            "strength": [1, 0.1],
+            "strength": [10, 1],
             "level": 1,
-            "image": "False"
+            "image": "False",
+            "cost": [20, 1]
         }
     ]
 };

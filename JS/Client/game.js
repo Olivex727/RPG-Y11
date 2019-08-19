@@ -25,6 +25,9 @@ var facing;
 var distance = 0;
 var traveled = 0;
 
+var selected = null;
+var crafting = ["", ""];
+
 window.onload = function() {
     window.addEventListener("keypress", update);
     updateInvent(null);
@@ -32,6 +35,13 @@ window.onload = function() {
     facing = map["0,0"];
     //alert(map["0,0"]);
 };
+
+var slot1 = document.getElementById("item1");
+var slot2 = document.getElementById("item2");
+var slot3 = document.getElementById("item3");
+var title = document.getElementById("inv");
+
+//function test(){return "4";}
 
 //Update the selections on the inventory
 function updateInvent(scroll, change = null) {
@@ -42,16 +52,26 @@ function updateInvent(scroll, change = null) {
         scrollnum = 0;
     }
     
-    
+    document.getElementById("money").textContent = "Money: " + money;
+    var res = craft(false);
+    //var res = test();
+    document.getElementById("crafting").textContent = "Crafting Table: [" +crafting[0]+", "+crafting[1]+" ] Result: ["+res+"]";
     var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
     title.textContent = inventstage.toUpperCase();
     var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
 
     b2.textContent = ButtonPresets[inventstage.split("_")[0]][1].text; b3.textContent = ButtonPresets[inventstage.split("_")[0]][2].text; b1.textContent = ButtonPresets[inventstage.split("_")[0]][0].text;
 
+    function upButtons(text){
+        for (i = 0; i < 3; i++){
+            document.getElementById("sel_"+i).textContent = text;
+        }     
+    }
+
     //INVENTORY
     //Update and output information of items and such (Crafting involved)
     if (inventstage.split("_")[0] === "inventory") {
+        upButtons("Select");
         if (scroll != null && (scrollnum < inventory.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
@@ -63,14 +83,14 @@ function updateInvent(scroll, change = null) {
     //TOOLBELT
     //Section that contains the apparel, weapons and tools 
     if (inventstage.split("_")[0] === "toolbelt") {
-
+        upButtons("Upgrade");
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
-            slot1.textContent = toolbelt.weapons[scrollnum].name + ": Dmg: " + toolbelt.weapons[scrollnum].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum].level;
-            slot2.textContent = toolbelt.weapons[scrollnum+1].name + ": Dmg: " + toolbelt.weapons[scrollnum+1].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum+1].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum+1].level;
+            slot1.textContent = toolbelt.weapons[scrollnum].name + ": Dmg: " + toolbelt.weapons[scrollnum].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum].level + ", Cost: " + toolbelt.weapons[scrollnum].cost[0];
+            slot2.textContent = toolbelt.weapons[scrollnum + 1].name + ": Dmg: " + toolbelt.weapons[scrollnum + 1].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum + 1].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum + 1].level + ", Cost: " + toolbelt.weapons[scrollnum+1].cost[0];
             slot3.textContent = "";//toolbelt.weapons[scrollnum+2].name + ": Dmg: " + toolbelt.weapons[scrollnum+2].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum+2].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum+2].level;
         }
 
@@ -79,8 +99,8 @@ function updateInvent(scroll, change = null) {
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
-            slot1.textContent = toolbelt.tools[scrollnum].name + ": Spd: " + toolbelt.tools[scrollnum].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum].level;
-            slot2.textContent = toolbelt.tools[scrollnum + 1].name + ": Spd: " + toolbelt.tools[scrollnum + 1].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum + 1].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum + 1].level;
+            slot1.textContent = toolbelt.tools[scrollnum].name + ": Spd: " + toolbelt.tools[scrollnum].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum].level + ", Cost: " + toolbelt.tools[scrollnum].cost[0];
+            slot2.textContent = toolbelt.tools[scrollnum + 1].name + ": Spd: " + toolbelt.tools[scrollnum + 1].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum + 1].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum + 1].level + ", Cost: " + toolbelt.tools[scrollnum+1].cost[0];
             slot3.textContent = "";//toolbelt.tools[scrollnum+2].name + ": Spd:" + toolbelt.tools[scrollnum+2].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum+2].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum+2].level;
         }
 
@@ -89,8 +109,8 @@ function updateInvent(scroll, change = null) {
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
-            slot1.textContent = toolbelt.apparel[scrollnum].name + ": Str: " + toolbelt.apparel[scrollnum].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level;
-            slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Str: " + toolbelt.apparel[scrollnum + 1].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level;
+            slot1.textContent = toolbelt.apparel[scrollnum].name + ": Str: " + toolbelt.apparel[scrollnum].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level + ", Cost: " + toolbelt.apparel[scrollnum].cost[0];
+            slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Str: " + toolbelt.apparel[scrollnum + 1].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level + ", Cost: " + toolbelt.apparel[scrollnum+1].cost[0];
             slot3.textContent = "";//toolbelt.apparel[scrollnum+2].name + ": Str:" + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level;
         }
     }
@@ -98,6 +118,7 @@ function updateInvent(scroll, change = null) {
     //QUESTS
     if (inventstage.split("_")[0] === "quests") {
         //alert("quest: " + quests[0].name);
+        upButtons("Select");
         if (scroll != null && (scrollnum < quests.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
@@ -114,6 +135,7 @@ function updateInvent(scroll, change = null) {
 
     //MARKET
     if (inventstage.split("_")[0] === "market") {
+        upButtons("Select");
         if (scroll != null && (scrollnum < inventory.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
@@ -285,9 +307,61 @@ function update(key) { //keys
 
 };
 
+var desc = document.getElementById("desc");
+
+function selectItem(num){
+    if (inventstage.split("_")[0] !== "toolbelt") {
+        if (num == 0) { selected = slot1.textContent.split(":")[0] }
+        if (num == 1) { selected = slot2.textContent.split(":")[0] }
+        if (num == 2) { selected = slot3.textContent.split(":")[0] }
+        console.log("Selected: " + selected);
+    }
+    else
+    {
+        if (num == 0) {selected = slot1.textContent.split(":")[0]}
+        if (num == 1) {selected = slot2.textContent.split(":")[0]}
+        if (num == 2) {selected = slot3.textContent.split(":")[0]}
+        for(itemlist in toolbelt){
+            //console.log(itemlist);
+            for(i = 0; i < toolbelt[itemlist].length; i++)
+            {
+                //console.log(item);
+                if (selected === toolbelt[itemlist][i].name) {
+                    if (money >= toolbelt[itemlist][i].cost[0] && toolbelt[itemlist][i].level > 0) {
+                        money -= toolbelt[itemlist][i].cost[0];
+                        toolbelt[itemlist][i].cost[0] += toolbelt[itemlist][i].cost[1];
+                        if (inventstage.split("_")[1] === "weapons") {
+                            console.log(toolbelt[itemlist][i].speed[0]);
+                            console.log(toolbelt[itemlist][i].speed[1]);
+                            console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
+                            toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
+                            //Now that's a lota daamage!!
+                            toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
+                        }
+                        if (inventstage.split("_")[1] === "tools") {
+                            toolbelt[itemlist][i].efficiency[0] += toolbelt[itemlist][i].efficiency[1];
+                        }
+                        if (inventstage.split("_")[1] === "apparel") {
+                            toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
+                        }
+                        toolbelt[itemlist][i].level += 1;
+                        updateInvent(null);
+                    }
+                    else
+                    {
+                        desc.textContent = "Not enough funds to upgrade "+selected;
+                    }
+                    console.log("Upgraded: " + selected);
+                }
+                
+            }
+        }
+    }
+}
+
 function interact() {
     //var yeild = Math.random()*Math.pow(distance, 1/2);
-    var desc = document.getElementById("desc");
+    
     for(i = 0; i < inventory.length; i++)
     {
         if (facing['type'] === inventory[i]['tile']) {
@@ -307,4 +381,9 @@ function interact() {
         }
     }
     
+}
+
+craft(res)
+{
+    return ("r");
 }
