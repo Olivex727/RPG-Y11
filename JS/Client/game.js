@@ -51,7 +51,7 @@ function updateInvent(scroll, change = null) {
         inventstage = change;
         scrollnum = 0;
     }
-
+    
     document.getElementById("money").textContent = "Money: " + money;
     var res = craft(false);
     //var res = test();
@@ -65,7 +65,7 @@ function updateInvent(scroll, change = null) {
     function upButtons(text){
         for (i = 0; i < 3; i++){
             document.getElementById("sel_"+i).textContent = text;
-        }
+        }     
     }
 
     //INVENTORY
@@ -81,7 +81,7 @@ function updateInvent(scroll, change = null) {
     }
 
     //TOOLBELT
-    //Section that contains the apparel, weapons and tools
+    //Section that contains the apparel, weapons and tools 
     if (inventstage.split("_")[0] === "toolbelt") {
         upButtons("Upgrade");
         //TOOLBELT_WEAPONS
@@ -149,10 +149,10 @@ function updateInvent(scroll, change = null) {
 function ComPress(scroll, button, change=null){
 
     if (inventstage.split("_")[0] === "inventory"){
-
+        
     }
     if (inventstage.split("_")[0] === "quests") {
-
+        
     }
     if (inventstage.split("_")[0] === "toolbelt") {
         if (button == 1) { updateInvent(0, 'toolbelt_weapons'); }
@@ -277,13 +277,13 @@ function update(key) { //keys
         interact();
     }
     //alert(inter);
-
+    
     if (movex+movey != 0){
         infotxt = document.getElementById("info");
         //console.log(map["0,0"])
         //map[globalpos[0], globalpos[1]]['type'].toString();
         if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-
+            
             globalpos = [globalpos[0]+movex, globalpos[1]+movey]
             //console.log(globalpos);
 
@@ -292,10 +292,10 @@ function update(key) { //keys
             distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
             info3txt = document.getElementById("info2");
             info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
-
+            
             //alert(map["0,-1"]);
             infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
-
+            
         }
         facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
         facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
@@ -353,7 +353,7 @@ function selectItem(num){
                     }
                     console.log("Upgraded: " + selected);
                 }
-
+                
             }
         }
     }
@@ -361,18 +361,33 @@ function selectItem(num){
 
 function interact() {
     //var yeild = Math.random()*Math.pow(distance, 1/2);
-
+    
     for(i = 0; i < inventory.length; i++)
     {
         if (facing['type'] === inventory[i]['tile']) {
             if (map[facod]['har'] <= 0){
-                var x = Math.round(Math.random() * (distance + 1));
-                inventory[i]['amount'] += x;
-                updateInvent(null);
-                var y = Math.round(Math.random() * (distance+2));
-                map[facod]['har'] = y;
-                console.log("Harvested: "+y);
-                desc.textContent = "Picked up " + x + " " + inventory[i]['name'];
+                var minecheck = false;
+
+                for (item in toolbelt.tools) {
+                    console.log(toolbelt.tools[item].tilebase);
+                    if (toolbelt.tools[item].tilebase === map[facod]['type']) {
+
+                        if (toolbelt.tools[item].level > 0) {
+                            minecheck = true;
+                        }
+                    }
+                }
+                if (minecheck) {
+                    var x = Math.round(Math.random() * (distance + 1));
+                    inventory[i]['amount'] += x;
+                    updateInvent(null);
+                    var y = Math.round(Math.random() * (distance + 2));
+                    map[facod]['har'] = y;
+                    console.log("Harvested: " + y);
+                    desc.textContent = "Picked up " + x + " " + inventory[i]['name'];
+                } else {
+                    desc.textContent = "Missing the requred tool to mine " + map[facod]['type'];
+                }
             }
             else
             {
@@ -380,10 +395,10 @@ function interact() {
             }
         }
     }
-
+    
 }
 
-craft = (res) =>
+function craft(res)
 {
     return ("r");
 }

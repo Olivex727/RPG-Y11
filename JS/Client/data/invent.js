@@ -25,16 +25,25 @@ var toolbelt = {
     tools: [{
             "name": "Sickle",
             "color": "#000000",
-            "tilebase": "earth",
+            "tilebase": "grass",
             "efficiency": [40, 4],
             "level": 1,
             "image": "False",
             "cost": [110, 8]
         },
         {
+            "name": "Axe",
+            "color": "#000000",
+            "tilebase": "forest",
+            "efficiency": [12, 2],
+            "level": 1,
+            "image": "False",
+            "cost": [80, 10]
+        },
+        {
             "name": "Pickaxe",
             "color": "#000000",
-            "tilebase": "rock",
+            "tilebase": "mountain",
             "efficiency": [30, 7],
             "level": 0,
             "image": "False",
@@ -172,4 +181,12 @@ var quests = [
         req: [3, "Grass"],
         completed: false
     }
-]
+];
+
+var CraftingRecipes = [
+    [["Wood", "Wood"], ["Sticks", "invent"]],
+    [["Wood", "Rock"], ["Pickaxe", "toolbelt"]],
+    [["Lava", "Water"], ["Rock", "invent"]],
+    [["Lava", "Rock"], ["Chainmail", "toolbelt"]],
+    [["Wood", "Grass"], ["Bow", "toolbelt"]]
+];
