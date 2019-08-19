@@ -3,7 +3,7 @@ let globalpos = [0,0]
 const map = {};
 const size = 512
 let genmap;
-const sps = 11
+const sps = 15
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
 const maptext = $.ajax({
@@ -61,7 +61,7 @@ const drawscreen = (movex,movey) => {
     };
     const entities = {
         "player": {"colour":"#0d0d0d", "image":tileImage("player")},
-        "goblin": {"colour":"#ff0000"}
+        "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
     }
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
@@ -76,8 +76,10 @@ const drawscreen = (movex,movey) => {
 
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
-            ctx.fillRect((x)*(size/sps)+(size/sps)/4, (y)*(size/sps)+(size/sps)/4, (size/sps)/2, (size/sps)/2)
+            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            if(x == playerpos[0] || y == playerpos[1]){
+                console.log("battle start")
+            }
         }
     };
 
@@ -145,7 +147,7 @@ const drawscreen = (movex,movey) => {
         ctx.fillStyle = entities["player"]["colour"]
         ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
     } else {
-        ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+        ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
     }
 
 }

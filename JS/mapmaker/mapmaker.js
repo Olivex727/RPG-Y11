@@ -13,7 +13,7 @@ window.onmouseup = function() {
 }
 const ctx = canvas.getContext("2d");
 const size = 576
-const sps = 50
+const sps = 15
 
 for(i = 0; i<sps-1;i++){
     ctx.fillStyle = "#000000"
@@ -44,6 +44,7 @@ const terrain = {
     "forest": {"colour":"#336600", "stand":"True", "image":tileImage()},
     "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage()},
     "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage()},
+    "path": {"colour":"#00000", "stand":"False", "image":tileImage()},
     "bridge": {"colour":"#000000", "stand":"True", "image":tileImage()},
     "roof1": {"colour":"#000000", "stand":"False", "image":tileImage()},
     "roof2": {"colour":"#000000", "stand":"False", "image":tileImage()},
@@ -53,7 +54,9 @@ const terrain = {
     "roof6": {"colour":"#000000", "stand":"False", "image":tileImage()},
     "roof7": {"colour":"#000000", "stand":"False", "image":tileImage()},
     "chimney": {"colour":"#000000", "stand":"False", "image":tileImage()},
-    "door": {"colour":"#000000", "stand":"False", "image":tileImage()}
+    "door": {"colour":"#000000", "stand":"False", "image":tileImage()},
+    "floor": {"colour":"#00000", "stand":"False", "image":tileImage()},
+    "wall": {"colour":"#000000", "stand":"False", "image":tileImage()}
 
 };
 function changeColour(type){
