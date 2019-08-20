@@ -1,9 +1,11 @@
 // config variables
 let globalpos = [0,0]
 const map = {};
-const size = 512
+const canvas = document.getElementById("screen");
+const size = canvas.width
 let genmap;
 const sps = 15
+const sizeOfSquares = size/sps
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
 const maptext = $.ajax({
@@ -11,13 +13,13 @@ const maptext = $.ajax({
     url: "/map",
     async: false
 }).responseText.split("\n");
-for (i = 0; i < maptext.length; i++){
+for (i = 0; i < maptext.length; ++i){
     let tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5]}
 };
 let keysdown = []
-const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
+ctx.font = "20px Verdana";
 
 window.onload = function() {
     window.addEventListener("keydown", update);
@@ -31,8 +33,10 @@ window.onload = function() {
     drawscreen(0,0)
 };
 
+let combatActive = false;
+
 //drawing the screen
-const drawscreen = (movex,movey) => {
+const drawscreen =  (movex,movey) => {
     tileImage = (image) => {
         let img = new Image();
         img.src = "/Images/"+image+".png"
@@ -69,22 +73,24 @@ const drawscreen = (movex,movey) => {
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
             if(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"]=="False") {
                 ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
-                ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
+                ctx.fillRect((x)*(sizeOfSquares), (y)*(sizeOfSquares), (sizeOfSquares), (sizeOfSquares))
             } else {
-                ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"], (x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps));
+                ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"], (x)*(sizeOfSquares), (y)*(sizeOfSquares), (sizeOfSquares), (sizeOfSquares));
             }
 
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
                 console.log("battle start")
+                combatActive = true;
+                drawcombat("start");
             }
+            ctx.drawImage(entities["enemy"]["image"], x*(sizeOfSquares)+((sizeOfSquares)/8), y*(sizeOfSquares)+((sizeOfSquares)/8), (sizeOfSquares)/1.3, (sizeOfSquares)/1.3);
         }
     };
 
-    for (y = 0; y < sps; y++){
-        for (x = 0; x < sps; x++){ // draw map
+    for (y = 0; y < sps; ++y){
+        for (x = 0; x < sps; ++x){ // draw map
             try {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
@@ -145,11 +151,39 @@ const drawscreen = (movex,movey) => {
     };
     if(entities["player"]["colour"] == "False"){
         ctx.fillStyle = entities["player"]["colour"]
-        ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+        ctx.fillRect(playerpos[0]*(sizeOfSquares)+((sizeOfSquares)/4), playerpos[1]*(sizeOfSquares)+((sizeOfSquares)/4), ((sizeOfSquares)/2), ((sizeOfSquares)/2));
     } else {
-        ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
+        ctx.drawImage(entities["player"]["image"], playerpos[0]*(sizeOfSquares)+((sizeOfSquares)/8), playerpos[1]*(sizeOfSquares)+((sizeOfSquares)/8), ((sizeOfSquares)/1.3), ((sizeOfSquares)/1.3));
     }
 
+}
+
+drawcombat = async (phase) => {
+    if(phase == "start"){
+        clear = (per, colour, callback) => {
+            ctx.fillStyle = colour;
+            for(let y = 0; y<sps*per; ++y){
+                for(let x = 0; x<size/2; ++x){
+                    setTimeout( () =>{
+                        ctx.fillRect(x*2, (y)*(sizeOfSquares)+(size*(1-per)), 2, (sizeOfSquares+1))
+                    }, 1)
+                }
+            }
+            setTimeout( () =>{callback();}, 1)
+        }
+
+        clear(1, "#000000", ()=> {
+            clear(0.3, "#f2f2f2",()=> {
+                ctx.fillStyle = "#cc0000";
+                ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.5)
+                ctx.fillStyle = "#0033cc";
+                ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.5)
+                ctx.fillStyle = "#2aa22a";
+                ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.5)
+        })
+
+    })
+}
 }
 
 function update(key) { //keys
@@ -164,36 +198,40 @@ function update(key) { //keys
     if($(".output").html() == "press s to start"){
         $(".output").html("")
     }
-
-    let movex = 0;
-    let movey = 0;
-    if (key["type"] == "keydown"){
-        if(keysdown.indexOf(key["key"]) == -1){
-            keysdown.push(key["key"])
-        }
-        if(keysdown.indexOf("w") >= 0){
-            movey = -1;
-        }
-        else if (keysdown.indexOf("s") >= 0){
-            movey = 1;
-        }
-        if (keysdown.indexOf("a") >= 0){
-            movex = -1;
-        }
-        else if (keysdown.indexOf("d")>= 0){
-            movex = 1;
-        }
-        if (movex != 0 || movey != 0){
-            if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-                globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-                console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
-                drawscreen(movex,movey);
+    if (combatActive == true) {
+        drawcombat("move");
+    }
+    else {
+        let movex = 0;
+        let movey = 0;
+        if (key["type"] == "keydown"){
+            if(keysdown.indexOf(key["key"]) == -1){
+                keysdown.push(key["key"])
+            }
+            if(keysdown.indexOf("w") >= 0){
+                movey = -1;
+            }
+            else if (keysdown.indexOf("s") >= 0){
+                movey = 1;
+            }
+            if (keysdown.indexOf("a") >= 0){
+                movex = -1;
+            }
+            else if (keysdown.indexOf("d")>= 0){
+                movex = 1;
+            }
+            if (movex != 0 || movey != 0){
+                if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+                    globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                    console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
+                    drawscreen(movex,movey);
+                }
             }
         }
-    }
-    else{
-        if(keysdown.indexOf(key["key"]) != -1){
-            keysdown = arrayRemove(keysdown, key["key"]);
+        else{
+            if(keysdown.indexOf(key["key"]) != -1){
+                keysdown = arrayRemove(keysdown, key["key"]);
+            }
         }
     }
 };
