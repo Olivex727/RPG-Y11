@@ -361,23 +361,35 @@ function selectItem(num){
 
 function interact() {
     //var yeild = Math.random()*Math.pow(distance, 1/2);
-    
+    console.log("Facing: "+facing['type']);
+    console.log("Map: " + map[facod]['type']);
+    var minecheck = false;
+
+    //Check each item in inventory
     for(i = 0; i < inventory.length; i++)
     {
+        console.log(i);
+        // If the names of the tile and inventory items match up
         if (facing['type'] === inventory[i]['tile']) {
+            
+            //Check if the object can be harvested
             if (map[facod]['har'] <= 0){
-                var minecheck = false;
+                minecheck = false;
 
+                //Check if the toolbelt contains the correct tool so that the item can be harvested
                 for (item in toolbelt.tools) {
-                    console.log(toolbelt.tools[item].tilebase);
+                    
                     if (toolbelt.tools[item].tilebase === map[facod]['type']) {
 
                         if (toolbelt.tools[item].level > 0) {
                             minecheck = true;
+                            
                         }
                     }
                 }
+                //If the correct tool is in use
                 if (minecheck) {
+                    //Add items to inventory
                     var x = Math.round(Math.random() * (distance + 1));
                     inventory[i]['amount'] += x;
                     updateInvent(null);
@@ -395,7 +407,7 @@ function interact() {
             }
         }
     }
-    
+    console.log("interacted");
 }
 
 function craft(res)
