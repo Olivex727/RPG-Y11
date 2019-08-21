@@ -92,7 +92,7 @@ var inventory = [{
     {
         "name": "Wood",
         "color": "#550011",
-        "amount": 0,
+        "amount": 10,
         "image": "False",
         "cost": 1000,
         "stock": 0,
@@ -115,6 +115,15 @@ var inventory = [{
         "cost": 25,
         "stock": 9,
         "tile": "grass"
+    },
+    {
+        "name": "Sticks",
+        "color": "#00ff00",
+        "amount": 0,
+        "image": "False",
+        "cost": 32,
+        "stock": 0,
+        "tile": null
     }
 ];
 
@@ -184,9 +193,9 @@ var quests = [
 ];
 
 var CraftingRecipes = [
-    [["Wood", "Wood"], ["Sticks", "invent"]],
-    [["Wood", "Rock"], ["Pickaxe", "toolbelt"]],
-    [["Lava", "Water"], ["Rock", "invent"]],
-    [["Lava", "Rock"], ["Chainmail", "toolbelt"]],
-    [["Wood", "Grass"], ["Bow", "toolbelt"]]
+    [["Wood", "Wood"], ["Sticks", "invent"], [1, 1, 2]],
+    [["Wood", "Rock"], ["Pickaxe", "toolbelt"], [23, 43, 103]],
+    [["Lava", "Water"], ["Rock", "invent"], [13, 134, 189]],
+    [["Lava", "Rock"], ["Chainmail", "toolbelt"], [3, 13, 132]],
+    [["Wood", "Grass"], ["Bow", "toolbelt"], [13, 40, 81]]
 ];

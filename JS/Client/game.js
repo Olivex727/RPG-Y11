@@ -26,7 +26,7 @@ var distance = 0;
 var traveled = 0;
 
 var selected = null;
-var crafting = ["", ""];
+var crafting = ["Wood", "Wood"];
 
 window.onload = function() {
     window.addEventListener("keypress", update);
@@ -46,6 +46,7 @@ var title = document.getElementById("inv");
 //Update the selections on the inventory
 function updateInvent(scroll, change = null) {
     console.log("updateInvent: "+inventstage+" -> " + change);
+    selected="";
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -55,7 +56,7 @@ function updateInvent(scroll, change = null) {
     document.getElementById("money").textContent = "Money: " + money;
     var res = craft(false);
     //var res = test();
-    document.getElementById("crafting").textContent = "Crafting Table: [" +crafting[0]+", "+crafting[1]+" ] Result: ["+res+"]";
+    document.getElementById("crafting").textContent = "Crafting Table: [" +crafting[0]+", "+crafting[1]+"] Result: ["+res+"]";
     var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
     title.textContent = inventstage.toUpperCase();
     var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
@@ -149,7 +150,9 @@ function updateInvent(scroll, change = null) {
 function ComPress(scroll, button, change=null){
 
     if (inventstage.split("_")[0] === "inventory"){
-        
+        if (button == 1) { crafting[1] = crafting[0]; crafting[0]=selected; updateInvent(null); }
+        if (button == 2) { craft(true); updateInvent(null); }
+        if (button == 3) { /*Sell Item*/ }
     }
     if (inventstage.split("_")[0] === "quests") {
         
@@ -331,9 +334,9 @@ function selectItem(num){
                         money -= toolbelt[itemlist][i].cost[0];
                         toolbelt[itemlist][i].cost[0] += toolbelt[itemlist][i].cost[1];
                         if (inventstage.split("_")[1] === "weapons") {
-                            console.log(toolbelt[itemlist][i].speed[0]);
-                            console.log(toolbelt[itemlist][i].speed[1]);
-                            console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
+                            //console.log(toolbelt[itemlist][i].speed[0]);
+                            //console.log(toolbelt[itemlist][i].speed[1]);
+                            //console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
                             toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
                             //Now that's a lota daamage!!
                             toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
@@ -410,7 +413,68 @@ function interact() {
     console.log("interacted");
 }
 
-function craft(res)
+function craft(req)
 {
-    return ("r");
+    //console.log("START");
+    for(res in CraftingRecipes)
+    {
+        //console.log(CraftingRecipes[res][0][0] + CraftingRecipes[res][0][1]);
+        //console.log(crafting[0] + crafting[1]);
+        if (
+            (CraftingRecipes[res][0][0] === crafting[0]) &&
+            (CraftingRecipes[res][0][1] === crafting[1])
+        )
+        {
+            console.log("SUC: " + crafting[0] + crafting[1] + CraftingRecipes[res][1][0]);
+            
+            if(!req){return (CraftingRecipes[res][1][0]);}
+            else
+            {
+                var craftCheck = [false, false, false];
+                var indexStore = [-1, -1]
+                for (item in inventory) 
+                {
+                    if (inventory[item].name === CraftingRecipes[res][0][0]) {
+                        if (inventory[item].amount > CraftingRecipes[res][2][0])
+                        {
+                            inventory[item].amount -= CraftingRecipes[res][2][0];
+                            craftCheck[0] = true;
+                            indexStore[0] = item;
+                        }
+                    }
+                    if (inventory[item].name === CraftingRecipes[res][0][1])
+                    {
+                        if (inventory[item].amount > CraftingRecipes[res][2][1])
+                        {
+                            inventory[item].amount -= CraftingRecipes[res][2][1];
+                            craftCheck[1] = true;
+                            indexStore[1] = item;
+                        }
+                    }
+                }
+
+                if (money > CraftingRecipes[res][2][2])
+                {
+                    money -= CraftingRecipes[res][2][2];
+                    craftCheck[2] = true;
+                }
+                    
+                for (item in inventory) {
+                    if (inventory[item].name === CraftingRecipes[res][1][0] && craftCheck[0] && craftCheck[1] && craftCheck[2]) {
+                        inventory[item].amount += 1;
+                        desc.textContent = "Crafted " + CraftingRecipes[res][1][0];
+                    }
+                }
+
+                if (!craftCheck[0] || !craftCheck[1] || !craftCheck[2])
+                {
+                    desc.textContent = "Failed to Craft " + CraftingRecipes[res][1][0];
+                    if (craftCheck[0]) {inventory[indexStore[0]].amount += CraftingRecipes[res][2][0];}
+                    if (craftCheck[1]) {inventory[indexStore[0]].amount += CraftingRecipes[res][2][1];}
+                    if (craftCheck[2]) {money += CraftingRecipes[res][2][2];}
+                }
+            }
+        }
+    }
+    return ("");
 }
