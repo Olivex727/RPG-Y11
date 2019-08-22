@@ -2,10 +2,10 @@
 let globalpos = [0,0]
 const map = {};
 const canvas = document.getElementById("screen");
-const size = canvas.width
+let size = canvas.width
 let genmap;
 const sps = 15
-const sizeOfSquares = size/sps
+let sizeOfSquares = size/sps
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
 const maptext = $.ajax({
@@ -24,6 +24,7 @@ ctx.font = "20px Verdana";
 window.onload = function() {
     window.addEventListener("keydown", update);
     window.addEventListener("keyup", update);
+    window.addEventListener("resize", () =>{size = canvas.width});
     genmap = $.ajax({
         type: "GET",
         url: "/snoise?size=1000",
@@ -174,12 +175,18 @@ drawcombat = async (phase) => {
 
         clear(1, "#000000", ()=> {
             clear(0.3, "#f2f2f2",()=> {
-                ctx.fillStyle = "#cc0000";
-                ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.5)
                 ctx.fillStyle = "#0033cc";
-                ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.5)
+                ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.3)
+                ctx.fillText("Mana:", size*0.35, size*0.7+(size*0.3)*0.6)
+                ctx.fillText("100/100", size*0.35, size*0.7+(size*0.3)*0.8)
                 ctx.fillStyle = "#2aa22a";
-                ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.5)
+                ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.3)
+                ctx.fillText("EXP:", size*0.65, size*0.7+(size*0.3)*0.6)
+                ctx.fillText("0/100", size*0.65, size*0.7+(size*0.3)*0.8)
+                ctx.fillStyle = "#cc0000";
+                ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.3)
+                ctx.fillText("HP:", size*0.05, size*0.7+(size*0.3)*0.6)
+                ctx.fillText("100/100", size*0.05, size*0.7+(size*0.3)*0.8)
         })
 
     })
