@@ -369,16 +369,16 @@ function interact() {
     var minecheck = false;
 
     //Check each item in inventory
-    for(i = 0; i < inventory.length; i++)
+    for(i in inventory)
     {
-        console.log(i);
+        console.log(i + " " + inventory[i].name);
         // If the names of the tile and inventory items match up
-        if (facing['type'] === inventory[i]['tile']) {
+        if (facing['type'] === inventory[i].tile) {
             
             //Check if the object can be harvested
             if (map[facod]['har'] <= 0){
                 minecheck = false;
-
+                
                 //Check if the toolbelt contains the correct tool so that the item can be harvested
                 for (item in toolbelt.tools) {
                     
@@ -390,16 +390,20 @@ function interact() {
                         }
                     }
                 }
+
+                
                 //If the correct tool is in use
                 if (minecheck) {
+                    console.log("LOL: " + i + " " + inventory[i].name);
                     //Add items to inventory
                     var x = Math.round(Math.random() * (distance + 1));
-                    inventory[i]['amount'] += x;
-                    updateInvent(null);
+                    inventory[i].amount += x;
+                    
                     var y = Math.round(Math.random() * (distance + 2));
                     map[facod]['har'] = y;
-                    console.log("Harvested: " + y);
-                    desc.textContent = "Picked up " + x + " " + inventory[i]['name'];
+                    console.log("Harvested: " + y + inventory[i].name);
+                    desc.textContent = "Picked up " + x + " " + inventory[i].name;
+                    updateInvent(null);
                 } else {
                     desc.textContent = "Missing the requred tool to mine " + map[facod]['type'];
                 }
@@ -425,7 +429,7 @@ function craft(req)
             (CraftingRecipes[res][0][1] === crafting[1])
         )
         {
-            console.log("SUC: " + crafting[0] + crafting[1] + CraftingRecipes[res][1][0]);
+            //console.log("SUC: " + crafting[0] + crafting[1] + CraftingRecipes[res][1][0]);
             
             if(!req){return (CraftingRecipes[res][1][0]);}
             else
