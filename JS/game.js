@@ -84,7 +84,7 @@ const drawscreen =  (movex,movey) => {
             if(x == playerpos[0] || y == playerpos[1]){
                 console.log("battle start")
                 combatActive = true;
-                drawcombat("start");
+                drawcombat("start", entities);
             }
             ctx.drawImage(entities["enemy"]["image"], x*(sizeOfSquares)+((sizeOfSquares)/8), y*(sizeOfSquares)+((sizeOfSquares)/8), (sizeOfSquares)/1.3, (sizeOfSquares)/1.3);
         }
@@ -159,7 +159,7 @@ const drawscreen =  (movex,movey) => {
 
 }
 
-drawcombat = async (phase) => {
+drawcombat = async (phase, entities) => {
     if(phase == "start"){
         clear = (per, colour, callback) => {
             ctx.fillStyle = colour;
@@ -187,6 +187,7 @@ drawcombat = async (phase) => {
                 ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.3)
                 ctx.fillText("HP:", size*0.05, size*0.7+(size*0.3)*0.6)
                 ctx.fillText("100/100", size*0.05, size*0.7+(size*0.3)*0.8)
+                ctx.drawImage(entities["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7), size/2, size/2);
         })
 
     })
@@ -206,7 +207,7 @@ function update(key) { //keys
         $(".output").html("")
     }
     if (combatActive == true) {
-        drawcombat("move");
+        drawcombat("move", "none");
     }
     else {
         let movex = 0;
