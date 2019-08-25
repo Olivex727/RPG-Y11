@@ -1,6 +1,7 @@
 //
 //REMOVE SECTION WHEN MERGING TO OPENWORLD - TEMPORARILY HERE TO ALLOW USE OF TOOLS IN COMBAT
 //
+var money = 1000;
 var toolbelt = {
     weapons: [{
         "name": "Sword",
@@ -182,9 +183,10 @@ const drawscreen =  (movex,movey) => {
                 combatentity = entities;
                 Stats = {
                     "hp": [100, 100],
-                    "dmg": [equipped[0].damage, distance * (0.5 + Math.random())],
-                    "spd": [equipped[0].speed, distance * (0.5 + Math.random())],
-                    "def": [equipped[1].strength, distance * (0.5 + Math.random())]
+                    "dmg": [equipped[0].damage, 1 + Math.round(distance * (0.5 + Math.random()))],
+                    "spd": [equipped[0].speed, 1 + Math.round(distance * (0.5 + Math.random()))],
+                    "def": [equipped[1].strength, 1 + Math.round(distance * (0.5 + Math.random()))],
+                    "heal": [equipped[1].level, 1 + Math.round(distance / (1 + Math.random()))]
                 };
                 drawcombat("start", "A "+opponent+" has appeared!");
             }
@@ -368,27 +370,109 @@ function update(key) { //keys
 let Stats = null;
 let opponent = null;
 
+//Negative HP values are ok, if HP < 0 then straight after round, combat ends
 function CombatScene(key){
-    Stats.dmg = [equipped[0].damage, distance * (0.5 + Math.random())];
-    Stats.spd = [equipped[0].speed, distance * (0.5 + Math.random())];
-    Stats.def = [equipped[1].strength, distance * (0.5 + Math.random())];
+    //Equipping tools in inventory (when merge w openworld) will change these values
+    Stats.dmg = [equipped[0].damage, 1 + Math.round(distance * (0.5 + Math.random()))];
+    Stats.spd = [equipped[0].speed, 1 + Math.round(distance * (0.5 + Math.random()))];
+    Stats.def = [equipped[1].strength, 1 + Math.round(distance * (0.5 + Math.random()))];
+    Stats.heal = [equipped[1].level, 1 + Math.round(distance / (1 + Math.random()))];
+    let enemymove = Math.random();
+    let def = 0;
     
-    //The speed of the weapon will determine who goes first
-    if (Stats.spd[0] > Stats.spd[1])
+    if (key === "d" && enemymove <= 0.3)
     {
-
+        //drawCombat("none", "You both chose to defend the next attack");
     }
-    if (Stats.spd[0] < Stats.spd[1]) {
-
-    }
-    
-    function AIturn() //When it is the enemy's turn to play
+    //The speed of the weapon or if it's defense will determine who goes first
+    else if (Stats.spd[0] > Stats.spd[1] || key === "d")
     {
+        Playerturn();
+        setTimeout(AIturn(), 5000);
         
     }
+    else if (Stats.spd[0] < Stats.spd[1] || enemymove <= 0.3)
+    {
+        AIturn();
+        setTimeout(Playerturn(), 5000);
+    }
+    if (Stats.hp[1] <= 0 && Stats.hp[0] <= 0) { Reset(1); } //If Both die on the same round
+    else if (Stats.hp[1] <= 0) { Reset(2); } //If Enemy dies
+    else if (Stats.hp[0] <= 0) { Reset(0); } //If Player dies
+    
+    function Reset(win)
+    {
+        if(win == 2)
+        {
+            let rew = 1 + Math.round(distance * (0.5 + Math.random()));
+            money += rew;
+            //drawCombat("move", "The "+opponent+" lost. You won $"+rew);
+        }
+        if(win == 1)
+        {
+            //drawCombat("move", "You Drew");
+        }
+        if (win == 0) {
+            let rew = 1 + Math.round(distance * (0.5 + Math.random()));
+            if (money - rew <= 0){ money = 0; }else{ money -= rew; }
+            //drawCombat("move", "The "+opponent+" lost. You lost $"+rew);
+        }
+        opponent = null;
+        combatActive = false;
+        combatentity = null;
+        Stats = null;
+        setTimeout(drawscreen(0, 0), 5000)
+    }
+
+    function AIturn() //When it is the enemy's turn to play
+    {
+        if (enemymove <= 0.3)
+        {
+            def = Math.round(Stats.def[0] * (0.5 + Math.random()));
+            //drawCombat("move", "The "+opponent+" chose to defend the your attack");
+        }
+        else if (enemymove <= 0.7)
+        {
+            let atk = Math.round(Stats.dmg[0] * (0.5 + Math.random()));
+            Stats.hp[0] -= Math.round(atk - atk / def);
+            //drawCombat("move", "The "+opponent+" dealt "+atk+" damage");
+        }
+        else
+        {
+            let heal = Math.round(Stats.heal[0] * (0.5 + Math.random()));
+            if (Stats.hp[1] + heal >= 100) {
+                Stats.hp[1] = 100;
+            }
+            else {
+                Stats.hp[1] += heal;
+            }
+            //drawCombat("move", "The "+opponent+" healed "+heal+" HP");
+        }
+    }
     function Playerturn() {
-        if (key === "d") { } //drawCombat("move", "You chose to defend the next attack"); //Defence is based of strength of apparel
-        if (key === "a") { } //drawCombat("move", "You dealt "+atk+" damage"); //Attacking is based of damage of weapons
-        if (key === "s") { } //drawCombat("move", "You healed "+heal+" HP"); //Healing is based of level of apparel
+        if (key === "d") //Defence is based of strength of apparel
+        {
+            def = Math.round(Stats.def[0] * (0.5 + Math.random()));
+            //drawCombat("move", "You chose to defend the next attack");
+        }
+        else if (key === "a") //Attacking is based of damage of weapons
+        { 
+            let atk = Math.round(Stats.dmg[0] * (0.5 + Math.random()));
+            Stats.hp[1] -= Math.round(atk - atk/def);
+            //drawCombat("move", "You dealt "+atk+" damage");
+        }
+        else if (key === "s") //Healing is based of level of apparel
+        {
+            let heal = Math.round(Stats.heal[0] * (0.5 + Math.random()));
+            if (Stats.hp[0] + heal >= 100)
+            {
+                Stats.hp[0] = 100;
+            }
+            else
+            {
+                Stats.hp[0] += heal;
+            }
+            //drawCombat("move", "You healed "+heal+" HP");
+        }
     }
 }
