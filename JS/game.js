@@ -1,3 +1,96 @@
+//
+//REMOVE SECTION WHEN MERGING TO OPENWORLD - TEMPORARILY HERE TO ALLOW USE OF TOOLS IN COMBAT
+//
+var toolbelt = {
+    weapons: [{
+        "name": "Sword",
+        "color": "#000000",
+        "damage": [100, 12],
+        "speed": [20, 1],
+        "level": 1,
+        "image": "False",
+        "cost": [200, 5]
+    },
+    {
+        "name": "Bow",
+        "color": "#000000",
+        "damage": [60, 8],
+        "speed": [80, 2],
+        "level": 0,
+        "image": "False",
+        "cost": [230, 4]
+    }
+    ],
+    tools: [{
+        "name": "Sickle",
+        "color": "#000000",
+        "tilebase": "grass",
+        "efficiency": [40, 4],
+        "level": 1,
+        "image": "False",
+        "cost": [110, 8]
+    },
+    {
+        "name": "Axe",
+        "color": "#000000",
+        "tilebase": "forest",
+        "efficiency": [12, 2],
+        "level": 1,
+        "image": "False",
+        "cost": [80, 10]
+    },
+    {
+        "name": "Pickaxe",
+        "color": "#000000",
+        "tilebase": "mountain",
+        "efficiency": [30, 7],
+        "level": 0,
+        "image": "False",
+        "cost": [290, 2]
+    }
+
+    ],
+    apparel: [{
+        "name": "Chainmail",
+        "color": "#000000",
+        "strength": [90, 8],
+        "level": 0,
+        "image": "False",
+        "cost": [340, 2]
+    },
+    {
+        "name": "Clothes",
+        "color": "#000000",
+        "strength": [10, 1],
+        "level": 1,
+        "image": "False",
+        "cost": [20, 1]
+    }
+    ]
+};
+var equipped = [{
+    "name": "Sword",
+    "color": "#000000",
+    "damage": [100, 12],
+    "speed": [20, 1],
+    "level": 1,
+    "image": "False",
+    "cost": [200, 5]
+    },
+    {
+        "name": "Clothes",
+        "color": "#000000",
+        "strength": [10, 1],
+        "level": 1,
+        "image": "False",
+        "cost": [20, 1]
+    }
+];
+var distance = 100
+//
+//
+//
+
 // config variables
 let globalpos = [0,0]
 const map = {};
@@ -34,6 +127,7 @@ window.onload = function() {
     drawscreen(0,0)
 };
 
+let combatentity = null;
 let combatActive = false;
 
 //drawing the screen
@@ -83,8 +177,16 @@ const drawscreen =  (movex,movey) => {
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             if(x == playerpos[0] || y == playerpos[1]){
                 console.log("battle start")
+                opponent = map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'];
                 combatActive = true;
-                drawcombat("start", entities);
+                combatentity = entities;
+                Stats = {
+                    "hp": [100, 100],
+                    "dmg": [equipped[0].damage, distance * (0.5 + Math.random())],
+                    "spd": [equipped[0].speed, distance * (0.5 + Math.random())],
+                    "def": [equipped[1].strength, distance * (0.5 + Math.random())]
+                };
+                drawcombat("start", "A "+opponent+" has appeared!");
             }
             ctx.drawImage(entities["enemy"]["image"], x*(sizeOfSquares)+((sizeOfSquares)/8), y*(sizeOfSquares)+((sizeOfSquares)/8), (sizeOfSquares)/1.3, (sizeOfSquares)/1.3);
         }
@@ -159,7 +261,7 @@ const drawscreen =  (movex,movey) => {
 
 }
 
-drawcombat = async (phase, entities) => {
+drawcombat = async (phase, textque = "") => {
     if(phase == "start"){
         clear = (per, colour, callback) => {
             ctx.fillStyle = colour;
@@ -176,23 +278,26 @@ drawcombat = async (phase, entities) => {
         clear(1, "#000000", ()=> {
             clear(0.3, "#f2f2f2",()=> {
                 ctx.fillStyle = "#0033cc";
-                ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.3)
-                ctx.fillText("Mana:", size*0.35, size*0.7+(size*0.3)*0.6)
-                ctx.fillText("100/100", size*0.35, size*0.7+(size*0.3)*0.8)
+                ctx.fillText("Heal[s]", size*0.35, size*0.65+(size*0.3)*0.3)
+                ctx.fillText("HP:", size*0.35, size*0.65+(size*0.3)*0.6)
+                ctx.fillText(Stats.hp[0]+"/100", size*0.35, size*0.65+(size*0.3)*0.8)
                 ctx.fillStyle = "#2aa22a";
-                ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.3)
-                ctx.fillText("EXP:", size*0.65, size*0.7+(size*0.3)*0.6)
-                ctx.fillText("0/100", size*0.65, size*0.7+(size*0.3)*0.8)
+                ctx.fillText("Defend[d]", size*0.65, size*0.65+(size*0.3)*0.3)
+                ctx.fillText("Difficulty:", size*0.65, size*0.65+(size*0.3)*0.6)
+                ctx.fillText(distance, size*0.65, size*0.65+(size*0.3)*0.8) //Distance is the magnitude of dist. from origin (xpos^2+ypos^2)^1/2
                 ctx.fillStyle = "#cc0000";
-                ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.3)
-                ctx.fillText("HP:", size*0.05, size*0.7+(size*0.3)*0.6)
-                ctx.fillText("100/100", size*0.05, size*0.7+(size*0.3)*0.8)
-                ctx.drawImage(entities["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7), size/2, size/2);
-        })
+                ctx.fillText("Attack[a]", size*0.02, size*0.65+(size*0.3)*0.3)
+                ctx.fillText("Equipped:", size*0.02, size*0.65+(size*0.3)*0.6)
+                ctx.fillText(equipped[0].name + "/"+equipped[1].name, size*0.02, size*0.65+(size*0.3)*0.8)
+                ctx.drawImage(combatentity["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7), size/2, size/2);
+                ctx.fillStyle = "#aaaa00";
+                ctx.fillText(textque, size * 0.01, (size * 0.9 + (size * 0.3) * 0.3))
+            })
 
-    })
+        })
+    }
 }
-}
+
 
 function update(key) { //keys
 
@@ -207,7 +312,23 @@ function update(key) { //keys
         $(".output").html("")
     }
     if (combatActive == true) {
-        drawcombat("move", "none");
+        //drawcombat("start", "none");
+        //combat
+        if (key["type"] == "keydown") {
+            if (keysdown.indexOf(key["key"]) == -1) {
+                keysdown.push(key["key"])
+            }
+            if (keysdown.indexOf("a") >= 0) {
+                CombatScene("a");
+            }
+            else if (keysdown.indexOf("s") >= 0) {
+                CombatScene("s");
+            }
+            else if (keysdown.indexOf("d") >= 0) {
+                CombatScene("d");
+            }
+        }
+
     }
     else {
         let movex = 0;
@@ -243,3 +364,31 @@ function update(key) { //keys
         }
     }
 };
+
+let Stats = null;
+let opponent = null;
+
+function CombatScene(key){
+    Stats.dmg = [equipped[0].damage, distance * (0.5 + Math.random())];
+    Stats.spd = [equipped[0].speed, distance * (0.5 + Math.random())];
+    Stats.def = [equipped[1].strength, distance * (0.5 + Math.random())];
+    
+    //The speed of the weapon will determine who goes first
+    if (Stats.spd[0] > Stats.spd[1])
+    {
+
+    }
+    if (Stats.spd[0] < Stats.spd[1]) {
+
+    }
+    
+    function AIturn() //When it is the enemy's turn to play
+    {
+        
+    }
+    function Playerturn() {
+        if (key === "d") { } //drawCombat("move", "You chose to defend the next attack"); //Defence is based of strength of apparel
+        if (key === "a") { } //drawCombat("move", "You dealt "+atk+" damage"); //Attacking is based of damage of weapons
+        if (key === "s") { } //drawCombat("move", "You healed "+heal+" HP"); //Healing is based of level of apparel
+    }
+}

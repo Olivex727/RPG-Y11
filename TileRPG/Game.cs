@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+#pragma warning disable CS0252
 namespace TileRPG
 {
     public partial class Game : Form
