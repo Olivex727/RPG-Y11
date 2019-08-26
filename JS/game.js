@@ -52,7 +52,7 @@ function updateInvent(scroll, change = null) {
         inventstage = change;
         scrollnum = 0;
     }
-    
+
     document.getElementById("money").textContent = "Money: " + money;
     var res = craft(false);
     //var res = test();
@@ -66,7 +66,7 @@ function updateInvent(scroll, change = null) {
     function upButtons(text){
         for (i = 0; i < 3; i++){
             document.getElementById("sel_"+i).textContent = text;
-        }     
+        }
     }
 
     //INVENTORY
@@ -82,7 +82,7 @@ function updateInvent(scroll, change = null) {
     }
 
     //TOOLBELT
-    //Section that contains the apparel, weapons and tools 
+    //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
         upButtons("Upgrade");
         //TOOLBELT_WEAPONS
@@ -155,7 +155,7 @@ function ComPress(scroll, button, change=null){
         if (button == 3) { /*Sell Item*/ }
     }
     if (inventstage.split("_")[0] === "quests") {
-        
+
     }
     if (inventstage.split("_")[0] === "toolbelt") {
         if (button == 1) { updateInvent(0, 'toolbelt_weapons'); }
@@ -168,67 +168,100 @@ function ComPress(scroll, button, change=null){
 }
 
 //drawing the screen
-var drawscreen = (movex,movey) => {
-    var terrain = {
-        "grass": {"colour":"#33cc33", "stand":"True", "image":"False", "height":"1"},
-        "water": {"colour":"#0033cc", "stand":"False", "image":"False", "height":"3"},
-        "mountain": {"colour":"#666633", "stand":"True", "image":"False", "height":"4"},
-        "lava": {"colour":"#cc6600", "stand":"False", "image":"False", "height":"5"},
-        "forest": {"colour":"#336600", "stand":"True", "image":"False", "height":"2"},
-    };
-    var entities = {
-        "player": {"colour":"#0d0d0d"},
-        "goblin": {"colour":"#11aa00"},
-        "villager": {"colour":"#995500"},
-        "salesman": {"colour":"#dddd55"}
+const drawscreen = (movex,movey) => {
+    tileImage = (image) => {
+        let img = new Image();
+        img.src = "/Images/"+image+".png"
+        return img
     }
-    var interest = ["fountain", "dungeon", "monster", "teleport"]
-    var draw = (x,y) => {
+    const terrain = {
+        "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
+        "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
+        "water": {"colour":"#0033cc", "stand":"False", "image":tileImage("water")},
+        "mountain": {"colour":"#666633", "stand":"True", "image":tileImage("mountain")},
+        "lava": {"colour":"#cc6600", "stand":"False", "image":tileImage("lava")},
+        "forest": {"colour":"#336600", "stand":"True", "image":tileImage("forest")},
+        "snow": {"colour":"#b3ffff", "stand":"True", "image":tileImage("snow")},
+        "houseWall": {"colour":"#00000", "stand":"False", "image":tileImage("houseWall")},
+        "bridge": {"colour":"#000000", "stand":"True", "image":tileImage("bridge")},
+        "roof1": {"colour":"#000000", "stand":"False", "image":tileImage("roof1")},
+        "roof2": {"colour":"#000000", "stand":"False", "image":tileImage("roof2")},
+        "roof3": {"colour":"#000000", "stand":"False", "image":tileImage("roof3")},
+        "roof4": {"colour":"#000000", "stand":"False", "image":tileImage("roof4")},
+        "roof5": {"colour":"#000000", "stand":"False", "image":tileImage("roof5")},
+        "roof6": {"colour":"#000000", "stand":"False", "image":tileImage("roof6")},
+        "roof7": {"colour":"#000000", "stand":"False", "image":tileImage("roof7")},
+        "chimney": {"colour":"#000000", "stand":"False", "image":tileImage("chimney")},
+        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
+
+    };
+    const entities = {
+        "player": {"colour":"#0d0d0d", "image":tileImage("player")},
+        "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
+    }
+    const interest = ["fountain", "dungeon", "monster", "teleport"]
+    const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
             if(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"]=="False") {
                 ctx.fillStyle = terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["colour"];
                 ctx.fillRect((x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps))
             } else {
-                var img = document.getElementById(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']);
-                ctx.drawImage(img, (x)*(size/sps), (y)*(size/sps));
+                ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"], (x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps));
             }
 
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.fillStyle = entities[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy']]["colour"];
-            ctx.fillRect((x)*(size/sps)+(size/sps)/4, (y)*(size/sps)+(size/sps)/4, (size/sps)/2, (size/sps)/2)
+            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            if(x == playerpos[0] || y == playerpos[1]){
+                console.log("battle start")
+            }
         }
     };
+
     for (y = 0; y < sps; y++){
         for (x = 0; x < sps; x++){ // draw map
             try {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError ){
-
-                    if(Math.random() <= 0.6){ // terrain
+                    // console.log(genmap);
+                    // console.log(x+globalpos[0]+500, y+globalpos[1]+500)
+                    // console.log(genmap[x+globalpos[0]+500][y+globalpos[1]+500]);
+                    // chances of different tiles
+                    pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
+                    let stand = "True";
+                    let enemy = "none";
+                    if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
-                        stand = "True"
                         if(Math.random() <= 0.01){ // enemies
                             enemy = "goblin"
                             stand = "False"
-                        }
-                        else if (Math.random() <= 0.011) {
-                            enemy = "villager"
-                            stand = "False"
-                        }
-                        else if (Math.random() <= 0.012) {
-                            enemy = "salesman"
-                            stand = "False"
-                        }
-                        else {
-                            enemy = "none"
-                        }
-                    }else{
+                    }
+                }
+                    else if (pos < 0.49 && pos > 0.375) {
+                        type = "forest"
+                    }
+                    else if (pos < 0.28 && pos >= 0.175) {
+                        type = "sand"
+                    }
+                    else if (pos >= 0.725 && pos < 0.85) {
+                        type = "snow"
+                    }
+                    else if (pos > 0.56 && pos < 0.725) {
+                        type = "mountain"
+                    }
+                    else if (pos <= 0.175) {
+                        type = "water"
+                        stand = "False"
+                    }
+                    else if (pos >= 0.85) {
+                        type = "lava"
+                        stand = "False"
+                    }
+                    else{
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
-                        enemy = "none"
                     }
                     if(Math.random() <= 0.1){ // terrain
                         z = Math.floor(Math.random() * Object.keys(terrain).length) + 1
@@ -238,17 +271,21 @@ var drawscreen = (movex,movey) => {
                     }
 
 
-                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har":0, "load":true}
+                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy}
                     draw(x,y)
                 }else{
                     console.log(e)
                 }
             }
-            map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['har'] += -1;
         };
     };
-    ctx.fillStyle = entities["player"]["colour"]
-    ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    if(entities["player"]["colour"] == "False"){
+        ctx.fillStyle = entities["player"]["colour"]
+        ctx.fillRect(playerpos[0]*(size/sps)+((size/sps)/4), playerpos[1]*(size/sps)+((size/sps)/4), ((size/sps)/2), ((size/sps)/2));
+    } else {
+        ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
+    }
+
 }
 
 var facod = "";
@@ -280,13 +317,13 @@ function update(key) { //keys
         interact();
     }
     //alert(inter);
-    
+
     if (movex+movey != 0){
         infotxt = document.getElementById("info");
         //console.log(map["0,0"])
         //map[globalpos[0], globalpos[1]]['type'].toString();
         if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-            
+
             globalpos = [globalpos[0]+movex, globalpos[1]+movey]
             //console.log(globalpos);
 
@@ -295,10 +332,10 @@ function update(key) { //keys
             distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
             info3txt = document.getElementById("info2");
             info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
-            
+
             //alert(map["0,-1"]);
             infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
-            
+
         }
         facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
         facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
@@ -356,7 +393,7 @@ function selectItem(num){
                     }
                     console.log("Upgraded: " + selected);
                 }
-                
+
             }
         }
     }
@@ -374,31 +411,31 @@ function interact() {
         console.log(i + " " + inventory[i].name);
         // If the names of the tile and inventory items match up
         if (facing['type'] === inventory[i].tile) {
-            
+
             //Check if the object can be harvested
             if (map[facod]['har'] <= 0){
                 minecheck = false;
-                
+
                 //Check if the toolbelt contains the correct tool so that the item can be harvested
                 for (item in toolbelt.tools) {
-                    
+
                     if (toolbelt.tools[item].tilebase === map[facod]['type']) {
 
                         if (toolbelt.tools[item].level > 0) {
                             minecheck = true;
-                            
+
                         }
                     }
                 }
 
-                
+
                 //If the correct tool is in use
                 if (minecheck) {
                     console.log("LOL: " + i + " " + inventory[i].name);
                     //Add items to inventory
                     var x = Math.round(Math.random() * (distance + 1));
                     inventory[i].amount += x;
-                    
+
                     var y = Math.round(Math.random() * (distance + 2));
                     map[facod]['har'] = y;
                     console.log("Harvested: " + y + inventory[i].name);
@@ -430,13 +467,13 @@ function craft(req)
         )
         {
             //console.log("SUC: " + crafting[0] + crafting[1] + CraftingRecipes[res][1][0]);
-            
+
             if(!req){return (CraftingRecipes[res][1][0]);}
             else
             {
                 var craftCheck = [false, false, false];
                 var indexStore = [-1, -1]
-                for (item in inventory) 
+                for (item in inventory)
                 {
                     if (inventory[item].name === CraftingRecipes[res][0][0]) {
                         if (inventory[item].amount > CraftingRecipes[res][2][0])
@@ -462,7 +499,7 @@ function craft(req)
                     money -= CraftingRecipes[res][2][2];
                     craftCheck[2] = true;
                 }
-                    
+
                 for (item in inventory) {
                     if (inventory[item].name === CraftingRecipes[res][1][0] && craftCheck[0] && craftCheck[1] && craftCheck[2]) {
                         inventory[item].amount += 1;
