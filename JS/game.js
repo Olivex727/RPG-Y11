@@ -131,6 +131,7 @@ window.onload = function() {
 let combatentity = null;
 let combatActive = false;
 let combatDrawDone = false;
+let enemyGone = true;
 
 //drawing the screen
 const drawscreen =  (movex,movey) => {
@@ -178,19 +179,20 @@ const drawscreen =  (movex,movey) => {
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             if(x == playerpos[0] || y == playerpos[1]){
-                
+                map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'] = "none";
                 opponent = map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'];
                 combatActive = true;
                 combatentity = entities;
                 combatDrawDone = true;
                 Stats = {
-                    "hp": [100, 100],
-                    "dmg": [equipped[0].damage, 1 + Math.round(distance * (0.5 + Math.random()))],
-                    "spd": [equipped[0].speed, 1 + Math.round(distance * (0.5 + Math.random()))],
-                    "def": [equipped[1].strength, 1 + Math.round(distance * (0.5 + Math.random()))],
+                    "hp": [1000, 1000],
+                    "dmg": [equipped[0].damage[0], 1 + Math.round(distance * (0.5 + Math.random()))],
+                    "spd": [equipped[0].speed[0], 1 + Math.round(distance * (0.5 + Math.random()))],
+                    "def": [equipped[1].strength[0], 1 + Math.round(distance * (0.5 + Math.random()))],
                     "heal": [equipped[1].level, 1 + Math.round(distance / (1 + Math.random()))]
                 };
-                drawCombat("start", "A "+opponent+" has appeared!");//{ console.log("SBHWek"); }
+                
+                drawCombat("start", "A "+opponent+" has appeared!");
                 console.log("battle start");
                 
             }
@@ -268,62 +270,56 @@ const drawscreen =  (movex,movey) => {
 }
 
 drawCombat =  async (phase, textque = "") => {
-        clear = (per, colour, callback) => {
-            combatDrawDone = false;
-            ctx.fillStyle = colour;
-            for(let y = 0; y<sps*per; ++y){
-                for(let x = 0; x<size/2; ++x){
-                    setTimeout( () =>{
-                        ctx.fillRect(x*2, (y)*(sizeOfSquares)+(size*(1-per)), 2, (sizeOfSquares+1))
-                    }, 1)
-                }
+    clear = (per, colour, callback) => {
+        combatDrawDone = false;
+        ctx.fillStyle = colour;
+        for(let y = 0; y<sps*per; ++y){
+            for(let x = 0; x<size/2; ++x){
+                setTimeout( () =>{
+                    ctx.fillRect(x*2, (y)*(sizeOfSquares)+(size*(1-per)), 2, (sizeOfSquares+1))
+                }, 1)
             }
-            setTimeout( () =>{callback();}, 1)
-            combatDrawDone = true;
         }
+        setTimeout( () =>{callback();}, 1)
+        combatDrawDone = true;
+    }
+    drawDialouge = () => {
+        //if(phase != "none")
+        //{
+        ctx.fillStyle = "#0033cc";
+        ctx.fillText("Heal[s]", size * 0.35, size * 0.65 + (size * 0.3) * 0.3)
+        ctx.fillText("HP:", size * 0.35, size * 0.65 + (size * 0.3) * 0.6)
+        ctx.fillText(Stats.hp[0] + "/100", size * 0.35, size * 0.65 + (size * 0.3) * 0.8)
+        ctx.fillStyle = "#2aa22a";
+        ctx.fillText("Defend[d]", size * 0.65, size * 0.65 + (size * 0.3) * 0.3)
+        ctx.fillText("Difficulty:", size * 0.65, size * 0.65 + (size * 0.3) * 0.6)
+        ctx.fillText(distance, size * 0.65, size * 0.65 + (size * 0.3) * 0.8) //Distance is the magnitude of dist. from origin (xpos^2+ypos^2)^1/2
+        ctx.fillStyle = "#cc0000";
+        ctx.fillText("Attack[a]", size * 0.02, size * 0.65 + (size * 0.3) * 0.3)
+        ctx.fillText("Equipped:", size * 0.02, size * 0.65 + (size * 0.3) * 0.6)
+        ctx.fillText(equipped[0].name + "/" + equipped[1].name, size * 0.02, size * 0.65 + (size * 0.3) * 0.8)
+        //}
+        ctx.fillStyle = "#aaaa00";
+        ctx.fillText(textque, size * 0.01, (size * 0.9 + (size * 0.3) * 0.3))
+        ctx.drawImage(combatentity["enemy"]["image"], size * 0.25, (size * 0.7) / (4 * 1.7), size / 2, size / 2);
+    }
+
+
     if (combatDrawDone)
     {
-    if (phase == "start") {
-        clear(1, "#000000", ()=> {
-            clear(0.3, "#f2f2f2",()=> {
-                ctx.fillStyle = "#0033cc";
-                ctx.fillText("Heal[s]", size*0.35, size*0.65+(size*0.3)*0.3)
-                ctx.fillText("HP:", size*0.35, size*0.65+(size*0.3)*0.6)
-                ctx.fillText(Stats.hp[0]+"/100", size*0.35, size*0.65+(size*0.3)*0.8)
-                ctx.fillStyle = "#2aa22a";
-                ctx.fillText("Defend[d]", size*0.65, size*0.65+(size*0.3)*0.3)
-                ctx.fillText("Difficulty:", size*0.65, size*0.65+(size*0.3)*0.6)
-                ctx.fillText(distance, size*0.65, size*0.65+(size*0.3)*0.8) //Distance is the magnitude of dist. from origin (xpos^2+ypos^2)^1/2
-                ctx.fillStyle = "#cc0000";
-                ctx.fillText("Attack[a]", size*0.02, size*0.65+(size*0.3)*0.3)
-                ctx.fillText("Equipped:", size*0.02, size*0.65+(size*0.3)*0.6)
-                ctx.fillText(equipped[0].name + "/"+equipped[1].name, size*0.02, size*0.65+(size*0.3)*0.8)
-                ctx.fillStyle = "#aaaa00";
-                ctx.fillText(textque, size * 0.01, (size * 0.9 + (size * 0.3) * 0.3))
-                ctx.drawImage(combatentity["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7), size/2, size/2);
+        if (phase == "start") {
+            clear(1, "#000000", ()=> {
+                clear(0.3, "#f2f2f2",()=> {
+                    drawDialouge();
+                })
+
             })
 
-        })
+        }
 
-    }
-    
-    if (phase == "move") {
+        if (phase == "move" || phase == "none") {
             clear(0.3, "#f2f2f2", () => {
-                ctx.fillStyle = "#0033cc";
-                ctx.fillText("Heal[s]", size * 0.35, size * 0.65 + (size * 0.3) * 0.3)
-                ctx.fillText("HP:", size * 0.35, size * 0.65 + (size * 0.3) * 0.6)
-                ctx.fillText(Stats.hp[0] + "/100", size * 0.35, size * 0.65 + (size * 0.3) * 0.8)
-                ctx.fillStyle = "#2aa22a";
-                ctx.fillText("Defend[d]", size * 0.65, size * 0.65 + (size * 0.3) * 0.3)
-                ctx.fillText("Difficulty:", size * 0.65, size * 0.65 + (size * 0.3) * 0.6)
-                ctx.fillText(distance, size * 0.65, size * 0.65 + (size * 0.3) * 0.8) //Distance is the magnitude of dist. from origin (xpos^2+ypos^2)^1/2
-                ctx.fillStyle = "#cc0000";
-                ctx.fillText("Attack[a]", size * 0.02, size * 0.65 + (size * 0.3) * 0.3)
-                ctx.fillText("Equipped:", size * 0.02, size * 0.65 + (size * 0.3) * 0.6)
-                ctx.fillText(equipped[0].name + "/" + equipped[1].name, size * 0.02, size * 0.65 + (size * 0.3) * 0.8)
-                ctx.fillStyle = "#aaaa00";
-                ctx.fillText(textque, size * 0.01, (size * 0.9 + (size * 0.3) * 0.3))
-                ctx.drawImage(combatentity["enemy"]["image"], size * 0.25, (size * 0.7) / (4 * 1.7), size / 2, size / 2);
+                drawDialouge();
             })
         }
     }
@@ -403,30 +399,30 @@ let opponent = null;
 function CombatScene(key){
     //drawCombat("move", "lolololol");
     //Equipping tools in inventory (when merge w openworld) will change these values
-    Stats.dmg = [equipped[0].damage, 1 + Math.round(distance * (0.5 + Math.random()))];
-    Stats.spd = [equipped[0].speed, 1 + Math.round(distance * (0.5 + Math.random()))];
-    Stats.def = [equipped[1].strength, 1 + Math.round(distance * (0.5 + Math.random()))];
+    Stats.dmg = [equipped[0].damage[0], 1 + Math.round(distance * (0.5 + Math.random()))];
+    Stats.spd = [equipped[0].speed[0], 1 + Math.round(distance * (0.5 + Math.random()))];
+    Stats.def = [equipped[1].strength[0], 1 + Math.round(distance * (0.5 + Math.random()))];
     Stats.heal = [equipped[1].level, 1 + Math.round(distance / (1 + Math.random()))];
     console.log(key);
-    console.log(Stats);
+    //console.log(Stats.hp[0]);
     let enemymove = Math.random();
-    let def = 0;
+    let def = 10000;
     
     if (key === "d" && enemymove <= 0.3)
     {
-        //drawCombat("none", "You both chose to defend the next attack");
+        drawCombat("none", "You both chose to defend the next attack");
     }
     //The speed of the weapon or if it's defense will determine who goes first
     else if (Stats.spd[0] > Stats.spd[1] || key === "d")
     {
         Playerturn();
-        setTimeout(AIturn(), 5000);
+        setTimeout(AIturn(), 10000);
         
     }
     else if (Stats.spd[0] < Stats.spd[1] || enemymove <= 0.3)
     {
         AIturn();
-        setTimeout(Playerturn(), 5000);
+        setTimeout(Playerturn(), 10000);
     }
     if (Stats.hp[1] <= 0 && Stats.hp[0] <= 0) { Reset(1); } //If Both die on the same round
     else if (Stats.hp[1] <= 0) { Reset(2); } //If Enemy dies
@@ -438,16 +434,16 @@ function CombatScene(key){
         {
             let rew = 1 + Math.round(distance * (0.5 + Math.random()));
             money += rew;
-            //drawCombat("move", "The "+opponent+" lost. You won $"+rew);
+            drawCombat("none", "The "+opponent+" lost. You won $"+rew);
         }
         if(win == 1)
         {
-            //drawCombat("move", "You Drew");
+            drawCombat("none", "You Drew");
         }
         if (win == 0) {
             let rew = 1 + Math.round(distance * (0.5 + Math.random()));
             if (money - rew <= 0){ money = 0; }else{ money -= rew; }
-            //drawCombat("move", "The "+opponent+" lost. You lost $"+rew);
+            drawCombat("none", "The "+opponent+" lost. You lost $"+rew);
         }
         opponent = null;
         combatActive = false;
@@ -461,13 +457,15 @@ function CombatScene(key){
         if (enemymove <= 0.3)
         {
             def = Math.round(Stats.def[0] * (0.5 + Math.random()));
-            //drawCombat("move", "The "+opponent+" chose to defend the your attack");
+            drawCombat("move", "The "+opponent+" chose to defend the your attack");
+            console.log("Enemy Def: " + def);
         }
         else if (enemymove <= 0.7)
         {
-            let atk = Math.round(Stats.dmg[0] * (0.5 + Math.random()));
-            Stats.hp[0] -= Math.round(atk - atk / def);
-            //drawCombat("move", "The "+opponent+" dealt "+atk+" damage");
+            let atk = Math.round((Stats.dmg[0] * (0.5 + Math.random()))*(1-(1/def)));
+            Stats.hp[0] -= atk;
+            drawCombat("move", "The "+opponent+" dealt "+atk+" damage");
+            console.log("Enemy Attack: " + atk);
         }
         else
         {
@@ -478,20 +476,25 @@ function CombatScene(key){
             else {
                 Stats.hp[1] += heal;
             }
-            //drawCombat("move", "The "+opponent+" healed "+heal+" HP");
+            drawCombat("move", "The "+opponent+" healed "+heal+" HP");
+            console.log("Enemy Heal: " + heal);
         }
+        console.log("Enemy HP: " + Stats.hp[1]);
     }
     function Playerturn() {
         if (key === "d") //Defence is based of strength of apparel
         {
             def = Math.round(Stats.def[0] * (0.5 + Math.random()));
-            //drawCombat("move", "You chose to defend the next attack");
+            drawCombat("move", "You chose to defend the next attack");
+            console.log("Player Def: " + def);
         }
         else if (key === "a") //Attacking is based of damage of weapons
         { 
-            let atk = Math.round(Stats.dmg[0] * (0.5 + Math.random()));
-            Stats.hp[1] -= Math.round(atk - atk/def);
-            //drawCombat("move", "You dealt "+atk+" damage");
+            //console.log("Damage: " + Stats.dmg[0] + ", Defence: " + def);
+            let atk = Math.round( (Stats.dmg[0] * (0.5 + Math.random()) ) * (1 - (1 / def)) );
+            console.log("Player Attack: "+atk);
+            Stats.hp[1] -= atk;
+            drawCombat("move", "You dealt "+atk+" damage");
         }
         else if (key === "s") //Healing is based of level of apparel
         {
@@ -504,7 +507,9 @@ function CombatScene(key){
             {
                 Stats.hp[0] += heal;
             }
-            //drawCombat("move", "You healed "+heal+" HP");
+            console.log("Player Heal: " + heal);
+            drawCombat("move", "You healed "+heal+" HP");
         }
+        console.log("Player HP: " +Stats.hp[0]);
     }
 }
