@@ -299,60 +299,67 @@ const drawscreen = (movex,movey) => {
 var facod = "";
 
 function update(key) { //keys
-    var movex = 0;
-    var movey = 0;
+
+    function arrayRemove(arr, value) {
+
+       return arr.filter(function(ele){
+           return ele != value;
+       });
+
+    }
+
+    if($(".output").html() == "press s to start"){
+        $(".output").html("")
+    }
+
+    let movex = 0;
+    let movey = 0;
     var inter = false;
-
-    if(key["code"] == "KeyW"){
-        movey = -1;
-        lastmove = "w";
-
-    }
-    else if (key["code"] == "KeyA"){
-        movex = -1;
-        lastmove = "a";
-    }
-    else if (key["code"] == "KeyS"){
-        movey = 1;
-        lastmove = "s";
-    }
-    else if (key["code"] == "KeyD"){
-        movex = 1;
-        lastmove = "d";
-    }
-    else if (key["code"] == "KeyE" && facod !== "")
-    {
-        interact();
-    }
-    //alert(inter);
-
-    if (movex+movey != 0){
-        infotxt = document.getElementById("info");
-        //console.log(map["0,0"])
-        //map[globalpos[0], globalpos[1]]['type'].toString();
-        if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-
-            globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-            //console.log(globalpos);
-
-            drawscreen(movex,movey);
-            traveled++;
-            distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
-            info3txt = document.getElementById("info2");
-            info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
-
-            //alert(map["0,-1"]);
-            infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
-
+    if (key["type"] == "keydown"){
+        if(keysdown.indexOf(key["key"]) == -1){
+            keysdown.push(key["key"])
         }
-        facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
-        facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
-        console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
-        info2txt = document.getElementById("info1");
-        info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
+        if(keysdown.indexOf("w") >= 0){
+            movey = -1;
+        }
+        else if (keysdown.indexOf("s") >= 0){
+            movey = 1;
+        }
+        if (keysdown.indexOf("a") >= 0){
+            movex = -1;
+        }
+        else if (keysdown.indexOf("d")>= 0){
+            movex = 1;
+        }
+        if (keysdown.indexOf("e")>= 0){
+            interact();
+        }
+        if (movex != 0 || movey != 0){
+            infotxt = document.getElementById("info");
+            if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+                globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
+                drawscreen(movex,movey);
+                ++traveled;
+                distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
+                info3txt = document.getElementById("info2");
+                info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
+
+                //alert(map["0,-1"]);
+                infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
+
+            }
+            facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
+            facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
+            console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
+            info2txt = document.getElementById("info1");
+            info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
+        }
+    }else{
+        if(keysdown.indexOf(key["key"]) != -1){
+            keysdown = arrayRemove(keysdown, key["key"]);
+        }
     }
-
-
 };
 
 var desc = document.getElementById("desc");
