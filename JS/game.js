@@ -279,7 +279,7 @@ const drawscreen = (movex,movey) => {
                     }
 
 
-                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy}
+                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har": 0}
                     draw(x,y)
                 }else{
                     console.log(e)
