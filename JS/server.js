@@ -21,6 +21,11 @@ app.get('/js', function(req, res) {
     res.send(page);
 });
 
+app.get('/inventjs', function(req, res) {
+    const page = fs.readFileSync("invent.js", 'utf8');
+    res.send(page);
+});
+
 app.get('/noise', function(req, res) {
     res.sendfile("noise.html");
 });
@@ -124,7 +129,6 @@ app.get('/snoise', function(req, res) {
 
             return img;
         }
-
         function deviate(img, times){
             for(i = 0;i<times; ++i){
                 for(y = 0;y<img.length; ++y){
