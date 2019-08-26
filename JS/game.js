@@ -2,24 +2,25 @@
 var globalpos = [0,0]
 var map = {};
 var size = 512
-var sps = 11
+let genmap;
+var sps = 15
 var playerpos = [(sps-1)/2, (sps-1)/2]
-map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none"}
+map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0}
 var maptext = $.ajax({
     type: "GET",
-    url: "/maptest.txt",
+    url: "/map",
     async: false
 }).responseText.split("\n");
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
 };
-var canvas = document.getElementById("screen");
-var ctx = canvas.getContext("2d");
+const canvas = document.getElementById("screen");
+const ctx = canvas.getContext("2d");
 
 var scrollnum = 0;
 var inventstage = "inventory"
-
+let keysdown = []
 var lastmove = 'w';
 var facing;
 var distance = 0;
@@ -29,7 +30,14 @@ var selected = null;
 var crafting = ["Wood", "Wood"];
 
 window.onload = function() {
-    window.addEventListener("keypress", update);
+    window.addEventListener("keydown", update);
+    window.addEventListener("keyup", update);
+    genmap = $.ajax({
+        type: "GET",
+        url: "/snoise?size=1000",
+        async: false
+    }).responseJSON
+    $(".output").html("press s to start");
     updateInvent(null);
     drawscreen(0,0)
     facing = map["0,0"];
