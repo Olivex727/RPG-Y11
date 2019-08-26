@@ -129,7 +129,6 @@ app.get('/snoise', function(req, res) {
 
             return img;
         }
-
         function deviate(img, times){
             for(i = 0;i<times; ++i){
                 for(y = 0;y<img.length; ++y){

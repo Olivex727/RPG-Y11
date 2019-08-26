@@ -297,7 +297,6 @@ const drawscreen = (movex,movey) => {
 }
 
 var facod = "";
-
 function update(key) { //keys
 
     function arrayRemove(arr, value) {
