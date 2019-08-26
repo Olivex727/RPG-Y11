@@ -454,8 +454,7 @@ function interact() {
     console.log("interacted");
 }
 
-function craft(req)
-{
+function craft(req){
     //console.log("START");
     for(res in CraftingRecipes)
     {
