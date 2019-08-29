@@ -187,7 +187,7 @@ var ButtonPresets = {
         },
         {
             onclick: "",
-            text: "Loan (1000)"
+            text: "Loan (10000)"
         }
     ]
 };

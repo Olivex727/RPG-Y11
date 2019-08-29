@@ -1,34 +1,52 @@
-// config variables
+//======CONFIG VARIABLES======//
+//Map Generation and Design
 var globalpos = [0,0]
 var map = {};
-var size = 512
+var size = 512;
 let genmap;
-var sps = 15
+var sps = 15;
 var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0}
+
+//Compiling information on maps
 var maptext = $.ajax({
     type: "GET",
     url: "/map",
     async: false
 }).responseText.split("\n");
+
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
 };
+
+//Canvas Drawing
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
+//Movement
+let keysdown = []
+
+//Inventory Management Variables
 var scrollnum = 0;
 var inventstage = "inventory"
-let keysdown = []
-var lastmove = 'w';
+var selected = null;
+var crafting = ["", ""];
+var facod = "";
+
+//Interactability and general values
 var facing;
+var lastmove = 'w';
 var distance = 0;
 var traveled = 0;
 
-var selected = null;
-var crafting = ["Wood", "Wood"];
+//Combat Variables (equipped is default)
+let combatActive = false; //Used in combat branch, will be used for inventory only
+var equipped = ["", ""];
 
+//======MAIN FUNCTIONS======//
+
+//WINDOW.ONLOAD -- First Loading of window
 window.onload = function() {
     window.addEventListener("keydown", update);
     window.addEventListener("keyup", update);
@@ -49,12 +67,10 @@ var slot2 = document.getElementById("item2");
 var slot3 = document.getElementById("item3");
 var title = document.getElementById("inv");
 
-//function test(){return "4";}
-
-//Update the selections on the inventory
-function updateInvent(scroll, change = null, printToConsole = true) {
+//UPDATEINVENT -- Update the selections on the inventory
+function updateInvent(scroll, change = null, printToConsole = true, keepSelectedItem = false) {
     if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
-    selected="";
+    if (!keepSelectedItem){selected = "";}
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -62,9 +78,11 @@ function updateInvent(scroll, change = null, printToConsole = true) {
     }
 
     document.getElementById("money").textContent = "Money: " + money + ", Debt: " + debt;
+    if (debt == 0) { document.getElementById("money").textContent += ", You can loan money now"; }
+    else { document.getElementById("money").textContent += ", You Have a debt to pay"; }
     var res = craft(false);
     //var res = test();
-    document.getElementById("crafting").textContent = "Crafting Table: [" +crafting[0]+", "+crafting[1]+"] Result: ["+res+"]";
+    document.getElementById("crafting").textContent = "Equipped: [ "+equipped[0].name+", "+equipped[1].name+" ], Selected: [ "+selected+" ] Crafting Table: [ " +crafting[0]+", "+crafting[1]+" ] Result: ["+res+"]";
     var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
     title.textContent = inventstage.toUpperCase();
     var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
@@ -92,9 +110,14 @@ function updateInvent(scroll, change = null, printToConsole = true) {
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        upButtons("Upgrade");
+        if (!combatActive) {
+            upButtons("Upgrade");
+        }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
+            if (combatActive) {
+                upButtons("Equip");
+            }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
@@ -105,6 +128,9 @@ function updateInvent(scroll, change = null, printToConsole = true) {
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
+            if (combatActive) {
+                upButtons("Upgrade");
+            }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
@@ -115,6 +141,9 @@ function updateInvent(scroll, change = null, printToConsole = true) {
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
+            if (combatActive) {
+                upButtons("Equip");
+            }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
@@ -155,6 +184,7 @@ function updateInvent(scroll, change = null, printToConsole = true) {
 
 }
 
+//COMPRESS -- Pressing the specialised buttons, runs sevreal other functions
 function ComPress(scroll, button, change=null){
 
     if (inventstage.split("_")[0] === "inventory"){
@@ -173,11 +203,11 @@ function ComPress(scroll, button, change=null){
     if (inventstage.split("_")[0] === "market") {
         if (button == 1) { Transaction(false, 1); }
         if (button == 2) { Transaction(false, 10); }
-        if (button == 3) { if(debt == 0){ Loan(false, 1000); } else { Loan(true, 0) } }
+        if (button == 3) { if(debt == 0){ Loan(false, 10000); } else { Loan(true, 0) } }
     }
 }
 
-//drawing the screen
+//DRAWSCREEN -- Drawing the Screen
 const drawscreen = (movex,movey) => {
     tileImage = (image) => {
         let img = new Image();
@@ -235,9 +265,7 @@ const drawscreen = (movex,movey) => {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError ){
-                    // console.log(genmap);
-                    // console.log(x+globalpos[0]+500, y+globalpos[1]+500)
-                    // console.log(genmap[x+globalpos[0]+500][y+globalpos[1]+500]);
+                
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
                     let stand = "True";
@@ -298,7 +326,7 @@ const drawscreen = (movex,movey) => {
 
 }
 
-var facod = "";
+//COMPRESS -- 
 function update(key) { //keys
 
     function arrayRemove(arr, value) {
@@ -343,6 +371,7 @@ function update(key) { //keys
                 drawscreen(movex,movey);
                 ++traveled;
                 debt = Math.round(debt*1.006);
+                MarketLoop();
                 updateInvent(null, null, false);
                 //console.log(debt * 1.6);
                 distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
@@ -374,8 +403,9 @@ function selectItem(num){
         if (num == 1) { selected = slot2.textContent.split(":")[0] }
         if (num == 2) { selected = slot3.textContent.split(":")[0] }
         console.log("Selected: " + selected);
+        updateInvent(null, null, true, true);
     }
-    else
+    else if (!combatActive)
     {
         if (num == 0) {selected = slot1.textContent.split(":")[0]}
         if (num == 1) {selected = slot2.textContent.split(":")[0]}
@@ -404,13 +434,32 @@ function selectItem(num){
                             toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
                         }
                         toolbelt[itemlist][i].level += 1;
-                        updateInvent(null);
+                        console.log("Upgraded: " + selected);
+                        equipped = ["", ""];
+                        updateInvent(null, null, true, true);
                     }
                     else
                     {
                         desc.textContent = "Not enough funds to upgrade "+selected;
                     }
-                    console.log("Upgraded: " + selected);
+                }
+
+            }
+        }
+    }
+    else
+    {
+        if (num == 0) {selected = slot1.textContent.split(":")[0]} if (num == 1) {selected = slot2.textContent.split(":")[0]} if (num == 2) {selected = slot3.textContent.split(":")[0]}
+        for (itemlist in toolbelt) {
+
+            for (i = 0; i < toolbelt[itemlist].length; i++) {
+                
+                if (selected === toolbelt[itemlist][i].name) {
+                    
+                    if (inventstage.split("_")[1] === "weapons") {equipped[0] = toolbelt[itemlist][i];}
+                    if (inventstage.split("_")[1] === "apparel") {equipped[1] = toolbelt[itemlist][i];}
+                    console.log("Equipped: " + selected);
+                    updateInvent(null, null, true, true);
                 }
 
             }
@@ -575,4 +624,32 @@ function Loan(pay, amount)
     if(!pay){ debt += amount; money += amount; }
     if (pay && money >= debt) { money -= debt; debt = 0; }
     updateInvent(null);
+}
+
+function MarketLoop()
+{
+    for(i in inventory)
+    {
+        if (inventory[i].cost > 10 && inventory[i].cost < 100000)
+        {
+            let x = inventory[i].stock;
+            let y = (Math.random() * 1/2) / ( 1 + 1/( Math.pow( Math.E, x ))); //Sigmoid function
+            //console.log(y);
+            if(y <= 0.5){
+                inventory[i].cost = Math.round(inventory[i].cost * (1 + (Math.random() / 10)));
+            }
+            else{
+                inventory[i].cost = Math.round(inventory[i].cost * (1 - (Math.random() / 10)));
+            }
+        }
+        else if (inventory[i].cost > 10)
+        {
+            inventory[i].cost = 100000;
+        }
+        else
+        {
+            inventory[i].cost = 10;
+        }
+        
+    }
 }
