@@ -52,8 +52,8 @@ var title = document.getElementById("inv");
 //function test(){return "4";}
 
 //Update the selections on the inventory
-function updateInvent(scroll, change = null) {
-    console.log("updateInvent: "+inventstage+" -> " + change);
+function updateInvent(scroll, change = null, printToConsole = true) {
+    if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
     selected="";
     //Change what tab the inventory is on
     if (change != null) {
@@ -61,7 +61,7 @@ function updateInvent(scroll, change = null) {
         scrollnum = 0;
     }
 
-    document.getElementById("money").textContent = "Money: " + money;
+    document.getElementById("money").textContent = "Money: " + money + ", Debt: " + debt;
     var res = craft(false);
     //var res = test();
     document.getElementById("crafting").textContent = "Crafting Table: [" +crafting[0]+", "+crafting[1]+"] Result: ["+res+"]";
@@ -160,7 +160,7 @@ function ComPress(scroll, button, change=null){
     if (inventstage.split("_")[0] === "inventory"){
         if (button == 1) { crafting[1] = crafting[0]; crafting[0]=selected; updateInvent(null); }
         if (button == 2) { craft(true); updateInvent(null); }
-        if (button == 3) { /*Sell Item*/ }
+        if (button == 3) { Transaction(true, 5); }
     }
     if (inventstage.split("_")[0] === "quests") {
 
@@ -170,8 +170,10 @@ function ComPress(scroll, button, change=null){
         if (button == 2) { updateInvent(0, 'toolbelt_tools'); }
         if (button == 3) { updateInvent(0, 'toolbelt_apparel'); }
     }
-    if (inventstage.split("_")[0] === "inventory") {
-
+    if (inventstage.split("_")[0] === "market") {
+        if (button == 1) { Transaction(false, 1); }
+        if (button == 2) { Transaction(false, 10); }
+        if (button == 3) { if(debt == 0){ Loan(false, 1000); } else { Loan(true, 0) } }
     }
 }
 
@@ -340,6 +342,9 @@ function update(key) { //keys
                 console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
                 drawscreen(movex,movey);
                 ++traveled;
+                debt = Math.round(debt*1.006);
+                updateInvent(null, null, false);
+                //console.log(debt * 1.6);
                 distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
                 info3txt = document.getElementById("info2");
                 info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
@@ -445,7 +450,7 @@ function interact() {
 
                 //If the correct tool is in use
                 if (minecheck) {
-                    console.log("LOL: " + i + " " + inventory[i].name);
+                    //console.log("LOL: " + i + " " + inventory[i].name);
                     //Add items to inventory
                     var x = Math.round(Math.random() * (distance + 1));
                     inventory[i].amount += x;
@@ -456,7 +461,7 @@ function interact() {
                     desc.textContent = "Picked up " + x + " " + inventory[i].name;
                     updateInvent(null);
                 } else {
-                    desc.textContent = "Missing the requred tool to mine " + map[facod]['type'];
+                    desc.textContent = "Missing the requred tool to harvest " + map[facod]['type'];
                 }
             }
             else
@@ -531,4 +536,43 @@ function craft(req){
         }
     }
     return ("");
+}
+
+function displayEditorInfo()
+{
+    var info = document.getElementById("editor");
+    if (info.hidden) { info.hidden = false; }
+    else if (!info.hidden) { info.hidden = true; }
+}
+
+function Transaction(sell, amount)
+{
+    for(i in inventory)
+    {
+        if (inventory[i].name === selected)
+        {
+            if (sell && inventory[i].amount >= amount) //Sell Items
+            {
+                inventory[i].amount -= amount;
+                inventory[i].stock += amount;
+                money += inventory[i].cost * amount
+                updateInvent(null);
+            }
+            if (!sell && inventory[i].stock >= amount && money >= inventory[i].cost * amount) //Buy items
+            {
+                inventory[i].amount += amount;
+                inventory[i].stock -= amount;
+                money -= inventory[i].cost * amount
+                updateInvent(null);
+            }   
+        }
+    }
+    
+}
+
+function Loan(pay, amount)
+{
+    if(!pay){ debt += amount; money += amount; }
+    if (pay && money >= debt) { money -= debt; debt = 0; }
+    updateInvent(null);
 }

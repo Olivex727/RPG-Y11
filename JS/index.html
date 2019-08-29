@@ -26,7 +26,9 @@
     <body>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <div id = "main">
+            <div id = "editor">
             <p id="info">Globalpos: [0, 0], Tile On: Grass</p><p id="info1">Lastmove: e, Facing: null</p><p id="info2">Distance: 0</p>
+            </div>
             <canvas id="screen" width="512" height="512" onkeypress="test">
                 <p>No display</p>
             </canvas>
@@ -53,10 +55,12 @@
                 <button id="sel_2" onclick="selectItem(2);"></button> <ls id="item3"></ls><br>
                 <button id="uscrl" onclick="updateInvent(-1);">/\</button>
                 <button id="dscrl" onclick="updateInvent(1);">\/</button><br>
-                <p id="crafting">Crafting Table: [ , ] Result: [ ]</p><br>
-                <p id="money">Money: 0</p><br>
+                <p id="crafting">Crafting Table: [ , ] Result: [ ]</p>
+                <p id="money">Money: 0</p>
             </div>
+            <button onclick="displayEditorInfo();">Display Editor Info</button>
         </div>
+        
         <script src="inventjs"></script>
         <script src="js"></script>
 

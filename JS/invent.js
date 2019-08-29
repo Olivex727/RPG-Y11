@@ -1,6 +1,7 @@
 //NOTE: All zero level values mean that the object has not been picked up/crafted
 
 var money = 10000; //The player's money that can be used to buy/sell items on market
+var debt = 0;
 
 var toolbelt = {
     weapons: [{
@@ -124,6 +125,15 @@ var inventory = [{
         "cost": 32,
         "stock": 0,
         "tile": null
+    },
+    {
+        "name": "Snowball",
+        "color": "#dddddd",
+        "amount": 0,
+        "image": "False",
+        "cost": 35,
+        "stock": 0,
+        "tile": "snow"
     }
 ];
 
@@ -151,7 +161,7 @@ var ButtonPresets = {
         },
         {
             onclick: "",
-            text: "Sell"
+            text: "Sell (5)"
         }
     ],
     "quests": [{
@@ -177,7 +187,7 @@ var ButtonPresets = {
         },
         {
             onclick: "",
-            text: "Loan"
+            text: "Loan (1000)"
         }
     ]
 };
@@ -194,7 +204,7 @@ var quests = [
 
 var CraftingRecipes = [
     [["Wood", "Wood"], ["Sticks", "invent"], [1, 1, 2]],
-    [["Wood", "Rock"], ["Pickaxe", "toolbelt"], [23, 43, 103]],
+    [["Sticks", "Rock"], ["Pickaxe", "toolbelt"], [23, 43, 103]],
     [["Lava", "Water"], ["Rock", "invent"], [13, 134, 189]],
     [["Lava", "Rock"], ["Chainmail", "toolbelt"], [3, 13, 132]],
     [["Wood", "Grass"], ["Bow", "toolbelt"], [13, 40, 81]]
