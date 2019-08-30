@@ -1,11 +1,12 @@
 //======CONFIG VARIABLES======//
 //Map Generation and Design
-var globalpos = [0,0]
-var map = {};
-var size = 512;
+let globalpos = [0,0]
+let map = {};
+const size = 512;
 let genmap;
-var sps = 15;
-var playerpos = [(sps-1)/2, (sps-1)/2]
+const sps = 15;
+const sizeOfSquares = (size/sps)
+const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0}
 
 //Compiling information on maps
@@ -20,9 +21,28 @@ for (i = 0; i < maptext.length; i++){
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
 };
 
+tileImage = (image) => {
+    let img = new Image();
+    img.src = "/Images/"+image+".png"
+    return img
+}
+
+let entities = {
+    "player": {
+        "hp": {"cur": 100, "max": 100},
+        "ma": {"cur": 100, "max": 100},
+        "xp": {"cur": 100, "max": 100},
+        "colour":"#000000",
+        "image":tileImage("player")
+
+    },
+    "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
+}
 //Canvas Drawing
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
+ctx.font = "20px Verdana";
+
 
 //Movement
 let keysdown = []
@@ -209,11 +229,6 @@ function ComPress(scroll, button, change=null){
 
 //DRAWSCREEN -- Drawing the Screen
 const drawscreen = (movex,movey) => {
-    tileImage = (image) => {
-        let img = new Image();
-        img.src = "/Images/"+image+".png"
-        return img
-    }
     const terrain = {
         "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
         "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
@@ -235,10 +250,6 @@ const drawscreen = (movex,movey) => {
         "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
 
     };
-    const entities = {
-        "player": {"colour":"#0d0d0d", "image":tileImage("player")},
-        "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
-    }
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
@@ -254,7 +265,9 @@ const drawscreen = (movex,movey) => {
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
-                console.log("battle start")
+                console.log("combat start")
+                combatActive = true
+                drawcombat("start", entities)
             }
         }
     };
@@ -265,7 +278,7 @@ const drawscreen = (movex,movey) => {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError ){
-                
+
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
                     let stand = "True";
@@ -326,7 +339,48 @@ const drawscreen = (movex,movey) => {
 
 }
 
-//COMPRESS -- 
+
+drawcombat = async (phase, entities) => {
+    text = (entities)=> {
+        clear(0.3, "#f2f2f2",()=> {
+            ctx.fillStyle = "#0033cc";
+            ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.3);
+            ctx.fillText("Mana:", size*0.35, size*0.7+(size*0.3)*0.6);
+            ctx.fillText(entities["player"]["ma"]["cur"]+"/"+entities['player']["ma"]["max"], size*0.35, size*0.7+(size*0.3)*0.8);
+            ctx.fillStyle = "#2aa22a";
+            ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.3);
+            ctx.fillText("EXP:", size*0.65, size*0.7+(size*0.3)*0.6);
+            console.log(entities);
+            ctx.fillText(entities["player"]["xp"]["cur"]+"/"+entities["player"]["xp"]["max"], size*0.65, size*0.7+(size*0.3)*0.8);
+            ctx.fillStyle = "#cc0000";
+            ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.3);
+            ctx.fillText("HP:", size*0.05, size*0.7+(size*0.3)*0.6);
+            ctx.fillText(entities['player']["hp"]["cur"]+"/"+entities['player']["hp"]["max"], size*0.05, size*0.7+(size*0.3)*0.8);
+            ctx.drawImage(entities["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7), size/2, size/2);
+        })
+    }
+    if(phase == "start"){
+        clear = (per, colour, callback) => {
+            ctx.fillStyle = colour;
+            for(let y = 0; y<sps*per; ++y){
+                for(let x = 0; x<size/2; ++x){
+                    setTimeout( () =>{
+                        ctx.fillRect(x*2, (y)*(sizeOfSquares)+(size*(1-per)), 2, (sizeOfSquares+1));
+                    }, 1)
+                }
+            }
+            setTimeout( () =>{callback();}, 1)
+        }
+
+        clear(1, "#000000", ()=> {
+            text(entities)
+
+    })
+}
+}
+
+
+//COMPRESS --
 function update(key) { //keys
 
     function arrayRemove(arr, value) {
@@ -340,57 +394,61 @@ function update(key) { //keys
     if($(".output").html() == "press s to start"){
         $(".output").html("")
     }
-
-    let movex = 0;
-    let movey = 0;
-    var inter = false;
-    if (key["type"] == "keydown"){
-        if(keysdown.indexOf(key["key"]) == -1){
-            keysdown.push(key["key"])
-        }
-        if(keysdown.indexOf("w") >= 0){
-            movey = -1;
-        }
-        else if (keysdown.indexOf("s") >= 0){
-            movey = 1;
-        }
-        if (keysdown.indexOf("a") >= 0){
-            movex = -1;
-        }
-        else if (keysdown.indexOf("d")>= 0){
-            movex = 1;
-        }
-        if (keysdown.indexOf("e")>= 0){
-            interact();
-        }
-        if (movex != 0 || movey != 0){
-            infotxt = document.getElementById("info");
-            if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-                globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-                console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
-                drawscreen(movex,movey);
-                ++traveled;
-                debt = Math.round(debt*1.006);
-                MarketLoop();
-                updateInvent(null, null, false);
-                //console.log(debt * 1.6);
-                distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
-                info3txt = document.getElementById("info2");
-                info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
-
-                //alert(map["0,-1"]);
-                infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
-
+    if (combatActive){
+        //drawcombat("start", entities)
+    }
+    else{
+        let movex = 0;
+        let movey = 0;
+        var inter = false;
+        if (key["type"] == "keydown"){
+            if(keysdown.indexOf(key["key"]) == -1){
+                keysdown.push(key["key"])
             }
-            facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
-            facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
-            console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
-            info2txt = document.getElementById("info1");
-            info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
-        }
-    }else{
-        if(keysdown.indexOf(key["key"]) != -1){
-            keysdown = arrayRemove(keysdown, key["key"]);
+            if(keysdown.indexOf("w") >= 0){
+                movey = -1;
+            }
+            else if (keysdown.indexOf("s") >= 0){
+                movey = 1;
+            }
+            if (keysdown.indexOf("a") >= 0){
+                movex = -1;
+            }
+            else if (keysdown.indexOf("d")>= 0){
+                movex = 1;
+            }
+            if (keysdown.indexOf("e")>= 0){
+                interact();
+            }
+            if (movex != 0 || movey != 0){
+                infotxt = document.getElementById("info");
+                if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+                    globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                    console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
+                    drawscreen(movex,movey);
+                    ++traveled;
+                    debt = Math.round(debt*1.006);
+                    MarketLoop();
+                    updateInvent(null, null, false);
+                    //console.log(debt * 1.6);
+                    distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
+                    info3txt = document.getElementById("info2");
+                    info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
+
+                    //alert(map["0,-1"]);
+                    infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
+
+                }
+                facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
+                facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
+                console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
+                info2txt = document.getElementById("info1");
+                info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
+            }
+        }else{
+            if(keysdown.indexOf(key["key"]) != -1){
+                keysdown = arrayRemove(keysdown, key["key"]);
+            }
         }
     }
 };
@@ -453,9 +511,9 @@ function selectItem(num){
         for (itemlist in toolbelt) {
 
             for (i = 0; i < toolbelt[itemlist].length; i++) {
-                
+
                 if (selected === toolbelt[itemlist][i].name) {
-                    
+
                     if (inventstage.split("_")[1] === "weapons") {equipped[0] = toolbelt[itemlist][i];}
                     if (inventstage.split("_")[1] === "apparel") {equipped[1] = toolbelt[itemlist][i];}
                     console.log("Equipped: " + selected);
@@ -613,10 +671,10 @@ function Transaction(sell, amount)
                 inventory[i].stock -= amount;
                 money -= inventory[i].cost * amount
                 updateInvent(null);
-            }   
+            }
         }
     }
-    
+
 }
 
 function Loan(pay, amount)
@@ -650,6 +708,6 @@ function MarketLoop()
         {
             inventory[i].cost = 10;
         }
-        
+
     }
 }
