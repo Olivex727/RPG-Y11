@@ -70,7 +70,7 @@ var title = document.getElementById("inv");
 //UPDATEINVENT -- Update the selections on the inventory
 function updateInvent(scroll, change = null, printToConsole = true, keepSelectedItem = false) {
     if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
-    if (!keepSelectedItem){selected = "";}
+    if (!keepSelectedItem){selected = ""; }//desc.textContent = "";}
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -164,10 +164,10 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + ", reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
         } else {slot1.textContent = "";}
         if (quests[scrollnum + 1] != null) {
-            slot2.textContent = quests[scrollnum+1].name;
+            slot2.textContent = quests[scrollnum+1].name + ":\n " + quests[scrollnum+1].desc + ". req: " + quests[scrollnum+1].req[0] + " " + quests[scrollnum+1].req[1] + ", reward: " + quests[scrollnum+1].reward + ", DONE: " + quests[scrollnum+1].completed;
         } else {slot2.textContent = "";}
         if (quests[scrollnum+2] != null){
-            slot3.textContent = quests[scrollnum+2].name;
+            slot3.textContent = quests[scrollnum + 2].name + ":\n " + quests[scrollnum + 2].desc + ". req: " + quests[scrollnum + 2].req[0] + " " + quests[scrollnum + 2].req[1] + ", reward: " + quests[scrollnum + 2].reward + ", DONE: " + quests[scrollnum + 2].completed;
         } else {slot3.textContent = "";}
     }
 
@@ -193,7 +193,9 @@ function ComPress(scroll, button, change=null){
         if (button == 3) { Transaction(true, 5); }
     }
     if (inventstage.split("_")[0] === "quests") {
-
+        if (button == 1) { questManage('rem'); }
+        if (button == 2) { questManage('comp'); }
+        if (button == 3) { questManage('pri'); }
     }
     if (inventstage.split("_")[0] === "toolbelt") {
         if (button == 1) { updateInvent(0, 'toolbelt_weapons'); }
@@ -341,7 +343,7 @@ const drawscreen = (movex,movey) => {
 
 }
 
-//COMPRESS -- 
+//UPDATE -- Updates the screen with the KeyPress info
 function update(key) { //keys
 
     function arrayRemove(arr, value) {
@@ -376,7 +378,7 @@ function update(key) { //keys
             movex = 1;
         }
         if (keysdown.indexOf("e")>= 0){
-            interact();
+            try{interact();}catch{}
         }
         if (movex != 0 || movey != 0){
             infotxt = document.getElementById("info");
@@ -387,7 +389,7 @@ function update(key) { //keys
                 ++traveled;
                 debt = Math.round(debt*1.006);
                 MarketLoop();
-                updateInvent(null, null, false);
+                updateInvent(null, null, false, true);
                 //console.log(debt * 1.6);
                 distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
                 info3txt = document.getElementById("info2");
@@ -500,34 +502,15 @@ function interact() {
                 {
                     let x = quests.push(questbank[i]) - 1;
                     quests[x].banked = true;
-                    quests[x].facod = facod;
                     map[facod]['quest'] = true;
                     updateInvent(null);
                 }
             }
         }
-        /*
         else
         {
-            console.log("Facing NPC: " + facing['enemy']);
-            for (i in quests) {
-                if (map[facod]['enemy'] === quests[i].npc && !quests[i].banked && facod === quests[i].facod) {
-                    for(item in inventory){
-                        if (inventory[item].name === quests[i].req[1] && inventory[item].amount >= quests[i].req[0] && !quests[i].completed) {
-                            desc.textContent = "Congratulations! You got $" + quests[i].reward;
-                            money += quests[i].reward;
-                            quests[i].completed = true;
-                            quests[i].facod = "";
-                            updateInvent(null);
-                        }
-                        else if (inventory[item].name === quests[i].req[1]) {
-                            desc.textContent = "Your quest is not complete, come back later";
-                        }
-                    }
-                }
-            }
+            desc.textContent = "You can't get another quest from this person";
         }
-        */
         
     }
     else
@@ -692,14 +675,16 @@ function MarketLoop()
     {
         if (inventory[i].cost > 10 && inventory[i].cost < 100000)
         {
-            let x = inventory[i].stock;
-            let y = (Math.random() * 1/2) / ( 1 + 1/( Math.pow( Math.E, x ))); //Sigmoid function
-            //console.log(y);
-            if(y <= 0.5){
-                inventory[i].cost = Math.round(inventory[i].cost * (1 + (Math.random() / 10)));
+            //let x = ;
+            let y = Math.random() ;//(Math.random()/2) / ( 1 + 1/( Math.pow( Math.E, x ))); //Sigmoid function
+            console.log(y);
+            if(y >= 0.5){
+                inventory[i].cost = Math.round(inventory[i].cost * (1 + 1 / ((inventory[i].stock + 1) * 7)));
+                //console.log(inventory[i].name + ", " + (1 + 1 / ((inventory[i].stock + 1) * 10)));
             }
             else{
-                inventory[i].cost = Math.round(inventory[i].cost * (1 - (Math.random() / 10)));
+                inventory[i].cost = Math.round(inventory[i].cost * (1 - 1 / ((inventory[i].stock + 1) * 7)));
+                //console.log(inventory[i].name + ", " + (1 - 1 / ((inventory[i].stock + 1) * 10)));
             }
         }
         else if (inventory[i].cost > 10)
@@ -713,3 +698,43 @@ function MarketLoop()
         
     }
 }
+
+function questManage(preset)
+{
+    for(i in quests)
+    {
+        if (quests[i].name === selected){
+            if(preset === "rem")
+            {
+                quests[i].banked = false;
+                quests.splice(i, 1);
+            }
+            if (preset === "pri") {
+                quests = array_move(quests, i, 0);
+            }
+            if (preset === "comp") {
+                for(item in inventory){
+                    if (quests[i].req[1] === inventory[item].name && inventory[item].amount >= quests[i].req[0]) {
+                        inventory[item].amount -= quests[i].req[0];
+                        money = quests[i].reward;
+                        desc.textContent = "You completed the quest and got: $" + quests[i].reward;
+                    }
+                }
+            }
+        }
+    }
+    updateInvent(null);
+    
+}
+
+//Credit to user 'Reid' on Stack Overflow
+function array_move(arr, old_index, new_index) {
+    if (new_index >= arr.length) {
+        var k = new_index - arr.length + 1;
+        while (k--) {
+            arr.push(undefined);
+        }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+    return arr; // for testing
+};

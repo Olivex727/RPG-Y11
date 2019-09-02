@@ -75,7 +75,7 @@ var toolbelt = {
 var inventory = [{
         "name": "Rock",
         "color": "#666633",
-        "amount": 0,
+        "amount": 120,
         "image": "False",
         "cost": 100,
         "stock": 35,
@@ -84,7 +84,7 @@ var inventory = [{
     {
         "name": "Water",
         "color": "#0033cc",
-        "amount": 10,
+        "amount": 120,
         "image": "False",
         "cost": 120,
         "stock": 110,
@@ -93,7 +93,7 @@ var inventory = [{
     {
         "name": "Wood",
         "color": "#550011",
-        "amount": 10,
+        "amount": 110,
         "image": "False",
         "cost": 1000,
         "stock": 0,
@@ -102,7 +102,7 @@ var inventory = [{
     {
         "name": "Lava",
         "color": "#cc6600",
-        "amount": 0,
+        "amount": 560,
         "image": "False",
         "cost": 3200,
         "stock": 92,
@@ -111,7 +111,7 @@ var inventory = [{
     {
         "name": "Grass",
         "color": "#00ff00",
-        "amount": 0,
+        "amount": 70,
         "image": "False",
         "cost": 25,
         "stock": 9,
@@ -120,7 +120,7 @@ var inventory = [{
     {
         "name": "Sticks",
         "color": "#00ff00",
-        "amount": 0,
+        "amount": 80,
         "image": "False",
         "cost": 32,
         "stock": 0,
@@ -129,7 +129,7 @@ var inventory = [{
     {
         "name": "Snowball",
         "color": "#dddddd",
-        "amount": 0,
+        "amount": 90,
         "image": "False",
         "cost": 35,
         "stock": 0,
@@ -203,8 +203,16 @@ const questbank = [{
         req: [3, "Grass"],
         completed: false,
         npc:"villager",
-        banked: false,
-        facod: ""
+        banked: false
+    },
+    {
+        name: "Caveman",
+        desc: "Craft a stick",
+        reward: 2000,
+        req: [1, "Stick"],
+        completed: false,
+        npc: "villager",
+        banked: false
     },
     {
         name: "LumberJack",
@@ -213,8 +221,7 @@ const questbank = [{
         req: [5, "Wood"],
         completed: false,
         npc: "farmer",
-        banked: false,
-        facod: ""
+        banked: false
 }];
 
 var CraftingRecipes = [
