@@ -6,7 +6,7 @@ var size = 512;
 let genmap;
 var sps = 15;
 var playerpos = [(sps-1)/2, (sps-1)/2]
-map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0}
+map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 
 //Compiling information on maps
 var maptext = $.ajax({
@@ -17,7 +17,7 @@ var maptext = $.ajax({
 
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
 };
 
 //Canvas Drawing
@@ -32,7 +32,7 @@ var scrollnum = 0;
 var inventstage = "inventory"
 var selected = null;
 var crafting = ["", ""];
-var facod = "";
+var facod = ""; //FACing what Object in what Direction
 
 //Interactability and general values
 var facing;
@@ -42,7 +42,7 @@ var traveled = 0;
 
 //Combat Variables (equipped is default)
 let combatActive = false; //Used in combat branch, will be used for inventory only
-var equipped = ["", ""];
+var equipped = [{ name: "" }, { name: "" }];
 
 //======MAIN FUNCTIONS======//
 
@@ -207,6 +207,8 @@ function ComPress(scroll, button, change=null){
     }
 }
 
+let entity = null;
+
 //DRAWSCREEN -- Drawing the Screen
 const drawscreen = (movex,movey) => {
     tileImage = (image) => {
@@ -236,9 +238,11 @@ const drawscreen = (movex,movey) => {
 
     };
     const entities = {
-        "player": {"colour":"#0d0d0d", "image":tileImage("player")},
-        "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
+        "player": {"colour":"#0d0d0d", "image":tileImage("player"), "hostile":false },
+        "enemy": { "colour": "#ff0000", "image": tileImage("enemy"), "hostile": true, "type":["goblin", "witch"] },
+        "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
     }
+    entity = entities;
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
@@ -251,10 +255,15 @@ const drawscreen = (movex,movey) => {
             }
 
         }
-        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
-            if(x == playerpos[0] || y == playerpos[1]){
-                console.log("battle start")
+        if (map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'] != "none") {
+            if (entities["enemy"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])){
+                ctx.drawImage(entities["enemy"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
+                if ((x == playerpos[0] || y == playerpos[1])) {
+                    console.log("battle start");
+                }
+            }
+            if (entities["npc"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])) {
+                ctx.drawImage(entities["npc"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
             }
         }
     };
@@ -272,11 +281,17 @@ const drawscreen = (movex,movey) => {
                     let enemy = "none";
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
-                        if(Math.random() <= 0.01){ // enemies
-                            enemy = "goblin"
+                        let x = Math.random();
+                        if(x <= 0.01){ // enemies
+                            enemy = entities["enemy"]["type"][Math.round((entities["enemy"]["type"].length - 1) * Math.random())];
+
                             stand = "False"
+                        }
+                        else if (x <= 0.02) { // npcs
+                            enemy = entities["npc"]["type"][Math.round((entities["npc"]["type"].length - 1) * Math.random())];
+                            stand = "False"
+                        }
                     }
-                }
                     else if (pos < 0.49 && pos > 0.375) {
                         type = "forest"
                     }
@@ -435,7 +450,7 @@ function selectItem(num){
                         }
                         toolbelt[itemlist][i].level += 1;
                         console.log("Upgraded: " + selected);
-                        equipped = ["", ""];
+                        equipped = [{ name: "" }, { name: "" }];
                         updateInvent(null, null, true, true);
                     }
                     else
@@ -473,10 +488,54 @@ function interact() {
     console.log("Map: " + map[facod]['type']);
     var minecheck = false;
 
+    if (entity["npc"]["type"].includes(map[facod]['enemy']))
+    {
+        if (!map[facod]['quest'])
+        {
+            console.log("Facing NPC: " + facing['enemy']);
+            desc.textContent = "You've received a new quest from the " + map[facod]['enemy'];
+            for(i in questbank)
+            {
+                if (map[facod]['enemy'] === questbank[i].npc && !questbank[i].banked)
+                {
+                    let x = quests.push(questbank[i]) - 1;
+                    quests[x].banked = true;
+                    quests[x].facod = facod;
+                    map[facod]['quest'] = true;
+                    updateInvent(null);
+                }
+            }
+        }
+        /*
+        else
+        {
+            console.log("Facing NPC: " + facing['enemy']);
+            for (i in quests) {
+                if (map[facod]['enemy'] === quests[i].npc && !quests[i].banked && facod === quests[i].facod) {
+                    for(item in inventory){
+                        if (inventory[item].name === quests[i].req[1] && inventory[item].amount >= quests[i].req[0] && !quests[i].completed) {
+                            desc.textContent = "Congratulations! You got $" + quests[i].reward;
+                            money += quests[i].reward;
+                            quests[i].completed = true;
+                            quests[i].facod = "";
+                            updateInvent(null);
+                        }
+                        else if (inventory[item].name === quests[i].req[1]) {
+                            desc.textContent = "Your quest is not complete, come back later";
+                        }
+                    }
+                }
+            }
+        }
+        */
+        
+    }
+    else
+    {
     //Check each item in inventory
     for(i in inventory)
     {
-        console.log(i + " " + inventory[i].name);
+        //console.log(i + " " + inventory[i].name);
         // If the names of the tile and inventory items match up
         if (facing['type'] === inventory[i].tile) {
 
@@ -506,7 +565,7 @@ function interact() {
 
                     var y = Math.round(Math.random() * (distance + 2));
                     map[facod]['har'] = y;
-                    console.log("Harvested: " + y + inventory[i].name);
+                    console.log("Harvested: " + y + " " + inventory[i].name);
                     desc.textContent = "Picked up " + x + " " + inventory[i].name;
                     updateInvent(null);
                 } else {
@@ -518,6 +577,7 @@ function interact() {
                 desc.textContent = "Sorry, the tile has already been harvested. Come back later. Harvest = " + map[facod]['har'];
             }
         }
+    }
     }
     console.log("interacted");
 }

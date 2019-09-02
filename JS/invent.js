@@ -1,7 +1,7 @@
 //NOTE: All zero level values mean that the object has not been picked up/crafted
 
-var money = 10000; //The player's money that can be used to buy/sell items on market
-var debt = 0;
+let money = 10000; //The player's money that can be used to buy/sell items on market
+let debt = 0;
 
 var toolbelt = {
     weapons: [{
@@ -193,14 +193,29 @@ var ButtonPresets = {
 };
 
 var quests = [
-    {
+    
+];
+
+const questbank = [{
         name: "Getting Started",
         desc: "Cut some grass using the sickle",
         reward: 1000,
         req: [3, "Grass"],
-        completed: false
-    }
-];
+        completed: false,
+        npc:"villager",
+        banked: false,
+        facod: ""
+    },
+    {
+        name: "LumberJack",
+        desc: "Chop some wood in the forest",
+        reward: 1300,
+        req: [5, "Wood"],
+        completed: false,
+        npc: "farmer",
+        banked: false,
+        facod: ""
+}];
 
 var CraftingRecipes = [
     [["Wood", "Wood"], ["Sticks", "invent"], [1, 1, 2]],
