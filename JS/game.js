@@ -160,14 +160,14 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         if (scroll != null && (scrollnum < quests.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
-        if (quests[scrollnum] != null) {
-            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + ", reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
+        if (quests[scrollnum] != null /*&& !quests[scrollnum].completed*/) {
+            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + "(s), reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
         } else {slot1.textContent = "";}
-        if (quests[scrollnum + 1] != null) {
-            slot2.textContent = quests[scrollnum+1].name + ":\n " + quests[scrollnum+1].desc + ". req: " + quests[scrollnum+1].req[0] + " " + quests[scrollnum+1].req[1] + ", reward: " + quests[scrollnum+1].reward + ", DONE: " + quests[scrollnum+1].completed;
+        if (quests[scrollnum + 1] != null /*&& !quests[scrollnum].completed*/ ) {
+            slot2.textContent = quests[scrollnum+1].name + ":\n " + quests[scrollnum+1].desc + ". req: " + quests[scrollnum+1].req[0] + " " + quests[scrollnum+1].req[1] + "(s), reward: " + quests[scrollnum+1].reward + ", DONE: " + quests[scrollnum+1].completed;
         } else {slot2.textContent = "";}
-        if (quests[scrollnum+2] != null){
-            slot3.textContent = quests[scrollnum + 2].name + ":\n " + quests[scrollnum + 2].desc + ". req: " + quests[scrollnum + 2].req[0] + " " + quests[scrollnum + 2].req[1] + ", reward: " + quests[scrollnum + 2].reward + ", DONE: " + quests[scrollnum + 2].completed;
+        if (quests[scrollnum + 2] != null /*&& !quests[scrollnum].completed*/) {
+            slot3.textContent = quests[scrollnum + 2].name + ":\n " + quests[scrollnum + 2].desc + ". req: " + quests[scrollnum + 2].req[0] + " " + quests[scrollnum + 2].req[1] + "(s), reward: " + quests[scrollnum + 2].reward + ", DONE: " + quests[scrollnum + 2].completed;
         } else {slot3.textContent = "";}
     }
 
@@ -498,13 +498,39 @@ function interact() {
             desc.textContent = "You've received a new quest from the " + map[facod]['enemy'];
             for(i in questbank)
             {
-                if (map[facod]['enemy'] === questbank[i].npc && !questbank[i].banked)
+                if (map[facod]['enemy'] === questbank[i].npc && !map[facod]['quest'])
                 {
-                    let x = quests.push(questbank[i]) - 1;
-                    quests[x].banked = true;
-                    map[facod]['quest'] = true;
-                    updateInvent(null);
+                    let alreadyexists = false;
+                    for(q in quests)
+                    {
+                        if (quests[q].name === questbank[i].name)
+                        {
+                            alreadyexists = true;
+                        }
+                    }
+                    if(!alreadyexists)
+                    {
+                        let x = quests.unshift(questbank[i]) - 1;
+                        quests[x].banked = true;
+                        map[facod]['quest'] = true;
+                        updateInvent(null);
+                    }
                 }
+            }
+            if (!map[facod]['quest']) //If there are no more quests in the questbank
+            {
+                let newquest = {
+                    name: "Help out the " + map[facod]['enemy'],
+                    desc: "See the requirements",
+                    reward: Math.round(distance * Math.random()),
+                    req: [Math.round(distance * Math.random()), inventory[Math.round(Math.random() * (inventory.length - 1))].name],
+                    completed: false,
+                    npc: map[facod]['enemy'],
+                    banked: true
+                }
+                let x = quests.push(newquest) - 1;
+                map[facod]['quest'] = true;
+                updateInvent(null);
             }
         }
         else
@@ -677,7 +703,7 @@ function MarketLoop()
         {
             //let x = ;
             let y = Math.random() ;//(Math.random()/2) / ( 1 + 1/( Math.pow( Math.E, x ))); //Sigmoid function
-            console.log(y);
+            //console.log(y);
             if(y >= 0.5){
                 inventory[i].cost = Math.round(inventory[i].cost * (1 + 1 / ((inventory[i].stock + 1) * 7)));
                 //console.log(inventory[i].name + ", " + (1 + 1 / ((inventory[i].stock + 1) * 10)));
@@ -701,23 +727,35 @@ function MarketLoop()
 
 function questManage(preset)
 {
+    var done = false;
     for(i in quests)
     {
-        if (quests[i].name === selected){
+        
+        if (quests[i].name === selected && !done){
             if(preset === "rem")
             {
                 quests[i].banked = false;
-                quests.splice(i, 1);
+                quests = array_move(quests, i, quests.length - 1);
+                quests.splice(quests.length - 1, 1);
+                done = true;
             }
             if (preset === "pri") {
                 quests = array_move(quests, i, 0);
+                done = true;
             }
             if (preset === "comp") {
                 for(item in inventory){
                     if (quests[i].req[1] === inventory[item].name && inventory[item].amount >= quests[i].req[0]) {
+                        selected = "";
                         inventory[item].amount -= quests[i].req[0];
+                        quests[i].completed = true;
                         money = quests[i].reward;
                         desc.textContent = "You completed the quest and got: $" + quests[i].reward;
+                        //console.log(quests[i]);
+                        quests = array_move(quests, i, quests.length - 1); //Doesn't work
+                        //console.log(quests[quests.length - 1]);
+                        //console.log(quests[i]);
+                        done = true;
                     }
                 }
             }

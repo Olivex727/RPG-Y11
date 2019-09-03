@@ -209,7 +209,7 @@ const questbank = [{
         name: "Caveman",
         desc: "Craft a stick",
         reward: 2000,
-        req: [1, "Stick"],
+        req: [1, "Sticks"],
         completed: false,
         npc: "villager",
         banked: false
