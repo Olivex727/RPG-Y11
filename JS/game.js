@@ -8,10 +8,19 @@ var sps = 15;
 var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 
+const save = 1;
+
 //Compiling information on maps
 var maptext = $.ajax({
     type: "GET",
     url: "/map",
+    async: false
+}).responseText.split("\n");
+
+//Get save info from save file
+var maptext = $.ajax({
+    type: "GET",
+    url: "/save",
     async: false
 }).responseText.split("\n");
 

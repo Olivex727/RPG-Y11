@@ -5,17 +5,28 @@ const SimplexNoise = require('simplex-noise');
 const app = express();
 const dir = path.join(__dirname, 'public');
 let cashedmap = []
+let save = 1;
 
 app.use(express.static(dir));
 
 app.get('/map', function(req, res) {
-    const map = fs.readFileSync("maptest.txt", 'utf8');
+    const map = fs.readFileSync("saves/maptest" + save + ".txt", 'utf8');
     res.send(map);
 });
 
-app.get('/', function(req, res) {
-    res.sendfile("index.html");
+app.get('/save', function (req, res) {
+    const saves = fs.readFileSync("saves/save" + save + ".txt", 'utf8');
+    res.send(saves);
 });
+
+app.get('/', function(req, res) {
+    //console.log(req.query.num);
+    save = req.query.num;
+    res.sendfile("index.html");
+    //res.send(save);
+    
+});
+
 app.get('/js', function(req, res) {
     const page = fs.readFileSync("game.js", 'utf8');
     res.send(page);
