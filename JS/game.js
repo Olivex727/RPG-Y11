@@ -9,17 +9,10 @@ var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 let mapchunk = "";
 
-//Compiling information on maps
+//Compiling information onto map
 var maptext = $.ajax({
     type: "GET",
     url: "/map",
-    async: false
-}).responseText.split("\n");
-
-//Get save info from save file
-var saves = $.ajax({
-    type: "GET",
-    url: "/save",
     async: false
 }).responseText.split("\n");
 
@@ -28,12 +21,15 @@ for (i = 0; i < maptext.length; i++){
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": parseInt(tile[6]), "quest": (tile[7] =="true")}
 };
 
+//Get save info from save file
+var saves = $.ajax({
+    type: "GET",
+    url: "/save",
+    async: false
+}).responseText.split("\n");
 
-toolbelt = {weapons:[],tools:[],apparel:[]}; inventory = []; quests = [];
+//Load player information
 for (i = 0; i < saves.length; i++){
-    //console.log(saves[i]);
-    if(false){ }
-    else {
         var line = saves[i].split("|");
         if(line[0] === "x"){globalpos[0] = parseInt(line[1]);}
         if(line[0] === "y"){globalpos[1] = parseInt(line[1]);}
@@ -59,7 +55,7 @@ for (i = 0; i < saves.length; i++){
             for(x=3; x < 5; x++){line[x]=parseInt(line[x]);}
             quests.push({name: line[1], desc: line[2], reward: line[3], req: [line[4],line[5]], completed: (line[6]=="true"), npc:line[7], banked: (line[8]=="true")});
         }
-    }
+    
 };
 
 //Canvas Drawing
@@ -85,8 +81,18 @@ var traveled = 0;
 //Combat Variables (equipped is default)
 let combatActive = false; //Used in combat branch, will be used for inventory only
 var equipped = [{ name: "" }, { name: "" }];
+let entity = null;
 
-//======MAIN FUNCTIONS======//
+//Player description element
+var desc = document.getElementById("desc");
+
+//Inventory Slots
+var slot1 = document.getElementById("item1");
+var slot2 = document.getElementById("item2");
+var slot3 = document.getElementById("item3");
+var title = document.getElementById("inv");
+
+//======INVENTORY DISPLAY FUNCTIONS======//
 
 //WINDOW.ONLOAD -- First Loading of window
 window.onload = function() {
@@ -100,20 +106,14 @@ window.onload = function() {
     $(".output").html("press s to start");
     updateInvent(null);
     console.log(globalpos[0].toString() + globalpos[1].toString());
-    drawscreen(0,0);//globalpos[0], globalpos[1])
+    drawscreen(0,0);
     facing = map["0,0"];
-    //alert(map["0,0"]);
 };
-
-var slot1 = document.getElementById("item1");
-var slot2 = document.getElementById("item2");
-var slot3 = document.getElementById("item3");
-var title = document.getElementById("inv");
 
 //UPDATEINVENT -- Update the selections on the inventory
 function updateInvent(scroll, change = null, printToConsole = true, keepSelectedItem = false) {
     if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
-    if (!keepSelectedItem){selected = ""; }//desc.textContent = "";}
+    if (!keepSelectedItem){selected = ""; }
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -132,6 +132,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
     b2.textContent = ButtonPresets[inventstage.split("_")[0]][1].text; b3.textContent = ButtonPresets[inventstage.split("_")[0]][2].text; b1.textContent = ButtonPresets[inventstage.split("_")[0]][0].text;
 
+    //Change the text on the 'select' buttons
     function upButtons(text){
         for (i = 0; i < 3; i++){
             document.getElementById("sel_"+i).textContent = text;
@@ -252,10 +253,11 @@ function ComPress(scroll, button, change=null){
     }
 }
 
-let entity = null;
+//======PLAYER MOVEMENT/KEY BINDING FUNCTIONS======//
 
-//DRAWSCREEN -- Drawing the Screen
+//DRAWSCREEN -- Drawing the Screen etc.
 const drawscreen = (movex,movey) => {
+    //TILEIMAGE -- Get the image of a specific tile
     tileImage = (image) => {
         let img = new Image();
         img.src = "/Images/"+image+".png"
@@ -457,8 +459,9 @@ function update(key) { //keys
     }
 };
 
-var desc = document.getElementById("desc");
+//======INVENTORY MANAGEMENT FUNCTIONS======//
 
+//SELECTITEM -- Selets/Upgrades/Equips an item in the inventory
 function selectItem(num){
     if (inventstage.split("_")[0] !== "toolbelt") {
         if (num == 0) { selected = slot1.textContent.split(":")[0] }
@@ -529,8 +532,8 @@ function selectItem(num){
     }
 }
 
+//INTERACT -- Allows player to interact with the map
 function interact() {
-    //var yeild = Math.random()*Math.pow(distance, 1/2);
     console.log("Facing: "+facing['type']);
     console.log("Map: " + map[facod]['type']);
     var minecheck = false;
@@ -589,7 +592,6 @@ function interact() {
     //Check each item in inventory
     for(i in inventory)
     {
-        //console.log(i + " " + inventory[i].name);
         // If the names of the tile and inventory items match up
         if (facing['type'] === inventory[i].tile) {
 
@@ -612,7 +614,6 @@ function interact() {
 
                 //If the correct tool is in use
                 if (minecheck) {
-                    //console.log("LOL: " + i + " " + inventory[i].name);
                     //Add items to inventory
                     var x = Math.round(Math.random() * (distance + 1));
                     inventory[i].amount += x;
@@ -636,12 +637,10 @@ function interact() {
     console.log("interacted");
 }
 
+//CRAFT -- Combines two items on the crafting stage
 function craft(req){
-    //console.log("START");
     for(res in CraftingRecipes)
     {
-        //console.log(CraftingRecipes[res][0][0] + CraftingRecipes[res][0][1]);
-        //console.log(crafting[0] + crafting[1]);
         if (
             (CraftingRecipes[res][0][0] === crafting[0]) &&
             (CraftingRecipes[res][0][1] === crafting[1])
@@ -701,6 +700,7 @@ function craft(req){
     return ("");
 }
 
+//DISPLAYEDITORINFO -- Changes wether the player can see the editior info
 function displayEditorInfo()
 {
     var info = document.getElementById("editor");
@@ -708,6 +708,9 @@ function displayEditorInfo()
     else if (!info.hidden) { info.hidden = true; }
 }
 
+//======MARKET/QUEST FUNCTIONS======//
+
+//TRANSACTION -- Sell/Buy items
 function Transaction(sell, amount)
 {
     for(i in inventory)
@@ -733,6 +736,7 @@ function Transaction(sell, amount)
     
 }
 
+//LOAN -- Loan a specific amount of money or pay it all back at once
 function Loan(pay, amount)
 {
     if(!pay){ debt += amount; money += amount; }
@@ -740,6 +744,7 @@ function Loan(pay, amount)
     updateInvent(null);
 }
 
+//MARKETLOOP -- Change the value of inventory items
 function MarketLoop()
 {
     for(i in inventory)
@@ -770,6 +775,7 @@ function MarketLoop()
     }
 }
 
+//QUESTMANAGE -- Perform operations on the quests in inventory
 function questManage(preset)
 {
     var done = false;
@@ -810,6 +816,9 @@ function questManage(preset)
     
 }
 
+//======SAVE GAME/OTHER FUNCTIONS======//
+
+//SAVEGAME -- Send request to server.js to write information to the text file
 function saveGame(op, mapsec = "0,0")
 {
     let mapdata = "";
