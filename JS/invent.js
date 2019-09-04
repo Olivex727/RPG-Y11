@@ -7,7 +7,7 @@ var toolbelt = {
     weapons: [{
             "name": "Sword",
             "color": "#000000",
-            "damage": [100, 12],
+            "damage": [8, 2],
             "speed": [20, 1],
             "level": 1,
             "image": "False",

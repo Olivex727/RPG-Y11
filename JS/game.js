@@ -31,12 +31,31 @@ let entities = {
     "player": {
         "hp": {"cur": 100, "max": 100},
         "ma": {"cur": 100, "max": 100},
-        "xp": {"cur": 100, "max": 100},
+        "xp": {"cur": 0, "max": 100, "level": 1},
+        "ac": 13,
+        "weapon": {
+            "name": "sword",
+            "maxDamage": 8,
+            "mod": 2,
+        },
         "colour":"#000000",
         "image":tileImage("player")
 
     },
-    "enemy": {"colour":"#ff0000", "image":tileImage("enemy")}
+    "enemy": {
+        "colour":"#ff0000",
+        "image":tileImage("enemy"),
+        "hp" : {
+            "cur": 20,
+            "max": 20
+        },
+        "ac": 10,
+        "weapon": {
+            "name": "sword",
+            "maxDamage": 8,
+            "mod": 2,
+        },
+    }
 }
 //Canvas Drawing
 const canvas = document.getElementById("screen");
@@ -61,7 +80,7 @@ var distance = 0;
 var traveled = 0;
 
 //Combat Variables (equipped is default)
-let combatActive = false; //Used in combat branch, will be used for inventory only
+let combatActive = [false, false]; //Used in combat branch, will be used for inventory only
 var equipped = ["", ""];
 
 //======MAIN FUNCTIONS======//
@@ -130,12 +149,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        if (!combatActive) {
+        if (!combatActive[0]) {
             upButtons("Upgrade");
         }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -148,7 +167,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Upgrade");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -161,7 +180,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -266,8 +285,9 @@ const drawscreen = (movex,movey) => {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
                 console.log("combat start")
-                combatActive = true
-                drawcombat("start", entities)
+                combatActive[0] = true
+                drawcombat("start", entities, "none")
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
             }
         }
     };
@@ -339,10 +359,23 @@ const drawscreen = (movex,movey) => {
 
 }
 
+gameover = () =>{
+    console.log("gameover");
+    window.removeEventListener("keydown", update);
+    window.removeEventListener("keyup", update);
+    ctx.fillStyle ="#000000"
+    ctx.fillRect(0, 0, size, size)
+    ctx.fillStyle ="#f2f2f2"
+    ctx.fillText("GAME OVER", (size/2)-60, (size/2)-10);
+}
 
-drawcombat = async (phase, entities) => {
+
+drawcombat = async (phase, entities, key) => {
     text = (entities)=> {
-        clear(0.3, "#f2f2f2",()=> {
+            ctx.fillStyle ="#000000"
+            ctx.fillRect(0, 0, size, size)
+            ctx.fillStyle ="#f2f2f2"
+            ctx.fillRect(0, size*0.7, size, size*0.3)
             ctx.fillStyle = "#0033cc";
             ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.3);
             ctx.fillText("Mana:", size*0.35, size*0.7+(size*0.3)*0.6);
@@ -350,16 +383,45 @@ drawcombat = async (phase, entities) => {
             ctx.fillStyle = "#2aa22a";
             ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.3);
             ctx.fillText("EXP:", size*0.65, size*0.7+(size*0.3)*0.6);
-            console.log(entities);
             ctx.fillText(entities["player"]["xp"]["cur"]+"/"+entities["player"]["xp"]["max"], size*0.65, size*0.7+(size*0.3)*0.8);
+            ctx.fillStyle = "#444444";
+            ctx.fillRect(size/8-5, (size*0.7)-size*0.1-8, size*3/4+10, 40)
             ctx.fillStyle = "#cc0000";
+            ctx.fillRect(size/8, (size*0.7)-size*0.1+2, size*3/4*(entities["enemy"]["hp"]['cur']/entities["enemy"]["hp"]["max"]), 20)
             ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.3);
             ctx.fillText("HP:", size*0.05, size*0.7+(size*0.3)*0.6);
             ctx.fillText(entities['player']["hp"]["cur"]+"/"+entities['player']["hp"]["max"], size*0.05, size*0.7+(size*0.3)*0.8);
-            ctx.drawImage(entities["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7), size/2, size/2);
-        })
+            ctx.drawImage(entities["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7)-10, size/2, size/2);
     }
+
+    enemy = entities["enemy"]
+    dice = (max) => {
+        return Math.floor(Math.random()*max)+1
+    }
+
+    attcheck = (entities, attacker, target) => {
+        roll = dice(20);
+        if (roll >= entities[target]["ac"]-entities[target]["weapon"]['mod']){
+            att = dice(entities[attacker]['weapon']['maxDamage']) + entities[attacker]['weapon']['mod'];
+            entities[target]["hp"]["cur"] -= att;
+            if (entities[target]["hp"]["cur"] <=0){
+                combatActive = [false, false];
+                entities[target]["hp"]["cur"] = 0
+                if (target == "player"){
+                    gameover();
+                }
+                else {
+                    drawscreen();
+                }
+            }else{
+                console.log(attacker, "miss");
+            }
+
+        }
+    }
+
     if(phase == "start"){
+        entities["enemy"]["hp"]["cur"] = entities["enemy"]["hp"]["max"];
         clear = (per, colour, callback) => {
             ctx.fillStyle = colour;
             for(let y = 0; y<sps*per; ++y){
@@ -369,14 +431,30 @@ drawcombat = async (phase, entities) => {
                     }, 1)
                 }
             }
-            setTimeout( () =>{callback();}, 1)
+            setTimeout( () =>{callback();}, 1);
         }
 
         clear(1, "#000000", ()=> {
-            text(entities)
+            clear(0.3, "#f2f2f2",()=> {
+                text(entities);
+                combatActive[1] = true
+            });
 
     })
-}
+    } else {
+        if (key == "a"){
+            attcheck(entities, "player", "enemy")
+        }else if (key == "s") {
+
+        }
+        else if (key == "d") {
+
+        }
+        attcheck(entities, "enemy", "player")
+        if (combatActive[0]){
+            text(entities)
+        }
+    }
 }
 
 
@@ -394,8 +472,13 @@ function update(key) { //keys
     if($(".output").html() == "press s to start"){
         $(".output").html("")
     }
-    if (combatActive){
-        //drawcombat("start", entities)
+    if (combatActive[0]){
+        if (key["type"] == "keyup"){
+            keysdown = []
+            if (combatActive[1]){
+                drawcombat("action", entities, key["key"])
+            }
+        }
     }
     else{
         let movex = 0;
@@ -463,7 +546,7 @@ function selectItem(num){
         console.log("Selected: " + selected);
         updateInvent(null, null, true, true);
     }
-    else if (!combatActive)
+    else if (!combatActive[0])
     {
         if (num == 0) {selected = slot1.textContent.split(":")[0]}
         if (num == 1) {selected = slot2.textContent.split(":")[0]}
