@@ -7,8 +7,7 @@ let genmap;
 var sps = 15;
 var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
-
-//const save = 1;
+let mapchunk = "";
 
 //Compiling information on maps
 var maptext = $.ajax({
@@ -33,12 +32,13 @@ for (i = 0; i < maptext.length; i++){
 toolbelt = {weapons:[],tools:[],apparel:[]}; inventory = []; quests = [];
 for (i = 0; i < saves.length; i++){
     //console.log(saves[i]);
-    if(i == 0){ globalpos[0] = parseInt(saves[i]);}
-    else if (i == 1) { globalpos[1] = parseInt(saves[i]); }
-    else if (i == 2) { money = parseInt(saves[i]);}
-    else if (i == 3) { debt = parseInt(saves[i]);}
+    if(false){ }
     else {
-        var line = saves[i].split("|")
+        var line = saves[i].split("|");
+        if(line[0] === "x"){globalpos[0] = parseInt(line[1]);}
+        if(line[0] === "y"){globalpos[1] = parseInt(line[1]);}
+        if(line[0] === "money"){money = parseInt(line[1]);}
+        if(line[0] === "debt"){debt = parseInt(line[1]);}
         if(line[0] === "weapon"){
             for(x=2; x < 9; x++){line[x]=parseInt(line[x]);}
             toolbelt.weapons.push({"name": line[1], "damage": [line[2], line[3]], "speed": [line[4], line[5]], "level": line[6], "cost": [line[7], line[8]]});
@@ -369,8 +369,9 @@ const drawscreen = (movex,movey) => {
                     }
 
 
-                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har": 0}
+                    map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har": 0, "quest":false}
                     draw(x,y)
+                    saveGame("add", (x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString());
                 }else{
                     console.log(e)
                 }
@@ -383,6 +384,7 @@ const drawscreen = (movex,movey) => {
     } else {
         ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
     }
+    saveGame("map"); //Progressively add map information to load folder (Helps speed up draw process)
 
 }
 
@@ -806,6 +808,71 @@ function questManage(preset)
     }
     updateInvent(null);
     
+}
+
+function saveGame(op, mapsec = "0,0")
+{
+    let mapdata = "";
+    let infodata = "";
+
+    //Add tile information to mapchunk
+    if(op === "add"){
+        let tile = map[mapsec];
+        mapdata = mapsec.split(",")[0] + "|" + mapsec.split(",")[1] + "|" + tile["type"] + "|" + tile["stand"] + "|" + tile["enemy"] + "|" + tile["har"].toString() + "|" + tile["quest"].toString();
+    }
+    //Add player info to load file
+    if(op === "info") {
+    infodata += "x|"+globalpos[0]+".";
+    infodata += "y|" + globalpos[1] + ".";
+    infodata += "money|" + money + ".";
+    infodata += "debt|" + debt + ".";
+    for(i in toolbelt.weapons){
+        infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1] 
+        +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
+        +".";
+    }
+    for (i in toolbelt.tools) {
+        infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
+        "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
+        ".";
+    }
+    for (i in toolbelt.apparel) {
+        infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].strength[0] +
+        "|" + toolbelt.apparel[i].strength[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
+        ".";
+    }
+    for (i in inventory) {
+        infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
+    }
+    for (i in quests) {
+        infodata += "quest|" + quests[i].name + "|" + quests[i].desc + "|" + quests[i].reward + "|" + quests[i].req[0] + "|" + quests[i].req[1] +
+        quests[i].completed + "|" + quests[i].npc + "|" + quests[i].banked + "|" +
+        ".";
+    }
+    }
+    //Send request for saving
+    if(op !== "add")
+    {
+        try {
+            const x = $.ajax({
+                type: "GET",
+                url: "/savegame?op="+op+"&map="+mapchunk+"&info="+infodata,
+                async: false//,
+                //data: {info:infodata, map:mapdata}
+            }).responseText;
+            console.log(x);
+        }
+        catch(err)
+        {
+            console.log(err);
+        }
+        if (op === "map") //Reset Chunk String for next drawscreen
+        {
+            mapchunk = "";
+        }
+    }
+    //If only adding map info, add to the chunk string
+    else{ mapchunk += mapdata + ".";}
 }
 
 //Credit to user 'Reid' on Stack Overflow
