@@ -1,0 +1,14 @@
+FOR SAVE:
+
+Player x
+Player y
+Money
+Debt
+weapon|name|damage[0]|damage[1]|speed[0]|speed[1]|level|cost[0]|cost[1] (etc.)
+tool|name|tilebase|efficiency[0]|efficiency[1]|level|cost[0]|cost[1] (etc.)
+apparel|name|strength[0]|strength[1]|level|cost[0]|cost[1] (etc.)
+item|name|amount|cost|stock|tile (etc.)
+quest|name|desc|reward|req[0]|req[1]|completed|npc|banked (etc.)
+
+FOR MAPTEST:
+x|y|type|stand|special|enemy|har|quest (etc.)

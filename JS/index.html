@@ -39,7 +39,6 @@
                 <button onclick="updateInvent(0, 'toolbelt_weapons');">Toolbelt</button>
                 <button onclick="updateInvent(0, 'quests');">Quests</button>
                 <button onclick="updateInvent(0, 'market');">Market</button>
-                <button onclick="updateInvent(0, 'ops');">Options</button>
                 <p id ="inv"></p>
                 <div id="command">
                     <button id="command_1" onclick="ComPress(0, 1, 'toolbelt_weapons');">Weapons</button>
@@ -53,6 +52,7 @@
                 <button id="dscrl" onclick="updateInvent(1, null, true, true);">\/</button><br>
                 <p id="crafting">Selected: [ ] Crafting Table: [ , ] Result: [ ]</p>
                 <p id="money">Money: 0, Debt: 0</p>
+                <p>To load previous save file, go to the url http://localhost:3000/?save=load, To overwrite previous save file, go to the url http://localhost:3000/?save=new</p>
             </div>
             <button onclick="displayEditorInfo();">Display Editor Info</button>
         </div>

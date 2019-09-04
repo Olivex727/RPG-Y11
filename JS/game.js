@@ -8,7 +8,7 @@ var sps = 15;
 var playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 
-const save = 1;
+//const save = 1;
 
 //Compiling information on maps
 var maptext = $.ajax({
@@ -18,7 +18,7 @@ var maptext = $.ajax({
 }).responseText.split("\n");
 
 //Get save info from save file
-var maptext = $.ajax({
+var saves = $.ajax({
     type: "GET",
     url: "/save",
     async: false
@@ -26,7 +26,40 @@ var maptext = $.ajax({
 
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": parseInt(tile[6]), "quest": (tile[7] =="true")}
+};
+
+
+toolbelt = {weapons:[],tools:[],apparel:[]}; inventory = []; quests = [];
+for (i = 0; i < saves.length; i++){
+    //console.log(saves[i]);
+    if(i == 0){ globalpos[0] = parseInt(saves[i]);}
+    else if (i == 1) { globalpos[1] = parseInt(saves[i]); }
+    else if (i == 2) { money = parseInt(saves[i]);}
+    else if (i == 3) { debt = parseInt(saves[i]);}
+    else {
+        var line = saves[i].split("|")
+        if(line[0] === "weapon"){
+            for(x=2; x < 9; x++){line[x]=parseInt(line[x]);}
+            toolbelt.weapons.push({"name": line[1], "damage": [line[2], line[3]], "speed": [line[4], line[5]], "level": line[6], "cost": [line[7], line[8]]});
+        }
+        if(line[0] === "tool"){
+            for(x=3; x < 8; x++){line[x]=parseInt(line[x]);}
+            toolbelt.tools.push({"name": line[1], "tilebase": line[2], "efficiency": [line[3], line[4]], "level": line[5], "cost": [line[6], line[7]]});
+        }
+        if(line[0] === "apparel"){
+            for(x=6; x < 7; x++){line[x]=parseInt(line[x]);}
+            toolbelt.apparel.push({"name": line[1], "strength": [line[2], line[3]], "level": line[4], "cost": [line[5], line[6]]});
+        }
+        if(line[0] === "item"){
+            for(x=2; x < 5; x++){line[x]=parseInt(line[x]);}
+            inventory.push({"name": line[1], "amount": line[2], "cost": line[3], "stock": line[4], "tile":line[5]});
+        }
+        if(line[0] === "quest"){
+            for(x=3; x < 5; x++){line[x]=parseInt(line[x]);}
+            quests.push({name: line[1], desc: line[2], reward: line[3], req: [line[4],line[5]], completed: (line[6]=="true"), npc:line[7], banked: (line[8]=="true")});
+        }
+    }
 };
 
 //Canvas Drawing
@@ -66,7 +99,8 @@ window.onload = function() {
     }).responseJSON
     $(".output").html("press s to start");
     updateInvent(null);
-    drawscreen(0,0)
+    console.log(globalpos[0].toString() + globalpos[1].toString());
+    drawscreen(0,0);//globalpos[0], globalpos[1])
     facing = map["0,0"];
     //alert(map["0,0"]);
 };
@@ -132,7 +166,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             }
             slot1.textContent = toolbelt.weapons[scrollnum].name + ": Dmg: " + toolbelt.weapons[scrollnum].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum].level + ", Cost: " + toolbelt.weapons[scrollnum].cost[0];
             slot2.textContent = toolbelt.weapons[scrollnum + 1].name + ": Dmg: " + toolbelt.weapons[scrollnum + 1].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum + 1].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum + 1].level + ", Cost: " + toolbelt.weapons[scrollnum+1].cost[0];
-            slot3.textContent = "";//toolbelt.weapons[scrollnum+2].name + ": Dmg: " + toolbelt.weapons[scrollnum+2].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum+2].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum+2].level;
+            slot3.textContent = toolbelt.weapons[scrollnum + 2].name + ": Dmg: " + toolbelt.weapons[scrollnum + 2].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum + 2].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum + 2].level + ", Cost: " + toolbelt.weapons[scrollnum + 2].cost[0];
         }
 
         //TOOLBELT_TOOLS
@@ -145,7 +179,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             }
             slot1.textContent = toolbelt.tools[scrollnum].name + ": Spd: " + toolbelt.tools[scrollnum].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum].level + ", Cost: " + toolbelt.tools[scrollnum].cost[0];
             slot2.textContent = toolbelt.tools[scrollnum + 1].name + ": Spd: " + toolbelt.tools[scrollnum + 1].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum + 1].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum + 1].level + ", Cost: " + toolbelt.tools[scrollnum+1].cost[0];
-            slot3.textContent = "";//toolbelt.tools[scrollnum+2].name + ": Spd:" + toolbelt.tools[scrollnum+2].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum+2].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum+2].level;
+            slot3.textContent = toolbelt.tools[scrollnum+2].name + ": Spd: " + toolbelt.tools[scrollnum+2].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum+2].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum+2].level + ", Cost: " + toolbelt.tools[scrollnum+2].cost[0];
         }
 
         //TOOLBELT_APPAREL
@@ -158,7 +192,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             }
             slot1.textContent = toolbelt.apparel[scrollnum].name + ": Str: " + toolbelt.apparel[scrollnum].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level + ", Cost: " + toolbelt.apparel[scrollnum].cost[0];
             slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Str: " + toolbelt.apparel[scrollnum + 1].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level + ", Cost: " + toolbelt.apparel[scrollnum+1].cost[0];
-            slot3.textContent = "";//toolbelt.apparel[scrollnum+2].name + ": Str:" + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level;
+            slot3.textContent = toolbelt.apparel[scrollnum+2].name + ": Str: " + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level + ", Cost: " + toolbelt.apparel[scrollnum+2].cost[0];
         }
     }
 
@@ -405,7 +439,7 @@ function update(key) { //keys
                 info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
 
                 //alert(map["0,-1"]);
-                infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
+                infotxt.textContent = "Globalpos: [" + (globalpos[0]).toString() + "," + (globalpos[1]).toString() + "], Playerpos: [" + (playerpos[0]).toString() + "," + (playerpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
 
             }
             facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];

@@ -10,6 +10,7 @@ let save = 1;
 app.use(express.static(dir));
 
 app.get('/map', function(req, res) {
+    
     const map = fs.readFileSync("saves/maptest" + save + ".txt", 'utf8');
     res.send(map);
 });
@@ -20,10 +21,16 @@ app.get('/save', function (req, res) {
 });
 
 app.get('/', function(req, res) {
-    //console.log(req.query.num);
-    save = req.query.num;
+    if (req.query.save.toString() != "load" && req.query.save.toString() != "new")
+    {
+        save = "load";
+    }
+    else
+    {
+        save = req.query.save.toString();
+    }
+    console.log(save);
     res.sendfile("index.html");
-    //res.send(save);
     
 });
 
@@ -162,3 +169,4 @@ app.get('/snoise', function(req, res) {
 app.listen(3000, function() {
     console.log('listening on port 3000');
 });
+
