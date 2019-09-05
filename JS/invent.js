@@ -5,9 +5,74 @@ let debt = 0; //The amount of money the player owes
 
 //Tools that the player can use
 var toolbelt = {
-    weapons: [],
-    tools: [],
-    apparel: []
+    weapons: [{
+            "name": "Sword",
+            "color": "#000000",
+            "damage": [8, 2],
+            "mod": 2,
+            "speed": [20, 1],
+            "level": 1,
+            "image": "False",
+            "cost":[1500, 1500]
+        },
+        {
+            "name": "Fire Spell",
+            "color": "#000000",
+            "damage": [15, 5],
+            "speed": [80, 2],
+            "mod": 15,
+            "level": 1,
+            "image": "False",
+            "maCost": [10, 5],
+            "cost": [1500, 1500]
+        }
+    ],
+    tools: [{
+            "name": "Sickle",
+            "color": "#000000",
+            "tilebase": "grass",
+            "efficiency": [40, 4],
+            "level": 1,
+            "image": "False",
+            "cost": [110, 8]
+        },
+        {
+            "name": "Axe",
+            "color": "#000000",
+            "tilebase": "forest",
+            "efficiency": [12, 2],
+            "level": 1,
+            "image": "False",
+            "cost": [80, 10]
+        },
+        {
+            "name": "Pickaxe",
+            "color": "#000000",
+            "tilebase": "mountain",
+            "efficiency": [30, 7],
+            "level": 0,
+            "image": "False",
+            "cost": [290, 2]
+        }
+
+    ],
+    apparel: [{
+            "name": "Chainmail",
+            "color": "#000000",
+            "strength": [90, 8],
+            "level": 0,
+            "image": "False",
+            "cost": [340, 2]
+        },
+        {
+            "name": "Clothes",
+            "color": "#000000",
+            "strength": [10, 1],
+            "level": 1,
+            "image": "False",
+            "cost": [20, 1]
+        }
+    ]
 };
 
 //Item management
