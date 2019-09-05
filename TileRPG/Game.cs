@@ -217,7 +217,9 @@ namespace TileRPG
 
                                 foreach (model m in models)
                                 {
+#pragma warning disable CS0252
                                     if (pic.Tag == m.modelID)
+#pragma warning restore CS0252
                                     {
                                         if (m.modelType == 1)
                                         {
@@ -259,7 +261,9 @@ namespace TileRPG
 
                                 foreach (model m in models)
                                 {
+#pragma warning disable CS0252
                                     if (pic.Tag == m.modelID)
+#pragma warning restore CS0252
                                     {
                                         if (m.modelType == 1)
                                         {

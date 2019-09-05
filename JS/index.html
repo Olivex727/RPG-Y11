@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test Game</title>
+        <!--<link rel="stylesheet" href="style.css">-->
+        <style>
+
+            #main{
+                background-color: #aaaaaa;
+            }
+            #screen, #screen2 {
+                color: crimson;
+                border:1px solid #000000;
+                display: inline;
+            }
+            #inventory
+            {
+                color: #000000;
+                font-family: sans-serif;
+                font-size: 12px;
+                background-color: #aaaaaa;
+            }
+        </style>
+
+    </head>
+    <body>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <div id = "main">
+            <div id = "editor">
+            <p id="info">Globalpos: [0, 0], Tile On: Grass</p><p id="info1">Lastmove: e, Facing: null</p><p id="info2">Distance: 0</p>
+            </div>
+            <canvas id="screen" width="512" height="512" onkeypress="test">
+                <p>No display</p>
+            </canvas>
+            <div class="output">generating terrain...</div>
+            <p id="desc"></p>
+            <div id="inventory">
+                <button onclick="updateInvent(0, 'inventory');">Inventory</button>
+                <button onclick="updateInvent(0, 'toolbelt_weapons');">Toolbelt</button>
+                <button onclick="updateInvent(0, 'quests');">Quests</button>
+                <button onclick="updateInvent(0, 'market');">Market</button>
+                <p id ="inv"></p>
+                <div id="command">
+                    <button id="command_1" onclick="ComPress(0, 1, 'toolbelt_weapons');">Weapons</button>
+                    <button id="command_2" onclick="ComPress(0, 2, 'toolbelt_tools');">Tools</button>
+                    <button id="command_3" onclick="ComPress(0, 3, 'toolbelt_apparel');">Apparel</button>
+                </div><br>
+                <button id="sel_0" onclick="selectItem(0);"></button> <ls id="item1"></ls><br>
+                <button id="sel_1" onclick="selectItem(1);"></button> <ls id="item2"></ls><br>
+                <button id="sel_2" onclick="selectItem(2);"></button> <ls id="item3"></ls><br>
+                <button id="uscrl" onclick="updateInvent(-1, null, true, true);">/\</button>
+                <button id="dscrl" onclick="updateInvent(1, null, true, true);">\/</button><br>
+                <p id="crafting">Selected: [ ] Crafting Table: [ , ] Result: [ ]</p>
+                <p id="money">Money: 0, Debt: 0</p>
+            </div>
+            <button onclick="displayEditorInfo();">Display Editor Info</button>
+        </div>
+        
+        <script src="inventjs"></script>
+        <script src="js"></script>
+
+        <!--<p>Loll</p>-->
+    </body>
+</html>
