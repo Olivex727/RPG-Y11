@@ -52,7 +52,8 @@ let entities = {
             "damage": [10],
             "mod": 2,
         },
-    }
+    },
+    "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
 }
 //Canvas Drawing
 const canvas = document.getElementById("screen");
@@ -106,7 +107,7 @@ var title = document.getElementById("inv");
 //UPDATEINVENT -- Update the selections on the inventory
 function updateInvent(scroll, change = null, printToConsole = true, keepSelectedItem = false) {
     if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
-    if (!keepSelectedItem){selected = "";}
+    if (!keepSelectedItem){selected = ""; }
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -125,6 +126,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
     b2.textContent = ButtonPresets[inventstage.split("_")[0]][1].text; b3.textContent = ButtonPresets[inventstage.split("_")[0]][2].text; b1.textContent = ButtonPresets[inventstage.split("_")[0]][0].text;
 
+    //Change the text on the 'select' buttons
     function upButtons(text){
         for (i = 0; i < 3; i++){
             document.getElementById("sel_"+i).textContent = text;
@@ -146,12 +148,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        if (!combatActive[0]) {
+        if (!combatActive) {
             upButtons("Upgrade");
         }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-            if (combatActive[0]) {
+            if (combatActive) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -159,12 +161,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             }
             slot1.textContent = toolbelt.weapons[scrollnum].name + ": Dmg: " + toolbelt.weapons[scrollnum].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum].level + ", Cost: " + toolbelt.weapons[scrollnum].cost[0];
             slot2.textContent = toolbelt.weapons[scrollnum + 1].name + ": Dmg: " + toolbelt.weapons[scrollnum + 1].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum + 1].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum + 1].level + ", Cost: " + toolbelt.weapons[scrollnum+1].cost[0];
-            slot3.textContent = "";//toolbelt.weapons[scrollnum+2].name + ": Dmg: " + toolbelt.weapons[scrollnum+2].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum+2].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum+2].level;
+            slot3.textContent = toolbelt.weapons[scrollnum + 2].name + ": Dmg: " + toolbelt.weapons[scrollnum + 2].damage[0] + ", Spd: " + toolbelt.weapons[scrollnum + 2].speed[0] + ", LEVEL: " + toolbelt.weapons[scrollnum + 2].level + ", Cost: " + toolbelt.weapons[scrollnum + 2].cost[0];
         }
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-            if (combatActive[0]) {
+            if (combatActive) {
                 upButtons("Upgrade");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -172,12 +174,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             }
             slot1.textContent = toolbelt.tools[scrollnum].name + ": Spd: " + toolbelt.tools[scrollnum].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum].level + ", Cost: " + toolbelt.tools[scrollnum].cost[0];
             slot2.textContent = toolbelt.tools[scrollnum + 1].name + ": Spd: " + toolbelt.tools[scrollnum + 1].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum + 1].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum + 1].level + ", Cost: " + toolbelt.tools[scrollnum+1].cost[0];
-            slot3.textContent = "";//toolbelt.tools[scrollnum+2].name + ": Spd:" + toolbelt.tools[scrollnum+2].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum+2].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum+2].level;
+            slot3.textContent = toolbelt.tools[scrollnum+2].name + ": Spd: " + toolbelt.tools[scrollnum+2].efficiency[0] + ", Use: " + toolbelt.tools[scrollnum+2].tilebase + ", LEVEL: " + toolbelt.tools[scrollnum+2].level + ", Cost: " + toolbelt.tools[scrollnum+2].cost[0];
         }
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-            if (combatActive[0]) {
+            if (combatActive) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -185,7 +187,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
             }
             slot1.textContent = toolbelt.apparel[scrollnum].name + ": Str: " + toolbelt.apparel[scrollnum].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level + ", Cost: " + toolbelt.apparel[scrollnum].cost[0];
             slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Str: " + toolbelt.apparel[scrollnum + 1].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level + ", Cost: " + toolbelt.apparel[scrollnum+1].cost[0];
-            slot3.textContent = "";//toolbelt.apparel[scrollnum+2].name + ": Str:" + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level;
+            slot3.textContent = toolbelt.apparel[scrollnum+2].name + ": Str: " + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level + ", Cost: " + toolbelt.apparel[scrollnum+2].cost[0];
         }
     }
 
@@ -196,14 +198,14 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         if (scroll != null && (scrollnum < quests.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
-        if (quests[scrollnum] != null) {
-            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + ", reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
+        if (quests[scrollnum] != null /*&& !quests[scrollnum].completed*/) {
+            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + "(s), reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
         } else {slot1.textContent = "";}
-        if (quests[scrollnum + 1] != null) {
-            slot2.textContent = quests[scrollnum+1].name;
+        if (quests[scrollnum + 1] != null /*&& !quests[scrollnum].completed*/ ) {
+            slot2.textContent = quests[scrollnum+1].name + ":\n " + quests[scrollnum+1].desc + ". req: " + quests[scrollnum+1].req[0] + " " + quests[scrollnum+1].req[1] + "(s), reward: " + quests[scrollnum+1].reward + ", DONE: " + quests[scrollnum+1].completed;
         } else {slot2.textContent = "";}
-        if (quests[scrollnum+2] != null){
-            slot3.textContent = quests[scrollnum+2].name;
+        if (quests[scrollnum + 2] != null /*&& !quests[scrollnum].completed*/) {
+            slot3.textContent = quests[scrollnum + 2].name + ":\n " + quests[scrollnum + 2].desc + ". req: " + quests[scrollnum + 2].req[0] + " " + quests[scrollnum + 2].req[1] + "(s), reward: " + quests[scrollnum + 2].reward + ", DONE: " + quests[scrollnum + 2].completed;
         } else {slot3.textContent = "";}
     }
 
@@ -219,7 +221,6 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     }
 
 }
-
 //COMPRESS -- Pressing the specialised buttons, runs sevreal other functions
 function ComPress(scroll, button, change=null){
 
@@ -229,7 +230,9 @@ function ComPress(scroll, button, change=null){
         if (button == 3) { Transaction(true, 5); }
     }
     if (inventstage.split("_")[0] === "quests") {
-
+        if (button == 1) { questManage('rem'); }
+        if (button == 2) { questManage('comp'); }
+        if (button == 3) { questManage('pri'); }
     }
     if (inventstage.split("_")[0] === "toolbelt") {
         if (button == 1) { updateInvent(0, 'toolbelt_weapons'); }
@@ -242,6 +245,7 @@ function ComPress(scroll, button, change=null){
         if (button == 3) { if(debt == 0){ Loan(false, 10000); } else { Loan(true, 0) } }
     }
 }
+
 
 //DRAWSCREEN -- Drawing the Screen
 const drawscreen = (movex,movey) => {
@@ -268,6 +272,12 @@ const drawscreen = (movex,movey) => {
         "ma": {"colour":"#ff0000", "stand":"True", "image":tileImage("mana")}
 
     };
+
+    const drawBlack = (x, y) => {
+        ctx.fillStyle = "#000000";
+        ctx.fillRect((x) * (size / sps), (y) * (size / sps), (size / sps), (size / sps));
+    }
+
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
@@ -580,6 +590,7 @@ function update(key) { //keys
 
 var desc = document.getElementById("desc");
 
+//SELECTITEM -- Selets/Upgrades/Equips an item in the inventory
 function selectItem(num){
     if (inventstage.split("_")[0] !== "toolbelt") {
         if (num == 0) { selected = slot1.textContent.split(":")[0] }
@@ -659,16 +670,66 @@ function selectItem(num){
     }
 }
 
+//INTERACT -- Allows player to interact with the map
 function interact() {
-    //var yeild = Math.random()*Math.pow(distance, 1/2);
     console.log("Facing: "+facing['type']);
     console.log("Map: " + map[facod]['type']);
     var minecheck = false;
 
+    if (entities["npc"]["type"].includes(map[facod]['enemy']))
+    {
+        if (!map[facod]['quest'])
+        {
+            console.log("Facing NPC: " + facing['enemy']);
+            desc.textContent = "You've received a new quest from the " + map[facod]['enemy'];
+            for(i in questbank)
+            {
+                if (map[facod]['enemy'] === questbank[i].npc && !map[facod]['quest'])
+                {
+                    let alreadyexists = false;
+                    for(q in quests)
+                    {
+                        if (quests[q].name === questbank[i].name)
+                        {
+                            alreadyexists = true;
+                        }
+                    }
+                    if(!alreadyexists)
+                    {
+                        let x = quests.unshift(questbank[i]) - 1;
+                        quests[x].banked = true;
+                        map[facod]['quest'] = true;
+                        updateInvent(null);
+                    }
+                }
+            }
+            if (!map[facod]['quest']) //If there are no more quests in the questbank
+            {
+                let newquest = {
+                    name: "Help out the " + map[facod]['enemy'],
+                    desc: "See the requirements",
+                    reward: Math.round(distance * Math.random()),
+                    req: [Math.round(distance * Math.random()), inventory[Math.round(Math.random() * (inventory.length - 1))].name],
+                    completed: false,
+                    npc: map[facod]['enemy'],
+                    banked: true
+                }
+                let x = quests.push(newquest) - 1;
+                map[facod]['quest'] = true;
+                updateInvent(null);
+            }
+        }
+        else
+        {
+            desc.textContent = "You can't get another quest from this person";
+        }
+
+    }
+    else
+    {
     //Check each item in inventory
     for(i in inventory)
     {
-        console.log(i + " " + inventory[i].name);
         // If the names of the tile and inventory items match up
         if (facing['type'] === inventory[i].tile) {
 
@@ -691,14 +752,13 @@ function interact() {
 
                 //If the correct tool is in use
                 if (minecheck) {
-                    //console.log("LOL: " + i + " " + inventory[i].name);
                     //Add items to inventory
                     var x = Math.round(Math.random() * (distance + 1));
                     inventory[i].amount += x;
 
                     var y = Math.round(Math.random() * (distance + 2));
                     map[facod]['har'] = y;
-                    console.log("Harvested: " + y + inventory[i].name);
+                    console.log("Harvested: " + y + " " + inventory[i].name);
                     desc.textContent = "Picked up " + x + " " + inventory[i].name;
                     updateInvent(null);
                 } else {
@@ -711,15 +771,14 @@ function interact() {
             }
         }
     }
+    }
     console.log("interacted");
 }
 
+//CRAFT -- Combines two items on the crafting stage
 function craft(req){
-    //console.log("START");
     for(res in CraftingRecipes)
     {
-        //console.log(CraftingRecipes[res][0][0] + CraftingRecipes[res][0][1]);
-        //console.log(crafting[0] + crafting[1]);
         if (
             (CraftingRecipes[res][0][0] === crafting[0]) &&
             (CraftingRecipes[res][0][1] === crafting[1])
@@ -779,15 +838,17 @@ function craft(req){
     return ("");
 }
 
-function displayEditorInfo()
-{
+//DISPLAYEDITORINFO -- Changes wether the player can see the editior info
+function displayEditorInfo(){
     var info = document.getElementById("editor");
     if (info.hidden) { info.hidden = false; }
     else if (!info.hidden) { info.hidden = true; }
 }
 
-function Transaction(sell, amount)
-{
+//======MARKET/QUEST FUNCTIONS======//
+
+//TRANSACTION -- Sell/Buy items
+function Transaction(sell, amount){
     for(i in inventory)
     {
         if (inventory[i].name === selected)
@@ -811,8 +872,8 @@ function Transaction(sell, amount)
 
 }
 
-function Loan(pay, amount)
-{
+//LOAN -- Loan a specific amount of money or pay it all back at once
+function Loan(pay, amount){
     if(!pay){ debt += amount; money += amount; }
     if (pay && money >= debt) { money -= debt; debt = 0; }
     updateInvent(null);
@@ -824,14 +885,16 @@ function MarketLoop()
     {
         if (inventory[i].cost > 10 && inventory[i].cost < 100000)
         {
-            let x = inventory[i].stock;
-            let y = (Math.random() * 1/2) / ( 1 + 1/( Math.pow( Math.E, x ))); //Sigmoid function
+            //let x = ;
+            let y = Math.random() ;//(Math.random()/2) / ( 1 + 1/( Math.pow( Math.E, x ))); //Sigmoid function
             //console.log(y);
-            if(y <= 0.5){
-                inventory[i].cost = Math.round(inventory[i].cost * (1 + (Math.random() / 10)));
+            if(y >= 0.5){
+                inventory[i].cost = Math.round(inventory[i].cost * (1 + 1 / ((inventory[i].stock + 1) * 7)));
+                //console.log(inventory[i].name + ", " + (1 + 1 / ((inventory[i].stock + 1) * 10)));
             }
             else{
-                inventory[i].cost = Math.round(inventory[i].cost * (1 - (Math.random() / 10)));
+                inventory[i].cost = Math.round(inventory[i].cost * (1 - 1 / ((inventory[i].stock + 1) * 7)));
+                //console.log(inventory[i].name + ", " + (1 - 1 / ((inventory[i].stock + 1) * 10)));
             }
         }
         else if (inventory[i].cost > 10)
@@ -845,3 +908,122 @@ function MarketLoop()
 
     }
 }
+
+//QUESTMANAGE -- Perform operations on the quests in inventory
+function questManage(preset)
+{
+    var done = false;
+    for(i in quests)
+    {
+
+        if (quests[i].name === selected && !done){
+            if(preset === "rem")
+            {
+                quests[i].banked = false;
+                quests = array_move(quests, i, quests.length - 1);
+                quests.splice(quests.length - 1, 1);
+                done = true;
+            }
+            if (preset === "pri") {
+                quests = array_move(quests, i, 0);
+                done = true;
+            }
+            if (preset === "comp") {
+                for(item in inventory){
+                    if (quests[i].req[1] === inventory[item].name && inventory[item].amount >= quests[i].req[0]) {
+                        selected = "";
+                        inventory[item].amount -= quests[i].req[0];
+                        quests[i].completed = true;
+                        money = quests[i].reward;
+                        desc.textContent = "You completed the quest and got: $" + quests[i].reward;
+                        //console.log(quests[i]);
+                        quests = array_move(quests, i, quests.length - 1); //Doesn't work
+                        //console.log(quests[quests.length - 1]);
+                        //console.log(quests[i]);
+                        done = true;
+                    }
+                }
+            }
+        }
+    }
+    updateInvent(null);
+
+}
+
+//======SAVE GAME/OTHER FUNCTIONS======//
+
+//SAVEGAME -- Send request to server.js to write information to the text file
+function saveGame(op, mapsec = "0,0"){
+    let mapdata = "";
+    let infodata = "";
+
+    //Add tile information to mapchunk
+    if(op === "add"){
+        let tile = map[mapsec];
+        mapdata = mapsec.split(",")[0] + "|" + mapsec.split(",")[1] + "|" + tile["type"] + "|" + tile["stand"] + "|" + tile["enemy"] + "|" + tile["har"].toString() + "|" + tile["quest"].toString();
+    }
+    //Add player info to load file
+    if(op === "info") {
+    infodata += "x|"+globalpos[0]+".";
+    infodata += "y|" + globalpos[1] + ".";
+    infodata += "money|" + money + ".";
+    infodata += "debt|" + debt + ".";
+    for(i in toolbelt.weapons){
+        infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1]
+        +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
+        +".";
+    }
+    for (i in toolbelt.tools) {
+        infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
+        "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
+        ".";
+    }
+    for (i in toolbelt.apparel) {
+        infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].strength[0] +
+        "|" + toolbelt.apparel[i].strength[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
+        ".";
+    }
+    for (i in inventory) {
+        infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
+    }
+    for (i in quests) {
+        infodata += "quest|" + quests[i].name + "|" + quests[i].desc + "|" + quests[i].reward + "|" + quests[i].req[0] + "|" + quests[i].req[1] +
+        quests[i].completed + "|" + quests[i].npc + "|" + quests[i].banked + "|" +
+        ".";
+    }
+    }
+    //Send request for saving
+    if(op !== "add")
+    {
+        try {
+            const x = $.ajax({
+                type: "GET",
+                url: "/savegame?op="+op+"&map="+mapchunk+"&info="+infodata,
+                async: false//,
+                //data: {info:infodata, map:mapdata}
+            }).responseText;
+            console.log(x);
+        }
+        catch(err)
+        {
+            console.log(err);
+        }
+        if (op === "map") //Reset Chunk String for next drawscreen
+        {
+            mapchunk = "";
+        }
+    }
+    //If only adding map info, add to the chunk string
+    else{ mapchunk += mapdata + ".";}
+}
+
+function array_move(arr, old_index, new_index) {
+    if (new_index >= arr.length) {
+        var k = new_index - arr.length + 1;
+        while (k--) {
+            arr.push(undefined);
+        }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+    return arr; // for testing
+};
