@@ -33,11 +33,7 @@ let entities = {
         "ma": {"cur": 100, "max": 100},
         "xp": {"cur": 0, "max": 100, "level": 1},
         "ac": 13,
-        "weapon": {
-            "name": "sword",
-            "maxDamage": 8,
-            "mod": 2,
-        },
+        "weapon": toolbelt.weapons[0],
         "colour":"#000000",
         "image":tileImage("player")
 
@@ -51,8 +47,8 @@ let entities = {
         },
         "ac": 10,
         "weapon": {
-            "name": "sword",
-            "maxDamage": 8,
+            "name": "Sword",
+            "damage": [8],
             "mod": 2,
         },
     }
@@ -266,7 +262,9 @@ const drawscreen = (movex,movey) => {
         "roof6": {"colour":"#000000", "stand":"False", "image":tileImage("roof6")},
         "roof7": {"colour":"#000000", "stand":"False", "image":tileImage("roof7")},
         "chimney": {"colour":"#000000", "stand":"False", "image":tileImage("chimney")},
-        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
+        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")},
+        "hp": {"colour":"#ff0000", "stand":"True", "image":tileImage("health")},
+        "ma": {"colour":"#ff0000", "stand":"True", "image":tileImage("mana")}
 
     };
     const interest = ["fountain", "dungeon", "monster", "teleport"]
@@ -288,6 +286,16 @@ const drawscreen = (movex,movey) => {
                 combatActive[0] = true
                 drawcombat("start", entities, "none")
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
+            }
+        } else if(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] != "none" && map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] == "True"){
+            ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            if(x == playerpos[0] && y == playerpos[1]){
+                entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["cur"] += 20;
+                if(entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["cur"] > entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["max"]){
+                    entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["cur"] = entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["max"];
+                }
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] = "none";
             }
         }
     };
@@ -305,11 +313,7 @@ const drawscreen = (movex,movey) => {
                     let enemy = "none";
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
-                        if(Math.random() <= 0.01){ // enemies
-                            enemy = "goblin"
-                            stand = "False"
                     }
-                }
                     else if (pos < 0.49 && pos > 0.375) {
                         type = "forest"
                     }
@@ -334,9 +338,16 @@ const drawscreen = (movex,movey) => {
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
                     }
-                    if(Math.random() <= 0.1){ // terrain
-                        z = Math.floor(Math.random() * Object.keys(terrain).length) + 1
-                        special = interest[z]
+                    if(Math.random() <= 0.001){ // enemies
+                        enemy = "goblin"
+                        stand = "False"
+                        special = "none"
+                    }
+                    else if(Math.random() <= 0.001){ // terrain
+                        special = "hp"
+                    }
+                    else if (Math.random() <= 0.001) {
+                        special = "ma"
                     } else {
                         special = "none"
                     }
@@ -378,7 +389,6 @@ drawcombat = async (phase, entities, key) => {
             ctx.fillRect(0, size*0.7, size, size*0.3)
             ctx.fillStyle = "#0033cc";
             ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.3);
-            ctx.fillText("Mana:", size*0.35, size*0.7+(size*0.3)*0.6);
             ctx.fillText(entities["player"]["ma"]["cur"]+"/"+entities['player']["ma"]["max"], size*0.35, size*0.7+(size*0.3)*0.8);
             ctx.fillStyle = "#2aa22a";
             ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.3);
@@ -401,8 +411,10 @@ drawcombat = async (phase, entities, key) => {
 
     attcheck = (entities, attacker, target) => {
         roll = dice(20);
-        if (roll >= entities[target]["ac"]-entities[target]["weapon"]['mod']){
-            att = dice(entities[attacker]['weapon']['maxDamage']) + entities[attacker]['weapon']['mod'];
+        if (roll >= entities[target]["ac"]){
+            console.log(entities);
+            att = dice(entities[attacker]['weapon']['damage'][0]) + entities[attacker]['weapon']['mod'];
+            console.log("damage", entities[attacker]['weapon']['damage'][0]);
             entities[target]["hp"]["cur"] -= att;
             if (entities[target]["hp"]["cur"] <=0){
                 combatActive = [false, false];

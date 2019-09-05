@@ -8,6 +8,7 @@ var toolbelt = {
             "name": "Sword",
             "color": "#000000",
             "damage": [8, 2],
+            "mod": 2,
             "speed": [20, 1],
             "level": 1,
             "image": "False",
