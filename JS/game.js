@@ -9,6 +9,7 @@ let genmap;
 var sps = 15;
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
+map[(sps-1)/2+","+((sps-1)/2+1)] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 let mapchunk = "";
 
 tileImage = (image) => {
@@ -339,7 +340,7 @@ const drawscreen = (movex,movey) => {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
                 console.log("combat start")
-                combatActive[0][0] = true
+                combatActive[0] = true
                 drawcombat("start", entities, "none")
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
@@ -565,7 +566,7 @@ drawcombat = async (phase, entities, key) => {
             }
 
         }
-        if (combatActive[0][0]){
+        if (combatActive[0]){
             text(entities)
         }
     }
@@ -588,7 +589,7 @@ function update(key) { //keys
     if($(".output").html() == ""){
         $(".output").html("")
     }
-    if (combatActive[0][0]){
+    if (combatActive[0]){
         if (key["type"] == "keyup"){
             keysdown = []
             if (combatActive[1]){
@@ -663,7 +664,7 @@ function selectItem(num){
         console.log("Selected: " + selected);
         updateInvent(null, null, true, true);
     }
-    else if (!combatActive[0][0])
+    else if (!combatActive[0])
     {
         if (num == 0) {selected = slot1.textContent.split(":")[0]}
         if (num == 1) {selected = slot2.textContent.split(":")[0]}

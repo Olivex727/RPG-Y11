@@ -10,29 +10,29 @@ let save = 1;
 app.use(express.static(dir));
 
 app.get('/savegame', function(req, res){
-    if (save === "new"){
-        //Clear the map if there's a new file
-        fs.writeFile("saves/maptestload.txt", "", (err) => {if (err) {console.log(err);}});
-    }
-    if (req.query.op === "map"){
-        for (i in req.query.map.split(".")) {
-            //Add Chunk of map information to map file
-            fs.appendFile("saves/maptestload.txt", req.query.map.split(".")[i]+"\n" , (err) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        }
-    }
-    if (req.query.op === "info"){
-        //Clear and Re-add the player's customisation statues
-        fs.writeFile("saves/saveload.txt", "", (err) => {if (err) {console.log(err);}});
-        for (i in req.query.info.split(".")) {
-            fs.appendFile("saves/saveload.txt", req.query.info.split(".")[i] + "\n", (err) => {
-                if (err) {console.log(err);}
-            });
-        }
-    }
+    // if (save === "new"){
+    //     //Clear the map if there's a new file
+    //     fs.writeFile("saves/maptestload.txt", "", (err) => {if (err) {console.log(err);}});
+    // }
+    // if (req.query.op === "map"){
+    //     for (i in req.query.map.split(".")) {
+    //         //Add Chunk of map information to map file
+    //         fs.appendFile("saves/maptestload.txt", req.query.map.split(".")[i]+"\n" , (err) => {
+    //             if (err) {
+    //                 console.log(err);
+    //             }
+    //         });
+    //     }
+    // }
+    // if (req.query.op === "info"){
+    //     //Clear and Re-add the player's customisation statues
+    //     fs.writeFile("saves/saveload.txt", "", (err) => {if (err) {console.log(err);}});
+    //     for (i in req.query.info.split(".")) {
+    //         fs.appendFile("saves/saveload.txt", req.query.info.split(".")[i] + "\n", (err) => {
+    //             if (err) {console.log(err);}
+    //         });
+    //     }
+    // }
     res.send("Saved: " + req.query.op);
 });
 app.get('/map', function(req, res) {
@@ -56,7 +56,7 @@ app.get('/', function(req, res) {
     }
     console.log(save);
     res.sendfile("index.html");
-    
+
 });
 
 app.get('/js', function(req, res) {
@@ -194,4 +194,3 @@ app.get('/snoise', function(req, res) {
 app.listen(3000, function() {
     console.log('listening on port 3000');
 });
-

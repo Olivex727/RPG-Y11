@@ -5,7 +5,28 @@ let debt = 0; //The amount of money the player owes
 
 //Tools that the player can use
 var toolbelt = {
-    weapons: [],
+    weapons: [{
+            "name": "Sword",
+            "color": "#000000",
+            "damage": [8, 2],
+            "mod": 2,
+            "speed": [20, 1],
+            "level": 1,
+            "image": "False",
+            "cost":[1500, 1500]
+        },
+        {
+            "name": "Fire Spell",
+            "color": "#000000",
+            "damage": [15, 5],
+            "speed": [80, 2],
+            "mod": 15,
+            "level": 1,
+            "image": "False",
+            "maCost": [10, 5],
+            "cost": [1500, 1500]
+        }
+    ],
     tools: [],
     apparel: []
 };
