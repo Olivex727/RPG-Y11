@@ -4,12 +4,50 @@
 let globalpos = [0,0]
 let map = {};
 const size = 512;
+const sizeOfSquares = (size/sps)
 let genmap;
-const sps = 15;
+var sps = 15;
+const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 let mapchunk = "";
-const sizeOfSquares = (size/sps)
-const playerpos = [(sps-1)/2, (sps-1)/2]
+
+tileImage = (image) => {
+    let img = new Image();
+    img.src = "/Images/"+image+".png"
+    return img
+}
+
+let entities = {
+    "player": {
+        "hp": {"cur": 100, "max": 100},
+        "ma": {"cur": 50, "max": 50},
+        "xp": {"cur": 0, "max": 20, "level": 1},
+        "ac": 10,
+        "weapon": toolbelt.weapons[0],
+        "spell": toolbelt.weapons[1],
+        "colour":"#000000",
+        "image":tileImage("player"),
+        "hostile":false
+
+    },
+    "enemy": {
+        "colour":"#ff0000",
+        "image":tileImage("enemy"),
+        "hp" : {
+            "cur": 20,
+            "max": 20
+        },
+        "ac": 10,
+        "hostile": true,
+        "type":["goblin", "witch"],
+        "weapon": {
+            "name": "Sword",
+            "damage": [10],
+            "mod": 2,
+        },
+    },
+    "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
+}
 
 //Compiling information onto map
 var maptext = $.ajax({
@@ -22,7 +60,7 @@ for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
 };
-console.log(maptext);
+
 //Get save info from save file
 var saves = $.ajax({
     type: "GET",
@@ -59,49 +97,11 @@ for (i = 0; i < saves.length; i++){
         }
 
 };
-console.log(saves);
 
-tileImage = (image) => {
-    let img = new Image();
-    img.src = "/Images/"+image+".png"
-    return img
-}
-
-let entities = {
-    "player": {
-        "hp": {"cur": 100, "max": 100},
-        "ma": {"cur": 50, "max": 50},
-        "xp": {"cur": 0, "max": 20, "level": 1},
-        "ac": 10,
-        "weapon": toolbelt.weapons[0],
-        "spell": toolbelt.weapons[1],
-        "colour":"#000000",
-        "image":tileImage("player"),
-        "hostile": false
-
-    },
-    "enemy": {
-        "colour":"#ff0000",
-        "image":tileImage("enemy"),
-        "hp" : {
-            "cur": 20,
-            "max": 20
-        },
-        "ac": 10,
-        "weapon": {
-            "name": "Sword",
-            "damage": [10],
-            "mod": 2,
-        },
-      "hostile": true
-    },
-    "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
-}
 //Canvas Drawing
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 ctx.font = "20px Verdana";
-
 
 //Movement
 let keysdown = []
@@ -120,9 +120,9 @@ var distance = 0;
 var traveled = 0;
 
 //Combat Variables (equipped is default)
+let combatActive = [false, false]; //Used in combat branch, will be used for inventory only
 var equipped = [{ name: "" }, { name: "" }];
 let entity = null;
-let combatActive = [false, false]; //Used in combat branch, will be used for inventory only
 
 //Player description element
 var desc = document.getElementById("desc");
@@ -196,12 +196,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        if (!combatActive[0]) {
+        if (!combatActive) {
             upButtons("Upgrade");
         }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-            if (combatActive[0]) {
+            if (combatActive) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -214,7 +214,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-            if (combatActive[0]) {
+            if (combatActive) {
                 upButtons("Upgrade");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -227,7 +227,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-            if (combatActive[0]) {
+            if (combatActive) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -272,7 +272,6 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
 //COMPRESS -- Pressing the specialised buttons, runs sevreal other functions
 function ComPress(scroll, button, change=null){
-
     if (inventstage.split("_")[0] === "inventory"){
         if (button == 1) { crafting[1] = crafting[0]; crafting[0]=selected; updateInvent(null); }
         if (button == 2) { craft(true); updateInvent(null); }
@@ -299,6 +298,7 @@ function ComPress(scroll, button, change=null){
 
 //DRAWSCREEN -- Drawing the Screen etc.
 const drawscreen = (movex,movey) => {
+    //TILEIMAGE -- Get the image of a specific tile
     const terrain = {
         "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
         "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
@@ -322,6 +322,7 @@ const drawscreen = (movex,movey) => {
         "ma": {"colour":"#ff0000", "stand":"True", "image":tileImage("mana")}
 
     };
+    entity = entities;
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
@@ -333,9 +334,6 @@ const drawscreen = (movex,movey) => {
                 ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['type']]["image"], (x)*(size/sps), (y)*(size/sps), (size/sps), (size/sps));
             }
 
-        }
-        if (entities["npc"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])) {
-            ctx.drawImage(entities["npc"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
         }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
@@ -356,6 +354,9 @@ const drawscreen = (movex,movey) => {
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] = "none";
             }
         }
+        else if (entities["npc"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])) {
+                ctx.drawImage(entities["npc"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
+        }
     };
     const drawBlack = (x, y) => {
         ctx.fillStyle = "#000000";
@@ -368,6 +369,7 @@ const drawscreen = (movex,movey) => {
                 if (x + globalpos[0] + 500 >= 0 && y + globalpos[1] + 500 >= 0){draw(x, y)} else {drawBlack(x,y);}
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError || (x + globalpos[0] + 500 >= 0 && y + globalpos[1] + 500 >= 0)) {
+
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
                     let stand = "True";
@@ -375,6 +377,10 @@ const drawscreen = (movex,movey) => {
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
                         let x = Math.random();
+                        if (x <= 0.02) { // npcs
+                            enemy = entities["npc"]["type"][Math.round((entities["npc"]["type"].length - 1) * Math.random())];
+                            stand = "False"
+                        }
                     }
                     else if (pos < 0.49 && pos > 0.375) {
                         type = "forest"
@@ -405,17 +411,12 @@ const drawscreen = (movex,movey) => {
                         stand = "False"
                         special = "none"
                     }
-                    else if(Math.random() <= 0.001){ // terrain
+                    else if(Math.random() <= 0.001 && stand == "True" ){ // terrain
                         special = "hp"
                     }
-                    else if (Math.random() <= 0.001) {
+                    else if (Math.random() <= 0.001 && stand == "True" ) {
                         special = "ma"
-                    }
-                    else if (x <= 0.002) { // npcs
-                        enemy = entities["npc"]["type"][Math.round((entities["npc"]["type"].length - 1) * Math.random())];
-                        stand = "False"
-                    }
-                    else {
+                    } else {
                         special = "none"
                     }
 
@@ -440,7 +441,8 @@ const drawscreen = (movex,movey) => {
         ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
     }
     saveGame("map"); //Progressively add map information to load folder (Helps speed up draw process)
-    }
+
+}
 
 gameover = () =>{
     console.log("gameover");
@@ -451,7 +453,6 @@ gameover = () =>{
     ctx.fillStyle ="#f2f2f2"
     ctx.fillText("GAME OVER", (size/2)-60, (size/2)-10);
 }
-
 
 drawcombat = async (phase, entities, key) => {
     text = (entities)=> {
@@ -571,6 +572,8 @@ drawcombat = async (phase, entities, key) => {
 }
 
 
+//COMPRESS --
+
 //UPDATE -- Updates the screen with the KeyPress info
 function update(key) { //keys
 
@@ -582,7 +585,7 @@ function update(key) { //keys
 
     }
 
-    if($(".output").html() != ""){
+    if($(".output").html() == ""){
         $(".output").html("")
     }
     if (combatActive[0]){
@@ -682,7 +685,7 @@ function selectItem(num){
                                 toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
                                 //Now that's a lota daamage!!
                                 toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
-                                if(i==1){
+                                if (i=1) {
                                     toolbelt[itemlist][i].maCost[0] += toolbelt[itemlist][i].maCost[1];
                                 }
                             }
@@ -694,13 +697,11 @@ function selectItem(num){
                             }
                             toolbelt[itemlist][i].level += 1;
                             console.log("Upgraded: " + selected);
-
-                            equipped = ["", ""];
+                            equipped = [{ name: "" }, { name: "" }];
                             updateInvent(null, null, true, true);
-                        } else{
+                        } else {
                             desc.textContent = "You need to level up to upgrade "+selected;
                         }
-
                     }
                     else
                     {
@@ -900,7 +901,8 @@ function craft(req){
 }
 
 //DISPLAYEDITORINFO -- Changes wether the player can see the editior info
-function displayEditorInfo(){
+function displayEditorInfo()
+{
     var info = document.getElementById("editor");
     if (info.hidden) { info.hidden = false; }
     else if (!info.hidden) { info.hidden = true; }
@@ -909,7 +911,8 @@ function displayEditorInfo(){
 //======MARKET/QUEST FUNCTIONS======//
 
 //TRANSACTION -- Sell/Buy items
-function Transaction(sell, amount){
+function Transaction(sell, amount)
+{
     for(i in inventory)
     {
         if (inventory[i].name === selected)
@@ -934,14 +937,16 @@ function Transaction(sell, amount){
 }
 
 //LOAN -- Loan a specific amount of money or pay it all back at once
-function Loan(pay, amount){
+function Loan(pay, amount)
+{
     if(!pay){ debt += amount; money += amount; }
     if (pay && money >= debt) { money -= debt; debt = 0; }
     updateInvent(null);
 }
 
 //MARKETLOOP -- Change the value of inventory items
-function MarketLoop(){
+function MarketLoop()
+{
     for(i in inventory)
     {
         if (inventory[i].cost > 10 && inventory[i].cost < 100000)
@@ -969,8 +974,10 @@ function MarketLoop(){
 
     }
 }
+
 //QUESTMANAGE -- Perform operations on the quests in inventory
-function questManage(preset){
+function questManage(preset)
+{
     var done = false;
     for(i in quests)
     {
@@ -1012,7 +1019,8 @@ function questManage(preset){
 //======SAVE GAME/OTHER FUNCTIONS======//
 
 //SAVEGAME -- Send request to server.js to write information to the text file
-function saveGame(op, mapsec = "0,0"){
+function saveGame(op, mapsec = "0,0")
+{
     let mapdata = "";
     let infodata = "";
 
@@ -1052,7 +1060,8 @@ function saveGame(op, mapsec = "0,0"){
     }
     }
     //Send request for saving
-    if(op !== "add"){
+    if(op !== "add")
+    {
         try {
             const x = $.ajax({
                 type: "GET",
@@ -1062,7 +1071,8 @@ function saveGame(op, mapsec = "0,0"){
             }).responseText;
             console.log(x);
         }
-        catch(err){
+        catch(err)
+        {
             console.log(err);
         }
         if (op === "map") //Reset Chunk String for next drawscreen
