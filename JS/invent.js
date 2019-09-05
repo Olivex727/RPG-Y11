@@ -195,15 +195,34 @@ var ButtonPresets = {
     ]
 };
 
-var quests = [
-    {
+const questbank = [{
         name: "Getting Started",
         desc: "Cut some grass using the sickle",
         reward: 1000,
         req: [3, "Grass"],
-        completed: false
-    }
-];
+        completed: false,
+        npc:"villager",
+        banked: false
+    },
+    {
+        name: "Caveman",
+        desc: "Craft a stick",
+        reward: 2000,
+        req: [1, "Sticks"],
+        completed: false,
+        npc: "villager",
+        banked: false
+    },
+    {
+        name: "LumberJack",
+        desc: "Chop some wood in the forest",
+        reward: 1300,
+        req: [5, "Wood"],
+        completed: false,
+        npc: "farmer",
+        banked: false
+}];
+
 
 var CraftingRecipes = [
     [["Wood", "Wood"], ["Sticks", "invent"], [1, 1, 2]],
