@@ -16,3 +16,4 @@ Level up to upgrade your weapon with resources you sell
 Your attack does less damage but can always be Used
 Your spell can do a lot of damage but requires Mana
 Mana and health can be found around the map
+Try to reach a high level
