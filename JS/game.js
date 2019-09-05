@@ -479,8 +479,9 @@ drawcombat = async (phase, entities, key) => {
                 if (entities["player"]["spell"]["maCost"] < 0){
                     entities["player"]["spell"]["maCost"] = 0
                 }
+                attcheck(entities, "enemy", "player", "weapon")
             }
-            attcheck(entities, "enemy", "player", "weapon")
+
         }
         else if (key == "d") {
             if (Math.random() <= 0.3){
