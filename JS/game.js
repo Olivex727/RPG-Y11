@@ -375,15 +375,6 @@ const drawscreen = (movex,movey) => {
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
                         let x = Math.random();
-                        if(x <= 0.01){ // enemies
-                            enemy = entities["enemy"]["type"][Math.round((entities["enemy"]["type"].length - 1) * Math.random())];
-
-                            stand = "False"
-                        }
-                        else if (x <= 0.02) { // npcs
-                            enemy = entities["npc"]["type"][Math.round((entities["npc"]["type"].length - 1) * Math.random())];
-                            stand = "False"
-                        }
                     }
                     else if (pos < 0.49 && pos > 0.375) {
                         type = "forest"
@@ -419,7 +410,12 @@ const drawscreen = (movex,movey) => {
                     }
                     else if (Math.random() <= 0.001) {
                         special = "ma"
-                    } else {
+                    }
+                    else if (x <= 0.002) { // npcs
+                        enemy = entities["npc"]["type"][Math.round((entities["npc"]["type"].length - 1) * Math.random())];
+                        stand = "False"
+                    }
+                    else {
                         special = "none"
                     }
 
@@ -704,6 +700,7 @@ function selectItem(num){
                         } else{
                             desc.textContent = "You need to level up to upgrade "+selected;
                         }
+
                     }
                     else
                     {
