@@ -11,6 +11,11 @@ const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 let mapchunk = "";
 
+tileImage = (image) => {
+    let img = new Image();
+    img.src = "/Images/"+image+".png"
+    return img
+}
 
 let entities = {
     "player": {
@@ -55,12 +60,6 @@ for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
 };
-
-tileImage = (image) => {
-    let img = new Image();
-    img.src = "/Images/"+image+".png"
-    return img
-}
 
 //Get save info from save file
 var saves = $.ajax({
