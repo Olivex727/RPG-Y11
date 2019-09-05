@@ -32,7 +32,7 @@ let entities = {
         "hp": {"cur": 100, "max": 100},
         "ma": {"cur": 50, "max": 50},
         "xp": {"cur": 0, "max": 20, "level": 1},
-        "ac": 10,
+        "armor": toolbelt.apparel[0],
         "weapon": toolbelt.weapons[0],
         "spell": toolbelt.weapons[1],
         "colour":"#000000",
@@ -46,7 +46,9 @@ let entities = {
             "cur": 20,
             "max": 20
         },
-        "ac": 10,
+        "armor": {
+            "ac": [10]
+        },
         "weapon": {
             "name": "Sword",
             "damage": [8],
@@ -180,14 +182,13 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
             if (combatActive) {
-                upButtons("Equip");
+                upButtons("Upgrade");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
-            slot1.textContent = toolbelt.apparel[scrollnum].name + ": Str: " + toolbelt.apparel[scrollnum].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level + ", Cost: " + toolbelt.apparel[scrollnum].cost[0];
-            slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Str: " + toolbelt.apparel[scrollnum + 1].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level + ", Cost: " + toolbelt.apparel[scrollnum+1].cost[0];
-            slot3.textContent = toolbelt.apparel[scrollnum+2].name + ": Str: " + toolbelt.apparel[scrollnum+2].strength[0] + ", LEVEL: " + toolbelt.apparel[scrollnum+2].level + ", Cost: " + toolbelt.apparel[scrollnum+2].cost[0];
+            slot1.textContent = toolbelt.apparel[scrollnum].name + ": Ac: " + toolbelt.apparel[scrollnum].ac[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level + ", Cost: " + toolbelt.apparel[scrollnum].cost[0];
+            slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Ac: " + toolbelt.apparel[scrollnum + 1].ac[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level + ", Cost: " + toolbelt.apparel[scrollnum+1].cost[0];
         }
     }
 
@@ -423,7 +424,7 @@ drawcombat = async (phase, entities, key) => {
 
     attcheck = (entities, attacker, target, weapon) => {
         roll = dice(20)+entities[attacker][weapon]['mod'];
-        if (roll >= entities[target]["ac"]){
+        if (roll >= entities[target]["armor"]["ac"][0]){
             console.log(entities);
             console.log(weapon);
             att = dice(entities[attacker][weapon]['damage'][0]) + entities[attacker][weapon]['mod'];
@@ -435,7 +436,7 @@ drawcombat = async (phase, entities, key) => {
                     gameover();
                 }
                 else {
-                    entities["player"]["xp"]["cur"] += (entities[target]["ac"]*entities[target]["hp"]["max"])/20
+                    entities["player"]["xp"]["cur"] += (entities[target]["armor"]["ac"][0]*entities[target]["hp"]["max"])/20
                     if (entities["player"]["xp"]["cur"] >= entities["player"]["xp"]["max"]){
                         entities["player"]["xp"]["max"] += 20;
                         entities["player"]["hp"]["max"] += 20;
@@ -630,7 +631,7 @@ function selectItem(num){
                                 toolbelt[itemlist][i].efficiency[0] += toolbelt[itemlist][i].efficiency[1];
                             }
                             if (inventstage.split("_")[1] === "apparel") {
-                                toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
+                                toolbelt[itemlist][i].ac[0] += toolbelt[itemlist][i].ac[1];
                             }
                             toolbelt[itemlist][i].level += 1;
                             console.log("Upgraded: " + selected);
@@ -980,8 +981,8 @@ function saveGame(op, mapsec = "0,0"){
         ".";
     }
     for (i in toolbelt.apparel) {
-        infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].strength[0] +
-        "|" + toolbelt.apparel[i].strength[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
+        infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].ac[0] +
+        "|" + toolbelt.apparel[i].ac[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
         ".";
     }
     for (i in inventory) {

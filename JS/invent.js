@@ -58,15 +58,15 @@ var toolbelt = {
     apparel: [{
             "name": "Chainmail",
             "color": "#000000",
-            "strength": [90, 8],
-            "level": 0,
+            "ac": [10, 1],
+            "level": 1,
             "image": "False",
-            "cost": [340, 2]
+            "cost": [2000, 2000]
         },
         {
             "name": "Clothes",
             "color": "#000000",
-            "strength": [10, 1],
+            "ac": [0, 0],
             "level": 1,
             "image": "False",
             "cost": [20, 1]
