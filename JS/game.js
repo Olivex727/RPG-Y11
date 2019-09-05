@@ -49,7 +49,7 @@ let entities = {
         "ac": 10,
         "weapon": {
             "name": "Sword",
-            "damage": [10],
+            "damage": [8],
             "mod": 2,
         },
     },
