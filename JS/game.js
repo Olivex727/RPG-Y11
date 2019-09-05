@@ -154,7 +154,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
             if (combatActive) {
-                upButtons("Equip");
+                upButtons("Upgrade");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
