@@ -1,22 +1,22 @@
-x|-61
-weapon|Sword|100|12|20|1|1|200|5
-weapon|Mace|85|18|7|1|0|300|6
-tool|Sickle|grass|40|4|1|110|8
+y|1
 weapon|Bow|60|8|80|2|0|230|4
-tool|Axe|forest|12|2|1|80|10
-tool|Pickaxe|mountain|30|7|0|290|2
-apparel|Chainmail|90|8|0|340|2
+tool|Sickle|grass|40|4|1|110|8
 money|10000
+debt|0
+apparel|Chainmail|90|8|0|340|2
 apparel|Clothes|10|1|1|20|1
 apparel|Metal Armour|110|12|0|645|8
+tool|Pickaxe|mountain|30|7|0|290|2
 item|Water|120|120|110|water
-item|Wood|110|74|0|forest
-item|Sticks|80|10|0|null
+item|Wood|110|857|0|forest
+item|Lava|560|3205|92|lava
 item|Grass|70|25|9|grass
-debt|0
-item|Snowball|90|126|0|snow
-quest|Getting Started|Cut some grass using the sickle|1000|3|Grassfalsefalsefalse|false|false|
-item|Rock|120|100|35|mountain
+item|Sticks|80|37|0|null
+tool|Axe|forest|12|2|1|80|10
 
-y|-144
-item|Lava|560|3245|92|lava
+x|0
+weapon|Mace|85|18|7|1|0|300|6
+item|Rock|120|100|35|mountain
+quest|Getting Started|Cut some grass using the sickle|1000|3|Grassfalse|villager|false|
+item|Snowball|90|30|0|snow
+weapon|Sword|100|12|20|1|1|200|5

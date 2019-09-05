@@ -1,4 +1,5 @@
 //======CONFIG VARIABLES======//
+
 //Map Generation and Design
 var globalpos = [0,0]
 var map = {};
@@ -18,7 +19,7 @@ var maptext = $.ajax({
 
 for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": parseInt(tile[6]), "quest": (tile[7] =="true")}
+    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
 };
 
 //Get save info from save file
@@ -104,6 +105,7 @@ window.onload = function() {
         async: false
     }).responseJSON
     $(".output").html("press s to start");
+    facing = map[(globalpos[0] + playerpos[0]).toString() +"," +(globalpos[1] + playerpos[1]).toString()];
     updateInvent(null);
     console.log(globalpos[0].toString() + globalpos[1].toString());
     drawscreen(0,0);
@@ -314,13 +316,17 @@ const drawscreen = (movex,movey) => {
             }
         }
     };
+    const drawBlack = (x, y) => {
+        ctx.fillStyle = "#000000";
+        ctx.fillRect((x) * (size / sps), (y) * (size / sps), (size / sps), (size / sps));
+    }
 
     for (y = 0; y < sps; y++){
         for (x = 0; x < sps; x++){ // draw map
             try {
-                draw(x,y)
+                if (x + globalpos[0] + 500 >= 0 && y + globalpos[1] + 500 >= 0){draw(x, y)} else {drawBlack(x,y);}
             } catch (e) { // if the tile dosent exist yet
-                if (e instanceof TypeError ){
+                if (e instanceof TypeError || (x + globalpos[0] + 500 >= 0 && y + globalpos[1] + 500 >= 0)) {
                 
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
@@ -374,8 +380,12 @@ const drawscreen = (movex,movey) => {
                     map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har": 0, "quest":false}
                     draw(x,y)
                     saveGame("add", (x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString());
-                }else{
-                    console.log(e)
+                }
+                else if (x + globalpos[0] + 500 >= 0 && y + globalpos[1] + 500 >= 0 ){
+                    console.log(e);
+                }
+                else{
+                    drawBlack(x, y);
                 }
             }
         };
@@ -412,17 +422,18 @@ function update(key) { //keys
         if(keysdown.indexOf(key["key"]) == -1){
             keysdown.push(key["key"])
         }
+        console.log(globalpos[0] + playerpos[0]);
         if(keysdown.indexOf("w") >= 0){
-            movey = -1;
+            if (globalpos[1] > -500){ movey = -1;}
         }
         else if (keysdown.indexOf("s") >= 0){
-            movey = 1;
+            if (globalpos[1] < 500){ movey = 1;}
         }
         if (keysdown.indexOf("a") >= 0){
-            movex = -1;
+            if (globalpos[0] > -500) {movex = -1;}
         }
         else if (keysdown.indexOf("d")>= 0){
-            movex = 1;
+            if (globalpos[0] < 500) {movex = 1;}
         }
         if (keysdown.indexOf("e")>= 0){
             try{interact();}catch{}
@@ -450,6 +461,7 @@ function update(key) { //keys
             facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
             console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
             info2txt = document.getElementById("info1");
+            //intentional game design
             info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
         }
     }else{
