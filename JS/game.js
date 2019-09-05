@@ -30,10 +30,11 @@ tileImage = (image) => {
 let entities = {
     "player": {
         "hp": {"cur": 100, "max": 100},
-        "ma": {"cur": 100, "max": 100},
-        "xp": {"cur": 0, "max": 100, "level": 1},
-        "ac": 13,
+        "ma": {"cur": 50, "max": 50},
+        "xp": {"cur": 0, "max": 20, "level": 1},
+        "ac": 10,
         "weapon": toolbelt.weapons[0],
+        "spell": toolbelt.weapons[1],
         "colour":"#000000",
         "image":tileImage("player")
 
@@ -48,7 +49,7 @@ let entities = {
         "ac": 10,
         "weapon": {
             "name": "Sword",
-            "damage": [8],
+            "damage": [10],
             "mod": 2,
         },
     }
@@ -338,7 +339,7 @@ const drawscreen = (movex,movey) => {
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
                     }
-                    if(Math.random() <= 0.001){ // enemies
+                    if(Math.random() <= 0.003 && stand == "True" ){ // enemies
                         enemy = "goblin"
                         stand = "False"
                         special = "none"
@@ -409,12 +410,12 @@ drawcombat = async (phase, entities, key) => {
         return Math.floor(Math.random()*max)+1
     }
 
-    attcheck = (entities, attacker, target) => {
-        roll = dice(20);
+    attcheck = (entities, attacker, target, weapon) => {
+        roll = dice(20)+entities[attacker][weapon]['mod'];
         if (roll >= entities[target]["ac"]){
             console.log(entities);
-            att = dice(entities[attacker]['weapon']['damage'][0]) + entities[attacker]['weapon']['mod'];
-            console.log("damage", entities[attacker]['weapon']['damage'][0]);
+            console.log(weapon);
+            att = dice(entities[attacker][weapon]['damage'][0]) + entities[attacker][weapon]['mod'];
             entities[target]["hp"]["cur"] -= att;
             if (entities[target]["hp"]["cur"] <=0){
                 combatActive = [false, false];
@@ -423,6 +424,20 @@ drawcombat = async (phase, entities, key) => {
                     gameover();
                 }
                 else {
+                    entities["player"]["xp"]["cur"] += (entities[target]["ac"]*entities[target]["hp"]["max"])/20
+                    if (entities["player"]["xp"]["cur"] >= entities["player"]["xp"]["max"]){
+                        entities["player"]["xp"]["max"] += 20;
+                        entities["player"]["hp"]["max"] += 20;
+                        entities["player"]["ma"]["max"] += 10;
+                        entities["player"]["xp"]["cur"] = 0;
+                        entities["player"]["xp"]["level"] += 1;
+                        entities["enemy"]["hp"]["max"] += 5;
+                        entities["enemy"]["weapon"]["damage"][0] += 2;
+                        $(".output").html("<spam style='color: red;'>LEVEL UP! now you can upgrade weapons and spells</spam>")
+
+
+
+                    }
                     drawscreen();
                 }
             }else{
@@ -455,14 +470,28 @@ drawcombat = async (phase, entities, key) => {
     })
     } else {
         if (key == "a"){
-            attcheck(entities, "player", "enemy")
+            attcheck(entities, "player", "enemy", "weapon")
+            attcheck(entities, "enemy", "player", "weapon")
         }else if (key == "s") {
-
+            if (entities["player"]["ma"]["cur"] >= entities["player"]["spell"]["maCost"][0]){
+                attcheck(entities, "player", "enemy", "spell")
+                entities["player"]["ma"]["cur"] -=  entities["player"]["spell"]["maCost"][0];
+                if (entities["player"]["spell"]["maCost"] < 0){
+                    entities["player"]["spell"]["maCost"] = 0
+                }
+            }
+            attcheck(entities, "enemy", "player", "weapon")
         }
         else if (key == "d") {
+            if (Math.random() <= 0.3){
+                combatActive = [false, false]
+                drawscreen()
+            }
+            else {
+                attcheck(entities, "enemy", "player", "weapon")
+            }
 
         }
-        attcheck(entities, "enemy", "player")
         if (combatActive[0]){
             text(entities)
         }
@@ -481,7 +510,7 @@ function update(key) { //keys
 
     }
 
-    if($(".output").html() == "press s to start"){
+    if($(".output").html() != ""){
         $(".output").html("")
     }
     if (combatActive[0]){
@@ -570,26 +599,35 @@ function selectItem(num){
                 //console.log(item);
                 if (selected === toolbelt[itemlist][i].name) {
                     if (money >= toolbelt[itemlist][i].cost[0] && toolbelt[itemlist][i].level > 0) {
-                        money -= toolbelt[itemlist][i].cost[0];
-                        toolbelt[itemlist][i].cost[0] += toolbelt[itemlist][i].cost[1];
-                        if (inventstage.split("_")[1] === "weapons") {
-                            //console.log(toolbelt[itemlist][i].speed[0]);
-                            //console.log(toolbelt[itemlist][i].speed[1]);
-                            //console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
-                            toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
-                            //Now that's a lota daamage!!
-                            toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
+                        if(toolbelt[itemlist][i].level < entities["player"]["xp"]["level"]){
+                            money -= toolbelt[itemlist][i].cost[0];
+                            toolbelt[itemlist][i].cost[0] += toolbelt[itemlist][i].cost[1];
+                            if (inventstage.split("_")[1] === "weapons") {
+                                //console.log(toolbelt[itemlist][i].speed[0]);
+                                //console.log(toolbelt[itemlist][i].speed[1]);
+                                //console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
+                                toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
+                                //Now that's a lota daamage!!
+                                toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
+                                if(i==1){
+                                    toolbelt[itemlist][i].maCost[0] += toolbelt[itemlist][i].maCost[1];
+                                }
+                            }
+                            if (inventstage.split("_")[1] === "tools") {
+                                toolbelt[itemlist][i].efficiency[0] += toolbelt[itemlist][i].efficiency[1];
+                            }
+                            if (inventstage.split("_")[1] === "apparel") {
+                                toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
+                            }
+                            toolbelt[itemlist][i].level += 1;
+                            console.log("Upgraded: " + selected);
+
+                            equipped = ["", ""];
+                            updateInvent(null, null, true, true);
+                        } else{
+                            desc.textContent = "You need to level up to upgrade "+selected;
                         }
-                        if (inventstage.split("_")[1] === "tools") {
-                            toolbelt[itemlist][i].efficiency[0] += toolbelt[itemlist][i].efficiency[1];
-                        }
-                        if (inventstage.split("_")[1] === "apparel") {
-                            toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
-                        }
-                        toolbelt[itemlist][i].level += 1;
-                        console.log("Upgraded: " + selected);
-                        equipped = ["", ""];
-                        updateInvent(null, null, true, true);
+
                     }
                     else
                     {

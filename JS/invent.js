@@ -12,16 +12,18 @@ var toolbelt = {
             "speed": [20, 1],
             "level": 1,
             "image": "False",
-            "cost":[200, 5]
+            "cost":[1500, 1500]
         },
         {
-            "name": "Bow",
+            "name": "Fire Spell",
             "color": "#000000",
-            "damage": [60, 8],
+            "damage": [15, 5],
             "speed": [80, 2],
-            "level": 0,
+            "mod": 15,
+            "level": 1,
             "image": "False",
-            "cost": [230, 4]
+            "maCost": [10, 5],
+            "cost": [1500, 1500]
         }
     ],
     tools: [{
