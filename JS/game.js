@@ -1,14 +1,48 @@
 //======CONFIG VARIABLES======//
 
 //Map Generation and Design
-var globalpos = [0,0]
-var map = {};
-var size = 512;
+let globalpos = [0,0]
+let map = {};
+const size = 512;
+const sizeOfSquares = (size/sps)
 let genmap;
 var sps = 15;
-var playerpos = [(sps-1)/2, (sps-1)/2]
+const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0, "quest": false}
 let mapchunk = "";
+
+
+let entities = {
+    "player": {
+        "hp": {"cur": 100, "max": 100},
+        "ma": {"cur": 50, "max": 50},
+        "xp": {"cur": 0, "max": 20, "level": 1},
+        "ac": 10,
+        "weapon": toolbelt.weapons[0],
+        "spell": toolbelt.weapons[1],
+        "colour":"#000000",
+        "image":tileImage("player"),
+        "hostile":false
+
+    },
+    "enemy": {
+        "colour":"#ff0000",
+        "image":tileImage("enemy"),
+        "hp" : {
+            "cur": 20,
+            "max": 20
+        },
+        "ac": 10,
+        "hostile": true,
+        "type":["goblin", "witch"],
+        "weapon": {
+            "name": "Sword",
+            "damage": [10],
+            "mod": 2,
+        },
+    },
+    "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
+}
 
 //Compiling information onto map
 var maptext = $.ajax({
@@ -21,6 +55,12 @@ for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
 };
+
+tileImage = (image) => {
+    let img = new Image();
+    img.src = "/Images/"+image+".png"
+    return img
+}
 
 //Get save info from save file
 var saves = $.ajax({
@@ -62,6 +102,7 @@ for (i = 0; i < saves.length; i++){
 //Canvas Drawing
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
+ctx.font = "20px Verdana";
 
 //Movement
 let keysdown = []
@@ -80,7 +121,7 @@ var distance = 0;
 var traveled = 0;
 
 //Combat Variables (equipped is default)
-let combatActive = false; //Used in combat branch, will be used for inventory only
+let combatActive = [false, false]; //Used in combat branch, will be used for inventory only
 var equipped = [{ name: "" }, { name: "" }];
 let entity = null;
 
@@ -232,7 +273,6 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
 //COMPRESS -- Pressing the specialised buttons, runs sevreal other functions
 function ComPress(scroll, button, change=null){
-
     if (inventstage.split("_")[0] === "inventory"){
         if (button == 1) { crafting[1] = crafting[0]; crafting[0]=selected; updateInvent(null); }
         if (button == 2) { craft(true); updateInvent(null); }
@@ -260,11 +300,6 @@ function ComPress(scroll, button, change=null){
 //DRAWSCREEN -- Drawing the Screen etc.
 const drawscreen = (movex,movey) => {
     //TILEIMAGE -- Get the image of a specific tile
-    tileImage = (image) => {
-        let img = new Image();
-        img.src = "/Images/"+image+".png"
-        return img
-    }
     const terrain = {
         "sand": {"colour":"#ffff4d", "stand":"True", "image":tileImage("sand")},
         "grass": {"colour":"#33cc33", "stand":"True", "image":tileImage("grass")},
@@ -283,14 +318,11 @@ const drawscreen = (movex,movey) => {
         "roof6": {"colour":"#000000", "stand":"False", "image":tileImage("roof6")},
         "roof7": {"colour":"#000000", "stand":"False", "image":tileImage("roof7")},
         "chimney": {"colour":"#000000", "stand":"False", "image":tileImage("chimney")},
-        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")}
+        "door": {"colour":"#000000", "stand":"False", "image":tileImage("door")},
+        "hp": {"colour":"#ff0000", "stand":"True", "image":tileImage("health")},
+        "ma": {"colour":"#ff0000", "stand":"True", "image":tileImage("mana")}
 
     };
-    const entities = {
-        "player": {"colour":"#0d0d0d", "image":tileImage("player"), "hostile":false },
-        "enemy": { "colour": "#ff0000", "image": tileImage("enemy"), "hostile": true, "type":["goblin", "witch"] },
-        "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
-    }
     entity = entities;
     const interest = ["fountain", "dungeon", "monster", "teleport"]
     const draw = (x,y) => {
@@ -304,16 +336,27 @@ const drawscreen = (movex,movey) => {
             }
 
         }
-        if (map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'] != "none") {
-            if (entities["enemy"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])){
-                ctx.drawImage(entities["enemy"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
-                if ((x == playerpos[0] || y == playerpos[1])) {
-                    console.log("battle start");
+        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
+            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            if(x == playerpos[0] || y == playerpos[1]){
+                console.log("combat start")
+                combatActive[0] = true
+                drawcombat("start", entities, "none")
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
+            }
+        } else if(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] != "none" && map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] == "True"){
+            ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            if(x == playerpos[0] && y == playerpos[1]){
+                entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["cur"] += 20;
+                if(entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["cur"] > entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["max"]){
+                    entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["cur"] = entities["player"][map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["max"];
                 }
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] = "none";
             }
-            if (entities["npc"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])) {
+        }
+        else if (entities["npc"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])) {
                 ctx.drawImage(entities["npc"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
-            }
         }
     };
     const drawBlack = (x, y) => {
@@ -335,12 +378,7 @@ const drawscreen = (movex,movey) => {
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
                         let x = Math.random();
-                        if(x <= 0.01){ // enemies
-                            enemy = entities["enemy"]["type"][Math.round((entities["enemy"]["type"].length - 1) * Math.random())];
-
-                            stand = "False"
-                        }
-                        else if (x <= 0.02) { // npcs
+                        if (x <= 0.02) { // npcs
                             enemy = entities["npc"]["type"][Math.round((entities["npc"]["type"].length - 1) * Math.random())];
                             stand = "False"
                         }
@@ -369,9 +407,16 @@ const drawscreen = (movex,movey) => {
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
                     }
-                    if(Math.random() <= 0.1){ // terrain
-                        z = Math.floor(Math.random() * Object.keys(terrain).length) + 1
-                        special = interest[z]
+                    if(Math.random() <= 0.003 && stand == "True" ){ // enemies
+                        enemy = "goblin"
+                        stand = "False"
+                        special = "none"
+                    }
+                    else if(Math.random() <= 0.001 && stand == "True" ){ // terrain
+                        special = "hp"
+                    }
+                    else if (Math.random() <= 0.001 && stand == "True" ) {
+                        special = "ma"
                     } else {
                         special = "none"
                     }
@@ -400,6 +445,136 @@ const drawscreen = (movex,movey) => {
 
 }
 
+gameover = () =>{
+    console.log("gameover");
+    window.removeEventListener("keydown", update);
+    window.removeEventListener("keyup", update);
+    ctx.fillStyle ="#000000"
+    ctx.fillRect(0, 0, size, size)
+    ctx.fillStyle ="#f2f2f2"
+    ctx.fillText("GAME OVER", (size/2)-60, (size/2)-10);
+}
+
+drawcombat = async (phase, entities, key) => {
+    text = (entities)=> {
+            ctx.fillStyle ="#000000"
+            ctx.fillRect(0, 0, size, size)
+            ctx.fillStyle ="#f2f2f2"
+            ctx.fillRect(0, size*0.7, size, size*0.3)
+            ctx.fillStyle = "#0033cc";
+            ctx.fillText("Spell[s]", size*0.35, size*0.7+(size*0.3)*0.3);
+            ctx.fillText(entities["player"]["ma"]["cur"]+"/"+entities['player']["ma"]["max"], size*0.35, size*0.7+(size*0.3)*0.8);
+            ctx.fillStyle = "#2aa22a";
+            ctx.fillText("Disengage[d]", size*0.65, size*0.7+(size*0.3)*0.3);
+            ctx.fillText("EXP:", size*0.65, size*0.7+(size*0.3)*0.6);
+            ctx.fillText(entities["player"]["xp"]["cur"]+"/"+entities["player"]["xp"]["max"], size*0.65, size*0.7+(size*0.3)*0.8);
+            ctx.fillStyle = "#444444";
+            ctx.fillRect(size/8-5, (size*0.7)-size*0.1-8, size*3/4+10, 40)
+            ctx.fillStyle = "#cc0000";
+            ctx.fillRect(size/8, (size*0.7)-size*0.1+2, size*3/4*(entities["enemy"]["hp"]['cur']/entities["enemy"]["hp"]["max"]), 20)
+            ctx.fillText("Attack[a]", size*0.05, size*0.7+(size*0.3)*0.3);
+            ctx.fillText("HP:", size*0.05, size*0.7+(size*0.3)*0.6);
+            ctx.fillText(entities['player']["hp"]["cur"]+"/"+entities['player']["hp"]["max"], size*0.05, size*0.7+(size*0.3)*0.8);
+            ctx.drawImage(entities["enemy"]["image"], size*0.25, (size*0.7)/(4*1.7)-10, size/2, size/2);
+    }
+
+    enemy = entities["enemy"]
+    dice = (max) => {
+        return Math.floor(Math.random()*max)+1
+    }
+
+    attcheck = (entities, attacker, target, weapon) => {
+        roll = dice(20)+entities[attacker][weapon]['mod'];
+        if (roll >= entities[target]["ac"]){
+            console.log(entities);
+            console.log(weapon);
+            att = dice(entities[attacker][weapon]['damage'][0]) + entities[attacker][weapon]['mod'];
+            entities[target]["hp"]["cur"] -= att;
+            if (entities[target]["hp"]["cur"] <=0){
+                combatActive = [false, false];
+                entities[target]["hp"]["cur"] = 0
+                if (target == "player"){
+                    gameover();
+                }
+                else {
+                    entities["player"]["xp"]["cur"] += (entities[target]["ac"]*entities[target]["hp"]["max"])/20
+                    if (entities["player"]["xp"]["cur"] >= entities["player"]["xp"]["max"]){
+                        entities["player"]["xp"]["max"] += 20;
+                        entities["player"]["hp"]["max"] += 20;
+                        entities["player"]["ma"]["max"] += 10;
+                        entities["player"]["xp"]["cur"] = 0;
+                        entities["player"]["xp"]["level"] += 1;
+                        entities["enemy"]["hp"]["max"] += 5;
+                        entities["enemy"]["weapon"]["damage"][0] += 2;
+                        $(".output").html("<spam style='color: red;'>LEVEL UP! now you can upgrade weapons and spells</spam>")
+
+
+
+                    }
+                    drawscreen();
+                }
+            }else{
+                console.log(attacker, "miss");
+            }
+
+        }
+    }
+
+    if(phase == "start"){
+        entities["enemy"]["hp"]["cur"] = entities["enemy"]["hp"]["max"];
+        clear = (per, colour, callback) => {
+            ctx.fillStyle = colour;
+            for(let y = 0; y<sps*per; ++y){
+                for(let x = 0; x<size/2; ++x){
+                    setTimeout( () =>{
+                        ctx.fillRect(x*2, (y)*(sizeOfSquares)+(size*(1-per)), 2, (sizeOfSquares+1));
+                    }, 1)
+                }
+            }
+            setTimeout( () =>{callback();}, 1);
+        }
+
+        clear(1, "#000000", ()=> {
+            clear(0.3, "#f2f2f2",()=> {
+                text(entities);
+                combatActive[1] = true
+            });
+
+    })
+    } else {
+        if (key == "a"){
+            attcheck(entities, "player", "enemy", "weapon")
+            attcheck(entities, "enemy", "player", "weapon")
+        }else if (key == "s") {
+            if (entities["player"]["ma"]["cur"] >= entities["player"]["spell"]["maCost"][0]){
+                attcheck(entities, "player", "enemy", "spell")
+                entities["player"]["ma"]["cur"] -=  entities["player"]["spell"]["maCost"][0];
+                if (entities["player"]["spell"]["maCost"] < 0){
+                    entities["player"]["spell"]["maCost"] = 0
+                }
+                attcheck(entities, "enemy", "player", "weapon")
+            }
+
+        }
+        else if (key == "d") {
+            if (Math.random() <= 0.3){
+                combatActive = [false, false]
+                drawscreen()
+            }
+            else {
+                attcheck(entities, "enemy", "player", "weapon")
+            }
+
+        }
+        if (combatActive[0]){
+            text(entities)
+        }
+    }
+}
+
+
+//COMPRESS --
+
 //UPDATE -- Updates the screen with the KeyPress info
 function update(key) { //keys
 
@@ -411,62 +586,69 @@ function update(key) { //keys
 
     }
 
-    if($(".output").html() == "press s to start"){
+    if($(".output").html() == ""){
         $(".output").html("")
     }
-
-    let movex = 0;
-    let movey = 0;
-    var inter = false;
-    if (key["type"] == "keydown"){
-        if(keysdown.indexOf(key["key"]) == -1){
-            keysdown.push(key["key"])
-        }
-        console.log(globalpos[0] + playerpos[0]);
-        if(keysdown.indexOf("w") >= 0){
-            if (globalpos[1] > -500){ movey = -1;}
-        }
-        else if (keysdown.indexOf("s") >= 0){
-            if (globalpos[1] < 500){ movey = 1;}
-        }
-        if (keysdown.indexOf("a") >= 0){
-            if (globalpos[0] > -500) {movex = -1;}
-        }
-        else if (keysdown.indexOf("d")>= 0){
-            if (globalpos[0] < 500) {movex = 1;}
-        }
-        if (keysdown.indexOf("e")>= 0){
-            try{interact();}catch{}
-        }
-        if (movex != 0 || movey != 0){
-            infotxt = document.getElementById("info");
-            if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
-                globalpos = [globalpos[0]+movex, globalpos[1]+movey]
-                console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
-                drawscreen(movex,movey);
-                ++traveled;
-                debt = Math.round(debt*1.006);
-                MarketLoop();
-                updateInvent(null, null, false, true);
-                //console.log(debt * 1.6);
-                distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
-                info3txt = document.getElementById("info2");
-                info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
-
-                //alert(map["0,-1"]);
-                infotxt.textContent = "Globalpos: [" + (globalpos[0]).toString() + "," + (globalpos[1]).toString() + "], Playerpos: [" + (playerpos[0]).toString() + "," + (playerpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
-
+    if (combatActive[0]){
+        if (key["type"] == "keyup"){
+            keysdown = []
+            if (combatActive[1]){
+                drawcombat("action", entities, key["key"])
             }
-            facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
-            facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
-            console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
-            info2txt = document.getElementById("info1");
-            //intentional game design
-            info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
         }
-    }else{
-        if(keysdown.indexOf(key["key"]) != -1){
-            keysdown = arrayRemove(keysdown, key["key"]);
+    }
+    else{
+        let movex = 0;
+        let movey = 0;
+        var inter = false;
+        if (key["type"] == "keydown"){
+            if(keysdown.indexOf(key["key"]) == -1){
+                keysdown.push(key["key"])
+            }
+            if(keysdown.indexOf("w") >= 0){
+                movey = -1;
+            }
+            else if (keysdown.indexOf("s") >= 0){
+                movey = 1;
+            }
+            if (keysdown.indexOf("a") >= 0){
+                movex = -1;
+            }
+            else if (keysdown.indexOf("d")>= 0){
+                movex = 1;
+            }
+            if (keysdown.indexOf("e")>= 0){
+                interact();
+            }
+            if (movex != 0 || movey != 0){
+                infotxt = document.getElementById("info");
+                if (map[(playerpos[0]+globalpos[0]+movex)+","+(playerpos[1]+globalpos[1]+movey)]['stand'] == "True"){
+                    globalpos = [globalpos[0]+movex, globalpos[1]+movey]
+                    console.log(globalpos[0]+playerpos[0], (globalpos[1]+playerpos[1]));
+                    drawscreen(movex,movey);
+                    ++traveled;
+                    debt = Math.round(debt*1.006);
+                    MarketLoop();
+                    updateInvent(null, null, false);
+                    //console.log(debt * 1.6);
+                    distance = Math.round(Math.pow( Math.pow(globalpos[0], 2) + Math.pow(globalpos[1], 2), 1/2));
+                    info3txt = document.getElementById("info2");
+                    info3txt.textContent = "Distance: " + distance.toString() + ", Travelled: " + traveled.toString();
+
+                    //alert(map["0,-1"]);
+                    infotxt.textContent = "Globalpos: [" + (globalpos[0]) + "," + (globalpos[1]).toString() + "], Tile On: " + map[(playerpos[0] + globalpos[0]) + "," + (playerpos[1] + globalpos[1])]['type'].toString();
+
+                }
+                facing = map[(playerpos[0] + globalpos[0] + movex) + "," + (playerpos[1] + globalpos[1] + movey)];
+                facod = (playerpos[0] + globalpos[0] + movex).toString() + "," + (playerpos[1] + globalpos[1] + movey).toString();
+                console.log((playerpos[0] + globalpos[0] + movex) , (playerpos[1] + globalpos[1] + movey));
+                info2txt = document.getElementById("info1");
+                info2txt.textContent = "Lastmove: " + lastmove + ", Facing: " + (facing['type'] + ", " + facing['enemy']).toString();
+            }
+        }else{
+            if(keysdown.indexOf(key["key"]) != -1){
+                keysdown = arrayRemove(keysdown, key["key"]);
+            }
         }
     }
 };
@@ -482,7 +664,7 @@ function selectItem(num){
         console.log("Selected: " + selected);
         updateInvent(null, null, true, true);
     }
-    else if (!combatActive)
+    else if (!combatActive[0])
     {
         if (num == 0) {selected = slot1.textContent.split(":")[0]}
         if (num == 1) {selected = slot2.textContent.split(":")[0]}
@@ -494,26 +676,33 @@ function selectItem(num){
                 //console.log(item);
                 if (selected === toolbelt[itemlist][i].name) {
                     if (money >= toolbelt[itemlist][i].cost[0] && toolbelt[itemlist][i].level > 0) {
-                        money -= toolbelt[itemlist][i].cost[0];
-                        toolbelt[itemlist][i].cost[0] += toolbelt[itemlist][i].cost[1];
-                        if (inventstage.split("_")[1] === "weapons") {
-                            //console.log(toolbelt[itemlist][i].speed[0]);
-                            //console.log(toolbelt[itemlist][i].speed[1]);
-                            //console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
-                            toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
-                            //Now that's a lota daamage!!
-                            toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
+                        if(toolbelt[itemlist][i].level < entities["player"]["xp"]["level"]){
+                            money -= toolbelt[itemlist][i].cost[0];
+                            toolbelt[itemlist][i].cost[0] += toolbelt[itemlist][i].cost[1];
+                            if (inventstage.split("_")[1] === "weapons") {
+                                //console.log(toolbelt[itemlist][i].speed[0]);
+                                //console.log(toolbelt[itemlist][i].speed[1]);
+                                //console.log(toolbelt[itemlist][i].speed[0] + toolbelt[itemlist][i].speed[1]);
+                                toolbelt[itemlist][i].speed[0] += toolbelt[itemlist][i].speed[1];
+                                //Now that's a lota daamage!!
+                                toolbelt[itemlist][i].damage[0] += toolbelt[itemlist][i].damage[1];
+                                if (i=1) {
+                                    toolbelt[itemlist][i].maCost[0] += toolbelt[itemlist][i].maCost[1];
+                                }
+                            }
+                            if (inventstage.split("_")[1] === "tools") {
+                                toolbelt[itemlist][i].efficiency[0] += toolbelt[itemlist][i].efficiency[1];
+                            }
+                            if (inventstage.split("_")[1] === "apparel") {
+                                toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
+                            }
+                            toolbelt[itemlist][i].level += 1;
+                            console.log("Upgraded: " + selected);
+                            equipped = [{ name: "" }, { name: "" }];
+                            updateInvent(null, null, true, true);
+                        } else {
+                            desc.textContent = "You need to level up to upgrade "+selected;
                         }
-                        if (inventstage.split("_")[1] === "tools") {
-                            toolbelt[itemlist][i].efficiency[0] += toolbelt[itemlist][i].efficiency[1];
-                        }
-                        if (inventstage.split("_")[1] === "apparel") {
-                            toolbelt[itemlist][i].strength[0] += toolbelt[itemlist][i].strength[1];
-                        }
-                        toolbelt[itemlist][i].level += 1;
-                        console.log("Upgraded: " + selected);
-                        equipped = [{ name: "" }, { name: "" }];
-                        updateInvent(null, null, true, true);
                     }
                     else
                     {
