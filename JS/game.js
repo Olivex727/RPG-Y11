@@ -111,7 +111,6 @@ var title = document.getElementById("inv");
 //UPDATEINVENT -- Update the selections on the inventory
 function updateInvent(scroll, change = null, printToConsole = true, keepSelectedItem = false) {
     if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
-    if (!keepSelectedItem){selected = ""; }
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -704,17 +703,17 @@ function interact() {
                 if (map[facod]['enemy'] === questbank[i].npc && !map[facod]['quest'])
                 {
                     let alreadyexists = false;
-                    for(q in quests)
+                    for(q in questbank)
                     {
-                        if (quests[q].name === questbank[i].name)
+                        if (questbank[q].name === questbank[i].name)
                         {
                             alreadyexists = true;
                         }
                     }
                     if(!alreadyexists)
                     {
-                        let x = quests.unshift(questbank[i]) - 1;
-                        quests[x].banked = true;
+                        let x = questbank.unshift(questbank[i]) - 1;
+                        questbank[x].banked = true;
                         map[facod]['quest'] = true;
                         updateInvent(null);
                     }
@@ -731,7 +730,7 @@ function interact() {
                     npc: map[facod]['enemy'],
                     banked: true
                 }
-                let x = quests.push(newquest) - 1;
+                let x = questbank.push(newquest) - 1;
                 map[facod]['quest'] = true;
                 updateInvent(null);
             }
@@ -930,31 +929,31 @@ function MarketLoop()
 function questManage(preset)
 {
     var done = false;
-    for(i in quests)
+    for(i in questbank)
     {
 
-        if (quests[i].name === selected && !done){
+        if (questbank[i].name === selected && !done){
             if(preset === "rem")
             {
-                quests[i].banked = false;
-                quests = array_move(quests, i, quests.length - 1);
-                quests.splice(quests.length - 1, 1);
+                questbank[i].banked = false;
+                questbank = array_move(questbank, i, questbank.length - 1);
+                questbank.splice(questbank.length - 1, 1);
                 done = true;
             }
             if (preset === "pri") {
-                quests = array_move(quests, i, 0);
+                questbank = array_move(questbank, i, 0);
                 done = true;
             }
             if (preset === "comp") {
                 for(item in inventory){
-                    if (quests[i].req[1] === inventory[item].name && inventory[item].amount >= quests[i].req[0]) {
+                    if (questbank[i].req[1] === inventory[item].name && inventory[item].amount >= questbank[i].req[0]) {
                         selected = "";
-                        inventory[item].amount -= quests[i].req[0];
-                        quests[i].completed = true;
-                        money = quests[i].reward;
-                        desc.textContent = "You completed the quest and got: $" + quests[i].reward;
+                        inventory[item].amount -= questbank[i].req[0];
+                        questbank[i].completed = true;
+                        money = questbank[i].reward;
+                        desc.textContent = "You completed the quest and got: $" + questbank[i].reward;
                         //console.log(quests[i]);
-                        quests = array_move(quests, i, quests.length - 1); //Doesn't work
+                        questbank = array_move(questbank, i, questbank.length - 1); //Doesn't work
                         //console.log(quests[quests.length - 1]);
                         //console.log(quests[i]);
                         done = true;
@@ -1003,9 +1002,9 @@ function saveGame(op, mapsec = "0,0"){
     for (i in inventory) {
         infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
     }
-    for (i in quests) {
-        infodata += "quest|" + quests[i].name + "|" + quests[i].desc + "|" + quests[i].reward + "|" + quests[i].req[0] + "|" + quests[i].req[1] +
-        quests[i].completed + "|" + quests[i].npc + "|" + quests[i].banked + "|" +
+    for (i in questbank) {
+        infodata += "quest|" + questbank[i].name + "|" + questbank[i].desc + "|" + questbank[i].reward + "|" + questbank[i].req[0] + "|" + questbank[i].req[1] +
+        questbank[i].completed + "|" + questbank[i].npc + "|" + questbank[i].banked + "|" +
         ".";
     }
     }
