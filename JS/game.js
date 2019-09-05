@@ -198,17 +198,17 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     if (inventstage.split("_")[0] === "quests") {
         //alert("quest: " + quests[0].name);
         upButtons("Select");
-        if (scroll != null && (scrollnum < quests.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+        if (scroll != null && (scrollnum < questbank.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
-        if (quests[scrollnum] != null /*&& !quests[scrollnum].completed*/) {
-            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + "(s), reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
+        if (questbank[scrollnum] != null /*&& !quests[scrollnum].completed*/) {
+            slot1.textContent = questbank[scrollnum].name + ":\n " + questbank[scrollnum].desc + ". req: " + questbank[scrollnum].req[0] +" "+ questbank[scrollnum].req[1] + "(s), reward: " + questbank[scrollnum].reward + ", DONE: " + questbank[scrollnum].completed;
         } else {slot1.textContent = "";}
-        if (quests[scrollnum + 1] != null /*&& !quests[scrollnum].completed*/ ) {
-            slot2.textContent = quests[scrollnum+1].name + ":\n " + quests[scrollnum+1].desc + ". req: " + quests[scrollnum+1].req[0] + " " + quests[scrollnum+1].req[1] + "(s), reward: " + quests[scrollnum+1].reward + ", DONE: " + quests[scrollnum+1].completed;
+        if (questbank[scrollnum + 1] != null /*&& !quests[scrollnum].completed*/ ) {
+            slot2.textContent = questbank[scrollnum+1].name + ":\n " + questbank[scrollnum+1].desc + ". req: " + questbank[scrollnum+1].req[0] + " " + questbank[scrollnum+1].req[1] + "(s), reward: " + questbank[scrollnum+1].reward + ", DONE: " + questbank[scrollnum+1].completed;
         } else {slot2.textContent = "";}
-        if (quests[scrollnum + 2] != null /*&& !quests[scrollnum].completed*/) {
-            slot3.textContent = quests[scrollnum + 2].name + ":\n " + quests[scrollnum + 2].desc + ". req: " + quests[scrollnum + 2].req[0] + " " + quests[scrollnum + 2].req[1] + "(s), reward: " + quests[scrollnum + 2].reward + ", DONE: " + quests[scrollnum + 2].completed;
+        if (questbank[scrollnum + 2] != null /*&& !quests[scrollnum].completed*/) {
+            slot3.textContent = questbank[scrollnum + 2].name + ":\n " + questbank[scrollnum + 2].desc + ". req: " + questbank[scrollnum + 2].req[0] + " " + questbank[scrollnum + 2].req[1] + "(s), reward: " + questbank[scrollnum + 2].reward + ", DONE: " + questbank[scrollnum + 2].completed;
         } else {slot3.textContent = "";}
     }
 

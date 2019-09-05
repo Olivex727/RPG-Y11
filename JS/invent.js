@@ -24,6 +24,16 @@ var toolbelt = {
             "image": "False",
             "maCost": [10, 5],
             "cost": [1500, 1500]
+        },
+        {
+            "name": "old wodden sword",
+            "color": "#000000",
+            "damage": [1, 1],
+            "mod": 0,
+            "speed": [20, 1],
+            "level": 1,
+            "image": "False",
+            "cost":[500, 1500]
         }
     ],
     tools: [{
