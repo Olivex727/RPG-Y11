@@ -21,12 +21,13 @@ for (i = 0; i < maptext.length; i++){
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
 };
 
+// gets image
 tileImage = (image) => {
     let img = new Image();
     img.src = "/Images/"+image+".png"
     return img
 }
-
+// the entities and their stats
 let entities = {
     "player": {
         "hp": {"cur": 100, "max": 100},
@@ -101,6 +102,7 @@ window.onload = function() {
     //alert(map["0,0"]);
 };
 
+//item slots
 var slot1 = document.getElementById("item1");
 var slot2 = document.getElementById("item2");
 var slot3 = document.getElementById("item3");
@@ -274,12 +276,14 @@ const drawscreen = (movex,movey) => {
 
     };
 
+    //draws the black around the map
     const drawBlack = (x, y) => {
         ctx.fillStyle = "#000000";
         ctx.fillRect((x) * (size / sps), (y) * (size / sps), (size / sps), (size / sps));
     }
 
     const interest = ["fountain", "dungeon", "monster", "teleport"]
+    // given an x and y draws the tile there
     const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
@@ -291,6 +295,7 @@ const drawscreen = (movex,movey) => {
             }
 
         }
+        //enermy check
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
@@ -300,6 +305,7 @@ const drawscreen = (movex,movey) => {
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
             }
+            //special potions check
         } else if(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] != "none" && map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] == "True"){
             ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] && y == playerpos[1]){
@@ -382,6 +388,7 @@ const drawscreen = (movex,movey) => {
 
 }
 
+// end of the game
 gameover = () =>{
     console.log("gameover");
     window.removeEventListener("keydown", update);
@@ -393,7 +400,7 @@ gameover = () =>{
     ctx.fillText("Score: " + entities["player"]["xp"]["level"], (size/2)-60, (size/2)+20);
 }
 
-
+//function for drawing combat
 drawcombat = async (phase, entities, key) => {
     text = (entities)=> {
             ctx.fillStyle ="#000000"
@@ -418,10 +425,11 @@ drawcombat = async (phase, entities, key) => {
     }
 
     enemy = entities["enemy"]
+
     dice = (max) => {
         return Math.floor(Math.random()*max)+1
     }
-
+    // attacks
     attcheck = (entities, attacker, target, weapon) => {
         roll = dice(20)+entities[attacker][weapon]['mod'];
         if (roll >= entities[target]["armor"]["ac"][0]){
@@ -437,6 +445,7 @@ drawcombat = async (phase, entities, key) => {
                 }
                 else {
                     entities["player"]["xp"]["cur"] += (entities[target]["armor"]["ac"][0]*entities[target]["hp"]["max"])/20
+                    // if level up
                     if (entities["player"]["xp"]["cur"] >= entities["player"]["xp"]["max"]){
                         entities["player"]["xp"]["max"] += 20;
                         entities["player"]["hp"]["max"] += 20;
@@ -458,7 +467,7 @@ drawcombat = async (phase, entities, key) => {
 
         }
     }
-
+    // on start of combat
     if(phase == "start"){
         entities["enemy"]["hp"]["cur"] = entities["enemy"]["hp"]["max"];
         clear = (per, colour, callback) => {
@@ -480,10 +489,12 @@ drawcombat = async (phase, entities, key) => {
             });
 
     })
+    //attack
     } else {
         if (key == "a"){
             attcheck(entities, "player", "enemy", "weapon")
             attcheck(entities, "enemy", "player", "weapon")
+        // spell
         }else if (key == "s") {
             if (entities["player"]["ma"]["cur"] >= entities["player"]["spell"]["maCost"][0]){
                 attcheck(entities, "player", "enemy", "spell")
@@ -495,6 +506,7 @@ drawcombat = async (phase, entities, key) => {
             }
 
         }
+        // Disengage
         else if (key == "d") {
             if (Math.random() <= 0.3){
                 combatActive = [false, false]
@@ -515,6 +527,7 @@ drawcombat = async (phase, entities, key) => {
 //COMPRESS --
 function update(key) { //keys
 
+    // function to remove from array
     function arrayRemove(arr, value) {
 
        return arr.filter(function(ele){
@@ -522,10 +535,11 @@ function update(key) { //keys
        });
 
     }
-
+    // removes output
     if($(".output").html() != ""){
         $(".output").html("")
     }
+    // if combat is running
     if (combatActive[0]){
         if (key["type"] == "keyup"){
             keysdown = []
@@ -535,6 +549,7 @@ function update(key) { //keys
         }
     }
     else{
+        // move based on keys pressed down
         let movex = 0;
         let movey = 0;
         var inter = false;
