@@ -121,7 +121,7 @@ var traveled = 0;
 
 //Combat Variables (equipped is default)
 let combatActive = [false, false]; //Used in combat branch, will be used for inventory only
-var equipped = [{ name: "" }, { name: "" }];
+var equipped = [toolbelt.weapons[0], toolbelt.weapons[1]];
 let entity = null;
 
 //Player description element
@@ -196,12 +196,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        if (!combatActive) {
+        if (!combatActive[0]) {
             upButtons("Upgrade");
         }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -214,7 +214,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Upgrade");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -227,7 +227,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -339,7 +339,7 @@ const drawscreen = (movex,movey) => {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
                 console.log("combat start")
-                combatActive[0] = true
+                combatActive[0][0] = true
                 drawcombat("start", entities, "none")
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
@@ -490,7 +490,7 @@ drawcombat = async (phase, entities, key) => {
             att = dice(entities[attacker][weapon]['damage'][0]) + entities[attacker][weapon]['mod'];
             entities[target]["hp"]["cur"] -= att;
             if (entities[target]["hp"]["cur"] <=0){
-                combatActive = [false, false];
+                combatActive[0] = [false, false];
                 entities[target]["hp"]["cur"] = 0
                 if (target == "player"){
                     gameover();
@@ -557,7 +557,7 @@ drawcombat = async (phase, entities, key) => {
         }
         else if (key == "d") {
             if (Math.random() <= 0.3){
-                combatActive = [false, false]
+                combatActive[0] = [false, false]
                 drawscreen()
             }
             else {
@@ -565,7 +565,7 @@ drawcombat = async (phase, entities, key) => {
             }
 
         }
-        if (combatActive[0]){
+        if (combatActive[0][0]){
             text(entities)
         }
     }
@@ -588,7 +588,7 @@ function update(key) { //keys
     if($(".output").html() == ""){
         $(".output").html("")
     }
-    if (combatActive[0]){
+    if (combatActive[0][0]){
         if (key["type"] == "keyup"){
             keysdown = []
             if (combatActive[1]){
@@ -663,7 +663,7 @@ function selectItem(num){
         console.log("Selected: " + selected);
         updateInvent(null, null, true, true);
     }
-    else if (!combatActive[0])
+    else if (!combatActive[0][0])
     {
         if (num == 0) {selected = slot1.textContent.split(":")[0]}
         if (num == 1) {selected = slot2.textContent.split(":")[0]}
