@@ -389,6 +389,7 @@ gameover = () =>{
     ctx.fillRect(0, 0, size, size)
     ctx.fillStyle ="#f2f2f2"
     ctx.fillText("GAME OVER", (size/2)-60, (size/2)-10);
+    ctx.fillText("Score: " + entities["player"]["xp"]["level"], (size/2)-60, (size/2)+20);
 }
 
 
