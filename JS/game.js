@@ -22,7 +22,7 @@ for (i = 0; i < maptext.length; i++){
     var tile = maptext[i].split("|")
     map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0, "quest": false}
 };
-
+console.log(maptext);
 //Get save info from save file
 var saves = $.ajax({
     type: "GET",
@@ -57,8 +57,9 @@ for (i = 0; i < saves.length; i++){
             for(x=3; x < 5; x++){line[x]=parseInt(line[x]);}
             quests.push({name: line[1], desc: line[2], reward: line[3], req: [line[4],line[5]], completed: (line[6]=="true"), npc:line[7], banked: (line[8]=="true")});
         }
-    
+
 };
+console.log(saves);
 
 tileImage = (image) => {
     let img = new Image();
@@ -75,7 +76,7 @@ let entities = {
         "weapon": toolbelt.weapons[0],
         "spell": toolbelt.weapons[1],
         "colour":"#000000",
-        "image":tileImage("player")
+        "image":tileImage("player"),
         "hostile": false
 
     },
@@ -335,6 +336,7 @@ const drawscreen = (movex,movey) => {
         }
         if (entities["npc"]["type"].includes(map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'])) {
             ctx.drawImage(entities["npc"]["image"], x * (size / sps) + ((size / sps) / 8), y * (size / sps) + ((size / sps) / 8), (size / sps) / 1.3, (size / sps) / 1.3);
+        }
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
             ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] || y == playerpos[1]){
@@ -442,8 +444,7 @@ const drawscreen = (movex,movey) => {
         ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
     }
     saveGame("map"); //Progressively add map information to load folder (Helps speed up draw process)
-
-}
+    }
 
 gameover = () =>{
     console.log("gameover");
@@ -703,10 +704,6 @@ function selectItem(num){
                         } else{
                             desc.textContent = "You need to level up to upgrade "+selected;
                         }
-                        toolbelt[itemlist][i].level += 1;
-                        console.log("Upgraded: " + selected);
-                        equipped = [{ name: "" }, { name: "" }];
-                        updateInvent(null, null, true, true);
                     }
                     else
                     {
@@ -790,7 +787,7 @@ function interact() {
         {
             desc.textContent = "You can't get another quest from this person";
         }
-        
+
     }
     else
     {
@@ -906,8 +903,7 @@ function craft(req){
 }
 
 //DISPLAYEDITORINFO -- Changes wether the player can see the editior info
-function displayEditorInfo()
-{
+function displayEditorInfo(){
     var info = document.getElementById("editor");
     if (info.hidden) { info.hidden = false; }
     else if (!info.hidden) { info.hidden = true; }
@@ -916,8 +912,7 @@ function displayEditorInfo()
 //======MARKET/QUEST FUNCTIONS======//
 
 //TRANSACTION -- Sell/Buy items
-function Transaction(sell, amount)
-{
+function Transaction(sell, amount){
     for(i in inventory)
     {
         if (inventory[i].name === selected)
@@ -942,16 +937,14 @@ function Transaction(sell, amount)
 }
 
 //LOAN -- Loan a specific amount of money or pay it all back at once
-function Loan(pay, amount)
-{
+function Loan(pay, amount){
     if(!pay){ debt += amount; money += amount; }
     if (pay && money >= debt) { money -= debt; debt = 0; }
     updateInvent(null);
 }
 
 //MARKETLOOP -- Change the value of inventory items
-function MarketLoop()
-{
+function MarketLoop(){
     for(i in inventory)
     {
         if (inventory[i].cost > 10 && inventory[i].cost < 100000)
@@ -980,12 +973,11 @@ function MarketLoop()
     }
 }
 //QUESTMANAGE -- Perform operations on the quests in inventory
-function questManage(preset)
-{
+function questManage(preset){
     var done = false;
     for(i in quests)
     {
-        
+
         if (quests[i].name === selected && !done){
             if(preset === "rem")
             {
@@ -1017,14 +1009,13 @@ function questManage(preset)
         }
     }
     updateInvent(null);
-    
+
 }
 
 //======SAVE GAME/OTHER FUNCTIONS======//
 
 //SAVEGAME -- Send request to server.js to write information to the text file
-function saveGame(op, mapsec = "0,0")
-{
+function saveGame(op, mapsec = "0,0"){
     let mapdata = "";
     let infodata = "";
 
@@ -1040,7 +1031,7 @@ function saveGame(op, mapsec = "0,0")
     infodata += "money|" + money + ".";
     infodata += "debt|" + debt + ".";
     for(i in toolbelt.weapons){
-        infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1] 
+        infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1]
         +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
         +".";
     }
@@ -1064,8 +1055,7 @@ function saveGame(op, mapsec = "0,0")
     }
     }
     //Send request for saving
-    if(op !== "add")
-    {
+    if(op !== "add"){
         try {
             const x = $.ajax({
                 type: "GET",
@@ -1075,8 +1065,7 @@ function saveGame(op, mapsec = "0,0")
             }).responseText;
             console.log(x);
         }
-        catch(err)
-        {
+        catch(err){
             console.log(err);
         }
         if (op === "map") //Reset Chunk String for next drawscreen
