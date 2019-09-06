@@ -56,6 +56,7 @@ let entities = {
             "damage": [8],
             "mod": 2,
         },
+        "hostile": true
     },
     "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
 }
@@ -157,7 +158,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
             if (combatActive) {
-                upButtons("Upgrade");
+                upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
@@ -170,7 +171,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
             if (combatActive) {
-                upButtons("Upgrade");
+                upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
@@ -183,7 +184,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
             if (combatActive) {
-                upButtons("Upgrade");
+                upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
@@ -198,17 +199,17 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     if (inventstage.split("_")[0] === "quests") {
         //alert("quest: " + quests[0].name);
         upButtons("Select");
-        if (scroll != null && (scrollnum < questbank.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
+        if (scroll != null && (scrollnum < quests.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
             scrollnum += scroll;
         }
-        if (questbank[scrollnum] != null /*&& !quests[scrollnum].completed*/) {
-            slot1.textContent = questbank[scrollnum].name + ":\n " + questbank[scrollnum].desc + ". req: " + questbank[scrollnum].req[0] +" "+ questbank[scrollnum].req[1] + "(s), reward: " + questbank[scrollnum].reward + ", DONE: " + questbank[scrollnum].completed;
+        if (quests[scrollnum] != null /*&& !quests[scrollnum].completed*/) {
+            slot1.textContent = quests[scrollnum].name + ":\n " + quests[scrollnum].desc + ". req: " + quests[scrollnum].req[0] +" "+ quests[scrollnum].req[1] + "(s), reward: " + quests[scrollnum].reward + ", DONE: " + quests[scrollnum].completed;
         } else {slot1.textContent = "";}
-        if (questbank[scrollnum + 1] != null /*&& !quests[scrollnum].completed*/ ) {
-            slot2.textContent = questbank[scrollnum+1].name + ":\n " + questbank[scrollnum+1].desc + ". req: " + questbank[scrollnum+1].req[0] + " " + questbank[scrollnum+1].req[1] + "(s), reward: " + questbank[scrollnum+1].reward + ", DONE: " + questbank[scrollnum+1].completed;
+        if (quests[scrollnum + 1] != null /*&& !quests[scrollnum].completed*/ ) {
+            slot2.textContent = quests[scrollnum+1].name + ":\n " + quests[scrollnum+1].desc + ". req: " + quests[scrollnum+1].req[0] + " " + quests[scrollnum+1].req[1] + "(s), reward: " + quests[scrollnum+1].reward + ", DONE: " + quests[scrollnum+1].completed;
         } else {slot2.textContent = "";}
-        if (questbank[scrollnum + 2] != null /*&& !quests[scrollnum].completed*/) {
-            slot3.textContent = questbank[scrollnum + 2].name + ":\n " + questbank[scrollnum + 2].desc + ". req: " + questbank[scrollnum + 2].req[0] + " " + questbank[scrollnum + 2].req[1] + "(s), reward: " + questbank[scrollnum + 2].reward + ", DONE: " + questbank[scrollnum + 2].completed;
+        if (quests[scrollnum + 2] != null /*&& !quests[scrollnum].completed*/) {
+            slot3.textContent = quests[scrollnum + 2].name + ":\n " + quests[scrollnum + 2].desc + ". req: " + quests[scrollnum + 2].req[0] + " " + quests[scrollnum + 2].req[1] + "(s), reward: " + quests[scrollnum + 2].reward + ", DONE: " + quests[scrollnum + 2].completed;
         } else {slot3.textContent = "";}
     }
 
@@ -294,13 +295,20 @@ const drawscreen = (movex,movey) => {
 
         }
         //enermy check
-        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
-            if(x == playerpos[0] || y == playerpos[1]){
+        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'][0] != "none" && traveled > 0) {
+            //console.log("hejr");
+            if (map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'][1]){
+                ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            }
+            else {
+                console.log("NPC");
+                ctx.drawImage(entities["npc"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            }
+            if ((x == playerpos[0] || y == playerpos[1]) && map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'][1]) {
                 console.log("combat start")
                 combatActive[0] = true
                 drawcombat("start", entities, "none")
-                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'][0] = "none";
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
             }
             //special potions check
@@ -322,11 +330,10 @@ const drawscreen = (movex,movey) => {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError ){
-
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
                     let stand = "True";
-                    let enemy = "none";
+                    let enemy = ["none", false];
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
                     }
@@ -354,8 +361,15 @@ const drawscreen = (movex,movey) => {
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
                     }
-                    if(Math.random() <= 0.003 && stand == "True" ){ // enemies
-                        enemy = "goblin"
+                    let rand = Math.random();
+                    if (rand <= 0.002 && stand == "True") { // enemies
+                        enemy = ["goblin", true]
+                        stand = "False"
+                        special = "none"
+
+                    }
+                    else if (rand <= 0.004 && stand == "True") { // npcs
+                        enemy = [entities.npc.type[Math.round(Math.random() * (entities.npc.type.length-1))], false]
                         stand = "False"
                         special = "none"
                     }
@@ -712,28 +726,21 @@ function interact() {
     console.log("Map: " + map[facod]['type']);
     var minecheck = false;
 
-    if (entities["npc"]["type"].includes(map[facod]['enemy']))
-    {
-        if (!map[facod]['quest'])
-        {
+    if (entities["npc"]["type"].includes(map[facod]['enemy'][0])) {
+        if (!map[facod]['quest']) {
             console.log("Facing NPC: " + facing['enemy']);
-            desc.textContent = "You've received a new quest from the " + map[facod]['enemy'];
-            for(i in questbank)
-            {
-                if (map[facod]['enemy'] === questbank[i].npc && !map[facod]['quest'])
-                {
+            desc.textContent = "You've received a new quest from the " + map[facod]['enemy'][0];
+            for (i in questbank) {
+                if (map[facod]['enemy'][0] === questbank[i].npc && !map[facod]['quest']) {
                     let alreadyexists = false;
-                    for(q in questbank)
-                    {
-                        if (questbank[q].name === questbank[i].name)
-                        {
+                    for (q in quests) {
+                        if (quests[q].name === questbank[i].name) {
                             alreadyexists = true;
                         }
                     }
-                    if(!alreadyexists)
-                    {
-                        let x = questbank.unshift(questbank[i]) - 1;
-                        questbank[x].banked = true;
+                    if (!alreadyexists) {
+                        let x = quests.unshift(questbank[i]) - 1;
+                        quests[x].banked = true;
                         map[facod]['quest'] = true;
                         updateInvent(null);
                     }
@@ -742,21 +749,19 @@ function interact() {
             if (!map[facod]['quest']) //If there are no more quests in the questbank
             {
                 let newquest = {
-                    name: "Help out the " + map[facod]['enemy'],
+                    name: "Help out the " + map[facod]['enemy'][0],
                     desc: "See the requirements",
                     reward: Math.round(distance * Math.random()),
                     req: [Math.round(distance * Math.random()), inventory[Math.round(Math.random() * (inventory.length - 1))].name],
                     completed: false,
-                    npc: map[facod]['enemy'],
+                    npc: map[facod]['enemy'][0],
                     banked: true
                 }
-                let x = questbank.push(newquest) - 1;
+                let x = quests.push(newquest) - 1;
                 map[facod]['quest'] = true;
                 updateInvent(null);
             }
-        }
-        else
-        {
+        } else {
             desc.textContent = "You can't get another quest from this person";
         }
 
@@ -946,34 +951,31 @@ function MarketLoop()
 }
 
 //QUESTMANAGE -- Perform operations on the quests in inventory
-function questManage(preset)
-{
+function questManage(preset) {
     var done = false;
-    for(i in questbank)
-    {
+    for (i in quests) {
 
-        if (questbank[i].name === selected && !done){
-            if(preset === "rem")
-            {
-                questbank[i].banked = false;
-                questbank = array_move(questbank, i, questbank.length - 1);
-                questbank.splice(questbank.length - 1, 1);
+        if (quests[i].name === selected && !done) {
+            if (preset === "rem") {
+                quests[i].banked = false;
+                quests = array_move(quests, i, quests.length - 1);
+                quests.splice(quests.length - 1, 1);
                 done = true;
             }
             if (preset === "pri") {
-                questbank = array_move(questbank, i, 0);
+                quests = array_move(quests, i, 0);
                 done = true;
             }
             if (preset === "comp") {
-                for(item in inventory){
-                    if (questbank[i].req[1] === inventory[item].name && inventory[item].amount >= questbank[i].req[0]) {
+                for (item in inventory) {
+                    if (quests[i].req[1] === inventory[item].name && inventory[item].amount >= quests[i].req[0]) {
                         selected = "";
-                        inventory[item].amount -= questbank[i].req[0];
-                        questbank[i].completed = true;
-                        money = questbank[i].reward;
-                        desc.textContent = "You completed the quest and got: $" + questbank[i].reward;
+                        inventory[item].amount -= quests[i].req[0];
+                        quests[i].completed = true;
+                        money = quests[i].reward;
+                        desc.textContent = "You completed the quest and got: $" + quests[i].reward;
                         //console.log(quests[i]);
-                        questbank = array_move(questbank, i, questbank.length - 1); //Doesn't work
+                        quests = array_move(quests, i, quests.length - 1); //Doesn't work
                         //console.log(quests[quests.length - 1]);
                         //console.log(quests[i]);
                         done = true;
@@ -1000,33 +1002,35 @@ function saveGame(op, mapsec = "0,0"){
     }
     //Add player info to load file
     if(op === "info") {
-    infodata += "x|"+globalpos[0]+".";
-    infodata += "y|" + globalpos[1] + ".";
-    infodata += "money|" + money + ".";
-    infodata += "debt|" + debt + ".";
-    for(i in toolbelt.weapons){
-        infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1]
-        +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
-        +".";
-    }
-    for (i in toolbelt.tools) {
-        infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
-        "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
-        ".";
-    }
-    for (i in toolbelt.apparel) {
-        infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].ac[0] +
-        "|" + toolbelt.apparel[i].ac[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
-        ".";
-    }
-    for (i in inventory) {
-        infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
-    }
-    for (i in questbank) {
-        infodata += "quest|" + questbank[i].name + "|" + questbank[i].desc + "|" + questbank[i].reward + "|" + questbank[i].req[0] + "|" + questbank[i].req[1] +
-        questbank[i].completed + "|" + questbank[i].npc + "|" + questbank[i].banked + "|" +
-        ".";
-    }
+        infodata += "x|"+globalpos[0]+".";
+        infodata += "y|" + globalpos[1] + ".";
+        infodata += "money|" + money + ".";
+        infodata += "debt|" + debt + ".";
+        //====
+        for(i in toolbelt.weapons){
+            infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1]
+            +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
+            +".";
+        }
+        for (i in toolbelt.apparel) {
+            infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].ac[0] +
+            "|" + toolbelt.apparel[i].ac[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
+            ".";
+        }
+        //====
+        for (i in toolbelt.tools) {
+            infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
+                "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
+                ".";
+        }
+        for (i in inventory) {
+            infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
+        }
+        for (i in quests) {
+            infodata += "quest|" + quests[i].name + "|" + questbank[i].desc + "|" + questbank[i].reward + "|" + questbank[i].req[0] + "|" + questbank[i].req[1] +
+            questbank[i].completed + "|" + questbank[i].npc + "|" + questbank[i].banked + "|" +
+            ".";
+        }
     }
     //Send request for saving
     if(op !== "add")
@@ -1073,7 +1077,7 @@ function LoadGame(op, file)
                 "type": tile[2],
                 "stand": tile[3],
                 "special": tile[4],
-                "enemy": tile[5],
+                "enemy": [tile[5], false],
                 "har": 0,
                 "quest":false
             }

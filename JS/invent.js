@@ -3,6 +3,8 @@
 var money = 10000; //The player's money that can be used to buy/sell items on market
 var debt = 0;
 
+let quests = [];
+
 var toolbelt = {
     weapons: [{
             "name": "Sword",
