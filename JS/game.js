@@ -1057,6 +1057,112 @@ function saveGame(op, mapsec = "0,0"){
     else{ mapchunk += mapdata + ".";}
 }
 
+function LoadGame(op, file) {
+    if (op === "map") {
+        for (i = 0; i < file.length; i++) {
+            var tile = file[i].split("|")
+            map[tile[0] + "," + tile[1]] = {
+                "type": tile[2],
+                "stand": tile[3],
+                "special": tile[4],
+                "enemy": ["none", false],
+                "har": 0,
+                "quest": false
+            }
+        };
+    }
+    if (op === "save") {
+        inventory = []; toolbelt = {weapons:[], tools:[], apparel:[]};
+        for (i = 0; i < file.length; i++) {
+            var line = file[i].split("|");
+            if (line[0] === "x"){globalpos[0]=parseInt(line[1]);}
+            else if (line[0] === "y"){globalpos[1]=parseInt(line[1]);}
+            else if (line[0] === "debt"){debt=parseInt(line[1]);}
+            else if (line[0] === "money"){money=parseInt(line[1]);}
+            else if (line[0] === "item"){
+                inventory.push({"name": line[1],"amount": parseInt(line[2]),"cost": parseInt(line[3]),"stock": parseInt(line[4]),"tile": line[5]});
+            }
+            else if (line[0] === "quest"){
+                quests.push({
+                    "name": line[1],
+                    "desc": line[2],
+                    "reward": parseInt(line[3]),
+                    "req": [parseInt(line[4]), parseInt(line[5])],
+                    "completed": (line[5] === "true"),
+                    "banked": (line[7] === "true"),
+                    "npc": line[6]
+                });
+            }
+            else if (line[0] === "weapon") {
+                toolbelt.weapons.push({
+                    "name": line[1],
+                    "damage": [parseInt(line[2]), parseInt(line[3])],
+                    "reward": parseInt(line[3]),
+                    "mod": parseInt(line[4]),
+                    "speed": [parseInt(line[5]), parseInt(line[6])],
+                    "level": parseInt(line[7]),
+                    "cost": [parseInt(line[8]), parseInt(line[9])],
+                });
+            }
+            else if (line[0] === "tools") {
+                toolbelt.tools.push({
+                    "name": line[1],
+                    "tilebase": line[2],
+                    "efficiency": [parseInt(line[3]), parseInt(line[4])],
+                    "level": parseInt(line[5]),
+                    "cost": [parseInt(line[6]), parseInt(line[7])],
+                });
+            }
+            else if (line[0] === "apparel") {
+                toolbelt.tools.push({
+                    "name": line[1],
+                    "ac": parseInt(line[2]),
+                    "level": parseInt(line[3]),
+                    "cost": [parseInt(line[4]), parseInt(line[5])]
+                });
+            }
+            else if (line[0] === "player") {
+                entities.player = {
+                    "hp": {"cur": parseInt(line[1]), "max": parseInt(line[2])},
+                    "ma": {"cur": parseInt(line[3]), "max": parseInt(line[4])},
+                    "xp": {"cur": parseInt(line[5]), "max": parseInt(line[6]), "level": parseInt(line[7])}
+                };
+            }
+            else if (line[0] === "enemy") {
+                entities.enemy = {
+                    "hp" : {
+                        "cur": parseInt(line[1]),
+                        "max": parseInt(line[2])
+                    },
+                    "armor": {
+                        "ac": [parseInt(line[3])]
+                    },
+                    "weapon": {
+                        "name": line[4],
+                        "damage": [parseInt(line[5])],
+                        "mod": parseInt(line[6]),
+                    },
+                    "hostile": true
+                };
+            }
+        };
+    }
+}
+
+/*
+x|0
+y|0
+debt|0
+money|10000
+item|name|amount|cost|stock|tile
+quest|name|desc|reward|req[0]|req[1]|completed|npc|banked
+weapon|name|damage[0]|damage[1]|mod|speed[0]|speed[1]|level|cost[0]|cost[1]
+tool|name|tilebase|efficiency[0]|efficiency[1]|level|cost[0]|cost[1]
+apparel|name|ac|level|cost[0]|cost[1]
+player|hp[cur]|hp[max]|ma[cur]|ma[max]|xp[cur]|xp[max]|xp[level]
+enemy|hp[cur]|hp[max]|armor[ac]|weapon[name]|weapon[damage]|weapon[mod]
+*/
+
 function array_move(arr, old_index, new_index) {
     if (new_index >= arr.length) {
         var k = new_index - arr.length + 1;
@@ -1067,24 +1173,3 @@ function array_move(arr, old_index, new_index) {
     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
     return arr; // for testing
 };
-
-function LoadGame(op, file)
-{
-    if(op === "map"){
-        for (i = 0; i < file.length; i++) {
-            var tile = file[i].split("|")
-            map[tile[0] + "," + tile[1]] = {
-                "type": tile[2],
-                "stand": tile[3],
-                "special": tile[4],
-                "enemy": [tile[5], false],
-                "har": 0,
-                "quest":false
-            }
-        };
-    }
-    if(op === "save")
-    {
-
-    }
-}
