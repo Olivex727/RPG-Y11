@@ -6,7 +6,7 @@ All of the Tile-Based RPG in Y11
 2. Navigate to the JS folder
 3. run npm install - if this doesn't work try to run npm init First
 4. run npm start - if this  doesn't work try to node server.js
-5. go to localhost:3000
+5. go to localhost:3000/?save=new or localhost:3000/?save=load
 
 # playing
 Use WASD to move
@@ -19,7 +19,7 @@ Use the inventory tab to sell resources
 
 Level up to upgrade your weapon with resources you sell
 
-Use toolbelt tab under weapons and aparal to upgrade weapons and armor
+Use toolbelt tab under weapons and apparel to upgrade weapons and armour
 
 Your attack does less damage but can always be Used
 
