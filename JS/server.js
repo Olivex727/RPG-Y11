@@ -5,15 +5,54 @@ const SimplexNoise = require('simplex-noise');
 const app = express();
 const dir = path.join(__dirname, 'public');
 let cashedmap = []
+let save = "load"
 
 app.use(express.static(dir));
 
+app.get('/savegame', function (req, res) {
+    if (save === "new"){
+        //Clear the map if there's a new file
+        fs.writeFile("saves/maptestload.txt", "", (err) => {if (err) {console.log(err);}});
+    }
+    if (req.query.op === "map"){
+        for (i in req.query.map.split(".")) {
+            //Add Chunk of map information to map file
+            fs.appendFile("saves/maptestload.txt", req.query.map.split(".")[i]+"\n" , (err) => {
+                if (err) {
+                   console.log(err);
+                }
+            });
+        }
+    }
+    if (req.query.op === "info"){
+        //Clear and Re-add the player's customisation statues
+        fs.writeFile("saves/infoload.txt", "", (err) => {if (err) {console.log(err);}});
+        for (i in req.query.info.split(".")) {
+            fs.appendFile("saves/infoload.txt", req.query.info.split(".")[i] + "\n", (err) => {
+                if (err) {console.log(err);}
+            });
+        }
+    }
+    res.send("Saved: " + req.query.op);
+});
+
 app.get('/map', function(req, res) {
-    const map = fs.readFileSync("maptest.txt", 'utf8');
+    const map = fs.readFileSync("saves/maptest"+save+".txt", 'utf8');
     res.send(map);
 });
 
+app.get('/save', function (req, res) {
+    const saves = fs.readFileSync("saves/info" + save + ".txt", 'utf8');
+    res.send(saves);
+});
+
 app.get('/', function(req, res) {
+    if (req.query.save.toString() != "load" && req.query.save.toString() != "new") {
+        save = "load";
+    } else {
+        save = req.query.save.toString();
+    }
+    console.log(save);
     res.sendfile("index.html");
 });
 app.get('/js', function(req, res) {

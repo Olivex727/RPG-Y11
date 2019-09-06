@@ -1,0 +1,11 @@
+x|0
+y|0
+debt|0
+money|10000
+item|name|amount|cost|stock|tile
+quest|name|desc|reward|req[0]|req[1]|completed|npc|banked
+weapon|name|damage[0]|damage[1]|mod|speed|level|cost[0]|cost[1]
+tool|name|tilebase|efficiency[0]|efficiency[1]|level|cost[0]|cost[1]
+apparel|name|ac|level|cost[0]|cost[1]
+player|hp[cur]|hp[max]|ma[cur]|ma[max]|xp[cur]|xp[max]|xp[level]
+enemy|name|hp[cur]|hp[max]|armor[ac]|damage|mod
