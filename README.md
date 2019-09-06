@@ -19,6 +19,8 @@ Use the inventory tab to sell resources
 
 Level up to upgrade your weapon with resources you sell
 
+Use toolbelt tab under weapons and aparal to upgrade weapons and armor
+
 Your attack does less damage but can always be Used
 
 Your spell can do a lot of damage but requires Mana
