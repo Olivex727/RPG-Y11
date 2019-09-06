@@ -157,12 +157,12 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        if (!combatActive) {
+        if (!combatActive[0]) {
             upButtons("Upgrade");
         }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -175,7 +175,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -188,7 +188,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-            if (combatActive) {
+            if (combatActive[0]) {
                 upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
@@ -367,13 +367,13 @@ const drawscreen = (movex,movey) => {
                         stand = terrain[type]["stand"]
                     }
                     let rand = Math.random();
-                    if (rand <= 0.002 && stand == "True") { // enemies
+                    if (rand <= 0.003 && stand == "True") { // enemies
                         enemy = ["goblin", true]
                         stand = "False"
                         special = "none"
 
                     }
-                    else if (rand <= 0.004 && stand == "True") { // npcs
+                    else if (rand <= 0.005 && stand == "True") { // npcs
                         enemy = [entities.npc.type[Math.round(Math.random() * (entities.npc.type.length-1))], false]
                         stand = "False"
                         special = "none"
@@ -450,6 +450,7 @@ drawcombat = async (phase, entities, key) => {
     }
     // attacks
     attcheck = (entities, attacker, target, weapon) => {
+        console.log("attacker", attacker)
         roll = dice(20)+entities[attacker][weapon]['mod'];
         if (roll >= entities[target]["armor"]["ac"][0]){
             console.log(entities);
@@ -1017,11 +1018,11 @@ function saveGame(op, mapsec = "0,0"){
         infodata += "enemy|" + [entities.enemy.hp['cur'], entities.enemy.hp['max'], entities.enemy.armor['ac'][0], entities.enemy.weapon['name'], entities.enemy.weapon['damage'][0], entities.enemy.weapon['mod']].join("|") + ".";
         for (i in toolbelt.weapons) {
             let wep = toolbelt.weapons[i];
-            infodata += "weapon|" + [wep.name, wep.damage[0], wep.damage[1], wep.mod, wep.speed[0], wep.speed[1], wep.level, wep.cost[0], wep.cost[1], wep.wc].join("|") + ".";
+            infodata += "weapon|" + [wep.name, wep.damage[0], wep.damage[1], wep.mod, wep.speed[0], wep.speed[1], wep.level, wep.cost[0], wep.cost[1], wep.wc, wep.maCost[0], wep.maCost[1]].join("|") + ".";
         }
         for (i in toolbelt.apparel) {
             let wep = toolbelt.apparel[i];
-            infodata += "apparel|" + [wep.name, wep.ac, wep.level, wep.cost[0], wep.cost[1]].join("|") + ".";
+            infodata += "apparel|" + [wep.name, wep.ac[0], wep.level, wep.cost[0], wep.cost[1], wep.ac[1]].join("|") + ".";
         }
         for (i in toolbelt.tools) {
             infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
@@ -1107,10 +1108,11 @@ function LoadGame(op, file) {
                     "speed": [parseInt(line[5]), parseInt(line[6])],
                     "level": parseInt(line[7]),
                     "cost": [parseInt(line[8]), parseInt(line[9])],
-                    "wc": line[10]
+                    "wc": line[10],
+                    "maCost": [parseInt(line[11]), parseInt(line[12])]
                 });
             }
-            else if (line[0] === "tools") {
+            else if (line[0] === "tool") {
                 toolbelt.tools.push({
                     "name": line[1],
                     "tilebase": line[2],
@@ -1122,7 +1124,7 @@ function LoadGame(op, file) {
             else if (line[0] === "apparel") {
                 toolbelt.apparel.push({
                     "name": line[1],
-                    "ac": parseInt(line[2]),
+                    "ac": [parseInt(line[2]), parseInt(line[6])],
                     "level": parseInt(line[3]),
                     "cost": [parseInt(line[4]), parseInt(line[5])]
                 });
@@ -1160,7 +1162,7 @@ function LoadGame(op, file) {
         var checkwep = false;
         var checksp = false;
         var wep = [];
-        console.log(toolbelt.apparel);
+        console.log(toolbelt.tools);
         for (i in toolbelt.weapons) {
             if (toolbelt.weapons[i].wc === "w" && !checkwep){wep[0]=toolbelt.weapons[i]; checkwep = true;}
             if (toolbelt.weapons[i].wc === "s" && !checksp){wep[1]=toolbelt.weapons[i]; checksp = true;}

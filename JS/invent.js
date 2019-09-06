@@ -15,6 +15,7 @@ var toolbelt = {
             "level": 1,
             "image": "False",
             "cost":[1500, 1500],
+            "maCost": [0, 0],
             "wc":"w"
         },
         {
@@ -25,7 +26,7 @@ var toolbelt = {
             "mod": 15,
             "level": 1,
             "image": "False",
-            "maCost": [10, 5],
+            "maCost": [10, 2],
             "cost": [1500, 1500],
             "wc": "s"
         },
@@ -38,6 +39,7 @@ var toolbelt = {
             "level": 1,
             "image": "False",
             "cost":[500, 1500],
+            "maCost": [0, 0],
             "wc": "w"
         }
     ],
@@ -81,7 +83,7 @@ var toolbelt = {
         },{
             "name": "Chainmail",
             "color": "#000000",
-            "ac": [18, 2],
+            "ac": [10, 2],
             "level": 0,
             "image": "False",
             "cost": [2000, 100]
