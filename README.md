@@ -13,7 +13,9 @@ Use WASD to move
 
 Kill enemies to level up
 
-use "e" to collect resources
+Use "e" to collect resources
+
+Use the inventory tab to sell resources
 
 Level up to upgrade your weapon with resources you sell
 
