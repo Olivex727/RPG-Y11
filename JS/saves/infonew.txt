@@ -1,0 +1,23 @@
+y|0
+x|0
+enemy|20|20|10|Sword|8|2
+weapon|Sword|8|2|2|20|1|1|1500|1500|w|0|0
+weapon|old wodden sword|1|1|0|20|1|1|500|1500|w|0|0
+money|10000
+apparel|Iron Armour|10|1|2000|2000|1
+apparel|Chainmail|10|0|2000|100|2
+apparel|Clothes|0|0|20|1|0
+tool|Sickle|grass|40|4|1|110|8
+player|100|100|50|50|0|20|1
+debt|0
+tool|Axe|forest|12|2|1|80|10
+tool|Pickaxe|mountain|30|7|0|290|2
+item|Rock|0|100|35|mountain
+item|Water|10|120|110|water
+item|Wood|10|579|0|forest
+item|Lava|0|3175|92|lava
+item|Sticks|0|19|0|null
+item|Grass|0|25|9|grass
+item|Snowball|0|36|0|snow
+
+weapon|Fire Spell|15|5|15|80|2|1|1500|1500|s|10|2

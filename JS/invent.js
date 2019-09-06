@@ -3,6 +3,8 @@
 var money = 10000; //The player's money that can be used to buy/sell items on market
 var debt = 0;
 
+let quests = [];
+
 var toolbelt = {
     weapons: [{
             "name": "Sword",
@@ -12,7 +14,9 @@ var toolbelt = {
             "speed": [20, 1],
             "level": 1,
             "image": "False",
-            "cost":[1500, 1500]
+            "cost":[1500, 1500],
+            "maCost": [0, 0],
+            "wc":"w"
         },
         {
             "name": "Fire Spell",
@@ -22,8 +26,21 @@ var toolbelt = {
             "mod": 15,
             "level": 1,
             "image": "False",
-            "maCost": [10, 5],
-            "cost": [1500, 1500]
+            "maCost": [10, 2],
+            "cost": [1500, 1500],
+            "wc": "s"
+        },
+        {
+            "name": "old wodden sword",
+            "color": "#000000",
+            "damage": [1, 1],
+            "mod": 0,
+            "speed": [20, 1],
+            "level": 1,
+            "image": "False",
+            "cost":[500, 1500],
+            "maCost": [0, 0],
+            "wc": "w"
         }
     ],
     tools: [{
@@ -55,22 +72,31 @@ var toolbelt = {
         }
 
     ],
-    apparel: [{
-            "name": "Chainmail",
+    apparel: [
+        {
+            "name": "Iron Armour",
             "color": "#000000",
             "ac": [10, 1],
             "level": 1,
             "image": "False",
             "cost": [2000, 2000]
+        },{
+            "name": "Chainmail",
+            "color": "#000000",
+            "ac": [10, 2],
+            "level": 0,
+            "image": "False",
+            "cost": [2000, 100]
         },
         {
             "name": "Clothes",
             "color": "#000000",
             "ac": [0, 0],
-            "level": 1,
+            "level": 0,
             "image": "False",
             "cost": [20, 1]
-        }
+        },
+        
     ]
 };
 

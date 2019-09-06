@@ -8,25 +8,16 @@ const sps = 15;
 const sizeOfSquares = (size/sps)
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0}
+let mapchunk = "";
 
-//Compiling information on maps
-var maptext = $.ajax({
-    type: "GET",
-    url: "/map",
-    async: false
-}).responseText.split("\n");
-
-for (i = 0; i < maptext.length; i++){
-    var tile = maptext[i].split("|")
-    map[tile[0]+","+tile[1]] = {"type":tile[2], "stand":tile[3], "special": tile[4], "enemy": tile[5], "har": 0}
-};
-
+// gets image
 tileImage = (image) => {
     let img = new Image();
-    img.src = "/Images/"+image+".png"
+    img.src = "/Images/" + image + ".png"
     return img
 }
 
+// the entities and their stats
 let entities = {
     "player": {
         "hp": {"cur": 100, "max": 100},
@@ -54,9 +45,26 @@ let entities = {
             "damage": [8],
             "mod": 2,
         },
+        "hostile": true
     },
     "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
 }
+
+//Compiling information on maps
+LoadGame("map", $.ajax({
+    type: "GET",
+    url: "/map",
+    async: false
+}).responseText.split("\n"));
+
+///*
+LoadGame("save", $.ajax({
+    type: "GET",
+    url: "/save",
+    async: false
+}).responseText.split("\n"));
+//*/
+
 //Canvas Drawing
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
@@ -101,6 +109,7 @@ window.onload = function() {
     //alert(map["0,0"]);
 };
 
+//item slots
 var slot1 = document.getElementById("item1");
 var slot2 = document.getElementById("item2");
 var slot3 = document.getElementById("item3");
@@ -109,7 +118,6 @@ var title = document.getElementById("inv");
 //UPDATEINVENT -- Update the selections on the inventory
 function updateInvent(scroll, change = null, printToConsole = true, keepSelectedItem = false) {
     if (printToConsole){console.log("updateInvent: " + inventstage + " -> " + change);}
-    if (!keepSelectedItem){selected = ""; }
     //Change what tab the inventory is on
     if (change != null) {
         inventstage = change;
@@ -120,8 +128,7 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     if (debt == 0) { document.getElementById("money").textContent += ", You can loan money now"; }
     else { document.getElementById("money").textContent += ", You Have a debt to pay"; }
     var res = craft(false);
-    //var res = test();
-    document.getElementById("crafting").textContent = "Equipped: [ "+equipped[0].name+", "+equipped[1].name+" ], Selected: [ "+selected+" ] Crafting Table: [ " +crafting[0]+", "+crafting[1]+" ] Result: ["+res+"]";
+    document.getElementById("crafting").textContent = "Equipped: [ " + entities.player.armor.name + ", " + entities.player.weapon.name + ", " + entities.player.spell.name + " ], Selected: [ " + selected + " ] Crafting Table: [ " + crafting[0] + ", " + crafting[1] + " ] Result: [" + res + "]";
     var slot1 = document.getElementById("item1"); var slot2 = document.getElementById("item2"); var slot3 = document.getElementById("item3"); var title = document.getElementById("inv");
     title.textContent = inventstage.toUpperCase();
     var b1 = document.getElementById("command_1"); var b2 = document.getElementById("command_2"); var b3 = document.getElementById("command_3");
@@ -150,13 +157,13 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
     //TOOLBELT
     //Section that contains the apparel, weapons and tools
     if (inventstage.split("_")[0] === "toolbelt") {
-        if (!combatActive) {
+        if (!combatActive[0]) {
             upButtons("Upgrade");
         }
         //TOOLBELT_WEAPONS
         if (inventstage.split("_")[1] === "weapons") {
-            if (combatActive) {
-                upButtons("Upgrade");
+            if (combatActive[0]) {
+                upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.weapons.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
@@ -168,8 +175,8 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_TOOLS
         if (inventstage.split("_")[1] === "tools") {
-            if (combatActive) {
-                upButtons("Upgrade");
+            if (combatActive[0]) {
+                upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.tools.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
@@ -181,14 +188,15 @@ function updateInvent(scroll, change = null, printToConsole = true, keepSelected
 
         //TOOLBELT_APPAREL
         if (inventstage.split("_")[1] === "apparel") {
-            if (combatActive) {
-                upButtons("Upgrade");
+            if (combatActive[0]) {
+                upButtons("Equip");
             }
             if (scroll != null && (scrollnum < toolbelt.apparel.length - 3 && scroll > 0) || (scrollnum > 0 && scroll < 0)) {
                 scrollnum += scroll;
             }
             slot1.textContent = toolbelt.apparel[scrollnum].name + ": Ac: " + toolbelt.apparel[scrollnum].ac[0] + ", LEVEL: " + toolbelt.apparel[scrollnum].level + ", Cost: " + toolbelt.apparel[scrollnum].cost[0];
             slot2.textContent = toolbelt.apparel[scrollnum + 1].name + ": Ac: " + toolbelt.apparel[scrollnum + 1].ac[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 1].level + ", Cost: " + toolbelt.apparel[scrollnum+1].cost[0];
+            slot3.textContent = toolbelt.apparel[scrollnum + 2].name + ": Ac: " + toolbelt.apparel[scrollnum + 2].ac[0] + ", LEVEL: " + toolbelt.apparel[scrollnum + 2].level + ", Cost: " + toolbelt.apparel[scrollnum + 2].cost[0];
         }
     }
 
@@ -274,12 +282,12 @@ const drawscreen = (movex,movey) => {
 
     };
 
-    const drawBlack = (x, y) => {
-        ctx.fillStyle = "#000000";
-        ctx.fillRect((x) * (size / sps), (y) * (size / sps), (size / sps), (size / sps));
-    }
-
-    const interest = ["fountain", "dungeon", "monster", "teleport"]
+    //draws the black around the map
+    //const drawBlack = (x, y) => {
+    //    ctx.fillStyle = "#000000";
+    //    ctx.fillRect((x) * (size / sps), (y) * (size / sps), (size / sps), (size / sps));
+    //}
+    // given an x and y draws the tile there
     const draw = (x,y) => {
         // check to see if the tile changes (although redraws if different interest currently)
         if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] != map[(x+globalpos[0]-movex).toString()+","+(y+globalpos[1]-movey).toString()] || movex+movey == 0){
@@ -291,15 +299,24 @@ const drawscreen = (movex,movey) => {
             }
 
         }
-        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] != "none") {
-            ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
-            if(x == playerpos[0] || y == playerpos[1]){
+        //enermy check
+        if (map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'][0] != "none" && traveled > 0) {
+            //console.log("hejr");
+            if (map[(x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString()]['enemy'][1]){
+                ctx.drawImage(entities["enemy"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            }
+            else {
+                console.log("NPC");
+                ctx.drawImage(entities["npc"]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
+            }
+            if ((x == playerpos[0] || y == playerpos[1]) && map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'][1]) {
                 console.log("combat start")
                 combatActive[0] = true
                 drawcombat("start", entities, "none")
-                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'] = "none";
+                map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['enemy'][0] = "none";
                 map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] = "True";
             }
+            //special potions check
         } else if(map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special'] != "none" && map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['stand'] == "True"){
             ctx.drawImage(terrain[map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()]['special']]["image"], x*(size/sps)+((size/sps)/8), y*(size/sps)+((size/sps)/8), (size/sps)/1.3, (size/sps)/1.3);
             if(x == playerpos[0] && y == playerpos[1]){
@@ -318,11 +335,10 @@ const drawscreen = (movex,movey) => {
                 draw(x,y)
             } catch (e) { // if the tile dosent exist yet
                 if (e instanceof TypeError ){
-
                     // chances of different tiles
                     pos = genmap[(x+globalpos[0]+500)][(y+globalpos[1]+500)]
                     let stand = "True";
-                    let enemy = "none";
+                    let enemy = ["none", false];
                     if((pos <= 0.375 && pos >= 0.28)||(pos <= 0.56 && pos >= 0.49)){ // terrain
                         type = "grass"
                     }
@@ -350,8 +366,15 @@ const drawscreen = (movex,movey) => {
                         type = Object.keys(terrain)[Object.keys(terrain).length * Math.random() << 0]
                         stand = terrain[type]["stand"]
                     }
-                    if(Math.random() <= 0.003 && stand == "True" ){ // enemies
-                        enemy = "goblin"
+                    let rand = Math.random();
+                    if (rand <= 0.003 && stand == "True") { // enemies
+                        enemy = ["goblin", true]
+                        stand = "False"
+                        special = "none"
+
+                    }
+                    else if (rand <= 0.005 && stand == "True") { // npcs
+                        enemy = [entities.npc.type[Math.round(Math.random() * (entities.npc.type.length-1))], false]
                         stand = "False"
                         special = "none"
                     }
@@ -366,6 +389,7 @@ const drawscreen = (movex,movey) => {
 
 
                     map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har": 0}
+                    saveGame("add", (x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString());
                     draw(x,y)
                 }else{
                     console.log(e)
@@ -379,9 +403,11 @@ const drawscreen = (movex,movey) => {
     } else {
         ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
     }
+    saveGame("map"); //Progressively add map information to load folder (Helps speed up draw process)
 
 }
 
+// end of the game
 gameover = () =>{
     console.log("gameover");
     window.removeEventListener("keydown", update);
@@ -393,7 +419,7 @@ gameover = () =>{
     ctx.fillText("Score: " + entities["player"]["xp"]["level"], (size/2)-60, (size/2)+20);
 }
 
-
+//function for drawing combat
 drawcombat = async (phase, entities, key) => {
     text = (entities)=> {
             ctx.fillStyle ="#000000"
@@ -418,16 +444,19 @@ drawcombat = async (phase, entities, key) => {
     }
 
     enemy = entities["enemy"]
+
     dice = (max) => {
         return Math.floor(Math.random()*max)+1
     }
-
+    // attacks
     attcheck = (entities, attacker, target, weapon) => {
+        console.log("attacker", attacker)
         roll = dice(20)+entities[attacker][weapon]['mod'];
         if (roll >= entities[target]["armor"]["ac"][0]){
             console.log(entities);
             console.log(weapon);
             att = dice(entities[attacker][weapon]['damage'][0]) + entities[attacker][weapon]['mod'];
+            console.log(att, entities[attacker][weapon]['damage'][0])
             entities[target]["hp"]["cur"] -= att;
             if (entities[target]["hp"]["cur"] <=0){
                 combatActive = [false, false];
@@ -437,6 +466,7 @@ drawcombat = async (phase, entities, key) => {
                 }
                 else {
                     entities["player"]["xp"]["cur"] += (entities[target]["armor"]["ac"][0]*entities[target]["hp"]["max"])/20
+                    // if level up
                     if (entities["player"]["xp"]["cur"] >= entities["player"]["xp"]["max"]){
                         entities["player"]["xp"]["max"] += 20;
                         entities["player"]["hp"]["max"] += 20;
@@ -458,7 +488,7 @@ drawcombat = async (phase, entities, key) => {
 
         }
     }
-
+    // on start of combat
     if(phase == "start"){
         entities["enemy"]["hp"]["cur"] = entities["enemy"]["hp"]["max"];
         clear = (per, colour, callback) => {
@@ -480,10 +510,12 @@ drawcombat = async (phase, entities, key) => {
             });
 
     })
+    //attack
     } else {
         if (key == "a"){
             attcheck(entities, "player", "enemy", "weapon")
             attcheck(entities, "enemy", "player", "weapon")
+        // spell
         }else if (key == "s") {
             if (entities["player"]["ma"]["cur"] >= entities["player"]["spell"]["maCost"][0]){
                 attcheck(entities, "player", "enemy", "spell")
@@ -495,6 +527,7 @@ drawcombat = async (phase, entities, key) => {
             }
 
         }
+        // Disengage
         else if (key == "d") {
             if (Math.random() <= 0.3){
                 combatActive = [false, false]
@@ -515,6 +548,7 @@ drawcombat = async (phase, entities, key) => {
 //COMPRESS --
 function update(key) { //keys
 
+    // function to remove from array
     function arrayRemove(arr, value) {
 
        return arr.filter(function(ele){
@@ -522,10 +556,11 @@ function update(key) { //keys
        });
 
     }
-
+    // removes output
     if($(".output").html() != ""){
         $(".output").html("")
     }
+    // if combat is running
     if (combatActive[0]){
         if (key["type"] == "keyup"){
             keysdown = []
@@ -535,6 +570,7 @@ function update(key) { //keys
         }
     }
     else{
+        // move based on keys pressed down
         let movex = 0;
         let movey = 0;
         var inter = false;
@@ -655,20 +691,40 @@ function selectItem(num){
     else
     {
         if (num == 0) {selected = slot1.textContent.split(":")[0]} if (num == 1) {selected = slot2.textContent.split(":")[0]} if (num == 2) {selected = slot3.textContent.split(":")[0]}
-        for (itemlist in toolbelt) {
-
-            for (i = 0; i < toolbelt[itemlist].length; i++) {
-
-                if (selected === toolbelt[itemlist][i].name) {
-
-                    if (inventstage.split("_")[1] === "weapons") {equipped[0] = toolbelt[itemlist][i];}
-                    if (inventstage.split("_")[1] === "apparel") {equipped[1] = toolbelt[itemlist][i];}
-                    console.log("Equipped: " + selected);
-                    updateInvent(null, null, true, true);
+        if (inventstage.split("_")[1] === "weapons") {
+            for (i in toolbelt.weapons)
+            {
+                if (toolbelt.weapons[i].name === selected)
+                {
+                    if (toolbelt.weapons[i].wc === "w" && toolbelt.weapons[i].level > 0) {
+                        let equip = toolbelt.weapons[i];
+                        toolbelt.weapons.splice(i, 1);
+                        toolbelt.weapons.splice(0, 0, equip);
+                    }
+                    if (toolbelt.weapons[i].wc === "s" && toolbelt.weapons[i].level > 0) {
+                        let equip = toolbelt.weapons[i];
+                        toolbelt.weapons.splice(i, 1);
+                        toolbelt.weapons.splice(1, 0, equip);
+                    }
                 }
-
             }
         }
+        if (inventstage.split("_")[1] === "apparel") {
+            for (i in toolbelt.apparel) {
+                if (toolbelt.apparel[i].name === selected) {
+                    if (toolbelt.apparel[i].level > 0)
+                    {
+                        let equip = toolbelt.weapons[i];
+                        toolbelt.weapons.splice(i, 1);
+                        toolbelt.weapons.splice(0, 0, equip);
+                    }
+                }
+            }
+        }
+        entities.player.armor = toolbelt.apparel[0];
+        entities.player.weapon = toolbelt.weapons[0];
+        entities.player.spell = toolbelt.weapons[1];
+        updateInvent(null);
     }
 }
 
@@ -678,26 +734,19 @@ function interact() {
     console.log("Map: " + map[facod]['type']);
     var minecheck = false;
 
-    if (entities["npc"]["type"].includes(map[facod]['enemy']))
-    {
-        if (!map[facod]['quest'])
-        {
+    if (entities["npc"]["type"].includes(map[facod]['enemy'][0])) {
+        if (!map[facod]['quest']) {
             console.log("Facing NPC: " + facing['enemy']);
-            desc.textContent = "You've received a new quest from the " + map[facod]['enemy'];
-            for(i in questbank)
-            {
-                if (map[facod]['enemy'] === questbank[i].npc && !map[facod]['quest'])
-                {
+            desc.textContent = "You've received a new quest from the " + map[facod]['enemy'][0];
+            for (i in questbank) {
+                if (map[facod]['enemy'][0] === questbank[i].npc && !map[facod]['quest']) {
                     let alreadyexists = false;
-                    for(q in quests)
-                    {
-                        if (quests[q].name === questbank[i].name)
-                        {
+                    for (q in quests) {
+                        if (quests[q].name === questbank[i].name) {
                             alreadyexists = true;
                         }
                     }
-                    if(!alreadyexists)
-                    {
+                    if (!alreadyexists) {
                         let x = quests.unshift(questbank[i]) - 1;
                         quests[x].banked = true;
                         map[facod]['quest'] = true;
@@ -708,21 +757,19 @@ function interact() {
             if (!map[facod]['quest']) //If there are no more quests in the questbank
             {
                 let newquest = {
-                    name: "Help out the " + map[facod]['enemy'],
+                    name: "Help out the " + map[facod]['enemy'][0],
                     desc: "See the requirements",
                     reward: Math.round(distance * Math.random()),
                     req: [Math.round(distance * Math.random()), inventory[Math.round(Math.random() * (inventory.length - 1))].name],
                     completed: false,
-                    npc: map[facod]['enemy'],
+                    npc: map[facod]['enemy'][0],
                     banked: true
                 }
                 let x = quests.push(newquest) - 1;
                 map[facod]['quest'] = true;
                 updateInvent(null);
             }
-        }
-        else
-        {
+        } else {
             desc.textContent = "You can't get another quest from this person";
         }
 
@@ -912,15 +959,12 @@ function MarketLoop()
 }
 
 //QUESTMANAGE -- Perform operations on the quests in inventory
-function questManage(preset)
-{
+function questManage(preset) {
     var done = false;
-    for(i in quests)
-    {
+    for (i in quests) {
 
-        if (quests[i].name === selected && !done){
-            if(preset === "rem")
-            {
+        if (quests[i].name === selected && !done) {
+            if (preset === "rem") {
                 quests[i].banked = false;
                 quests = array_move(quests, i, quests.length - 1);
                 quests.splice(quests.length - 1, 1);
@@ -931,7 +975,7 @@ function questManage(preset)
                 done = true;
             }
             if (preset === "comp") {
-                for(item in inventory){
+                for (item in inventory) {
                     if (quests[i].req[1] === inventory[item].name && inventory[item].amount >= quests[i].req[0]) {
                         selected = "";
                         inventory[item].amount -= quests[i].req[0];
@@ -962,37 +1006,37 @@ function saveGame(op, mapsec = "0,0"){
     //Add tile information to mapchunk
     if(op === "add"){
         let tile = map[mapsec];
-        mapdata = mapsec.split(",")[0] + "|" + mapsec.split(",")[1] + "|" + tile["type"] + "|" + tile["stand"] + "|" + tile["enemy"] + "|" + tile["har"].toString() + "|" + tile["quest"].toString();
+        mapdata = mapsec.split(",")[0] + "|" + mapsec.split(",")[1] + "|" + tile["type"] + "|" + tile["stand"] + "|" + tile["enemy"][0] + "|" + tile["enemy"][1];
     }
     //Add player info to load file
     if(op === "info") {
-    infodata += "x|"+globalpos[0]+".";
-    infodata += "y|" + globalpos[1] + ".";
-    infodata += "money|" + money + ".";
-    infodata += "debt|" + debt + ".";
-    for(i in toolbelt.weapons){
-        infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1]
-        +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
-        +".";
-    }
-    for (i in toolbelt.tools) {
-        infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
-        "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
-        ".";
-    }
-    for (i in toolbelt.apparel) {
-        infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].ac[0] +
-        "|" + toolbelt.apparel[i].ac[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
-        ".";
-    }
-    for (i in inventory) {
-        infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
-    }
-    for (i in quests) {
-        infodata += "quest|" + quests[i].name + "|" + quests[i].desc + "|" + quests[i].reward + "|" + quests[i].req[0] + "|" + quests[i].req[1] +
-        quests[i].completed + "|" + quests[i].npc + "|" + quests[i].banked + "|" +
-        ".";
-    }
+        infodata += "x|"+globalpos[0]+".";
+        infodata += "y|" + globalpos[1] + ".";
+        infodata += "money|" + money + ".";
+        infodata += "debt|" + debt + ".";
+        infodata += "player|"+[entities.player.hp['cur'], entities.player.hp['max'], entities.player.ma['cur'], entities.player.ma['max'], entities.player.xp['cur'], entities.player.xp['max'], entities.player.xp['level']].join("|") + ".";
+        infodata += "enemy|" + [entities.enemy.hp['cur'], entities.enemy.hp['max'], entities.enemy.armor['ac'][0], entities.enemy.weapon['name'], entities.enemy.weapon['damage'][0], entities.enemy.weapon['mod']].join("|") + ".";
+        for (i in toolbelt.weapons) {
+            let wep = toolbelt.weapons[i];
+            infodata += "weapon|" + [wep.name, wep.damage[0], wep.damage[1], wep.mod, wep.speed[0], wep.speed[1], wep.level, wep.cost[0], wep.cost[1], wep.wc, wep.maCost[0], wep.maCost[1]].join("|") + ".";
+        }
+        for (i in toolbelt.apparel) {
+            let wep = toolbelt.apparel[i];
+            infodata += "apparel|" + [wep.name, wep.ac[0], wep.level, wep.cost[0], wep.cost[1], wep.ac[1]].join("|") + ".";
+        }
+        for (i in toolbelt.tools) {
+            infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
+                "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
+                ".";
+        }
+        for (i in inventory) {
+            infodata += "item|" + inventory[i].name + "|" + inventory[i].amount + "|" + inventory[i].cost + "|" + inventory[i].stock + "|" + inventory[i].tile + ".";
+        }
+        for (i in quests) {
+            infodata += "quest|" + quests[i].name + "|" + questbank[i].desc + "|" + questbank[i].reward + "|" + questbank[i].req[0] + "|" + questbank[i].req[1] +
+            questbank[i].completed + "|" + questbank[i].npc + "|" + questbank[i].banked + "|" +
+            ".";
+        }
     }
     //Send request for saving
     if(op !== "add")
@@ -1017,6 +1061,118 @@ function saveGame(op, mapsec = "0,0"){
     }
     //If only adding map info, add to the chunk string
     else{ mapchunk += mapdata + ".";}
+}
+
+function LoadGame(op, file) {
+    if (op === "map") {
+        for (i = 0; i < file.length; i++) {
+            var tile = file[i].split("|")
+            map[tile[0] + "," + tile[1]] = {
+                "type": tile[2],
+                "stand": tile[3],
+                "special": tile[4],
+                "enemy": ["none", false],
+                "har": 0,
+                "quest": false
+            }
+        };
+    }
+    if (op === "save") {
+        inventory = []; toolbelt = {weapons:[], tools:[], apparel:[]};
+        for (i = 0; i < file.length; i++) {
+            var line = file[i].split("|");
+            if (line[0] === "x"){globalpos[0]=parseInt(line[1]);}
+            else if (line[0] === "y"){globalpos[1]=parseInt(line[1]);}
+            else if (line[0] === "debt"){debt=parseInt(line[1]);}
+            else if (line[0] === "money"){money=parseInt(line[1]);}
+            else if (line[0] === "item"){
+                inventory.push({"name": line[1],"amount": parseInt(line[2]),"cost": parseInt(line[3]),"stock": parseInt(line[4]),"tile": line[5]});
+            }
+            else if (line[0] === "quest"){
+                quests.push({
+                    "name": line[1],
+                    "desc": line[2],
+                    "reward": parseInt(line[3]),
+                    "req": [parseInt(line[4]), parseInt(line[5])],
+                    "completed": (line[5] === "true"),
+                    "banked": (line[7] === "true"),
+                    "npc": line[6]
+                });
+            }
+            else if (line[0] === "weapon") {
+                toolbelt.weapons.push({
+                    "name": line[1],
+                    "damage": [parseInt(line[2]), parseInt(line[3])],
+                    "reward": parseInt(line[3]),
+                    "mod": parseInt(line[4]),
+                    "speed": [parseInt(line[5]), parseInt(line[6])],
+                    "level": parseInt(line[7]),
+                    "cost": [parseInt(line[8]), parseInt(line[9])],
+                    "wc": line[10],
+                    "maCost": [parseInt(line[11]), parseInt(line[12])]
+                });
+            }
+            else if (line[0] === "tool") {
+                toolbelt.tools.push({
+                    "name": line[1],
+                    "tilebase": line[2],
+                    "efficiency": [parseInt(line[3]), parseInt(line[4])],
+                    "level": parseInt(line[5]),
+                    "cost": [parseInt(line[6]), parseInt(line[7])],
+                });
+            }
+            else if (line[0] === "apparel") {
+                toolbelt.apparel.push({
+                    "name": line[1],
+                    "ac": [parseInt(line[2]), parseInt(line[6])],
+                    "level": parseInt(line[3]),
+                    "cost": [parseInt(line[4]), parseInt(line[5])]
+                });
+            }
+            else if (line[0] === "player") {
+                entities.player = {
+                    "hp": {"cur": parseInt(line[1]), "max": parseInt(line[2])},
+                    "ma": {"cur": parseInt(line[3]), "max": parseInt(line[4])},
+                    "xp": {"cur": parseInt(line[5]), "max": parseInt(line[6]), "level": parseInt(line[7])},
+                    "colour":"#000000",
+                    "image":tileImage("player")
+                };
+            }
+            else if (line[0] === "enemy") {
+                entities.enemy = {
+                    "hp" : {
+                        "cur": parseInt(line[1]),
+                        "max": parseInt(line[2])
+                    },
+                    "armor": {
+                        "ac": [parseInt(line[3])]
+                    },
+                    "weapon": {
+                        "name": line[4],
+                        "damage": [parseInt(line[5])],
+                        "mod": parseInt(line[6]),
+                    },
+                    "colour": "#ff0000",
+                    "image": tileImage("enemy"),
+                    "hostile": true
+                };
+            }
+            
+        }
+        var checkwep = false;
+        var checksp = false;
+        var wep = [];
+        console.log(toolbelt.tools);
+        for (i in toolbelt.weapons) {
+            if (toolbelt.weapons[i].wc === "w" && !checkwep){wep[0]=toolbelt.weapons[i]; checkwep = true;}
+            if (toolbelt.weapons[i].wc === "s" && !checksp){wep[1]=toolbelt.weapons[i]; checksp = true;}
+        }
+        entities.player.weapon = wep[0];
+        entities.player.armor = toolbelt.apparel[0];
+        entities.player.spell = wep[1];
+        console.log(wep[0]);
+        console.log(entities.player.armor);
+    }
 }
 
 function array_move(arr, old_index, new_index) {
