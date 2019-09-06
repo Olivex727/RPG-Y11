@@ -8,26 +8,15 @@ const sps = 15;
 const sizeOfSquares = (size/sps)
 const playerpos = [(sps-1)/2, (sps-1)/2]
 map[(sps-1)/2+","+(sps-1)/2] = {"type":"grass", "stand":"True", "special": "none", "enemy": "none", "har": 0}
-
-//Compiling information on maps
-LoadGame("map", $.ajax({
-    type: "GET",
-    url: "/map",
-    async: false
-}).responseText.split("\n"));
-
-LoadGame("save", $.ajax({
-    type: "GET",
-    url: "/save",
-    async: false
-}).responseText.split("\n"));
+let mapchunk = "";
 
 // gets image
 tileImage = (image) => {
     let img = new Image();
-    img.src = "/Images/"+image+".png"
+    img.src = "/Images/" + image + ".png"
     return img
 }
+
 // the entities and their stats
 let entities = {
     "player": {
@@ -60,6 +49,22 @@ let entities = {
     },
     "npc": { "colour": "#ff0000", "image": tileImage("npc"), "hostile": false, "type":["villager", "farmer"] }
 }
+
+//Compiling information on maps
+LoadGame("map", $.ajax({
+    type: "GET",
+    url: "/map",
+    async: false
+}).responseText.split("\n"));
+
+///*
+LoadGame("save", $.ajax({
+    type: "GET",
+    url: "/save",
+    async: false
+}).responseText.split("\n"));
+//*/
+
 //Canvas Drawing
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
@@ -384,6 +389,7 @@ const drawscreen = (movex,movey) => {
 
 
                     map[(x+globalpos[0]).toString()+","+(y+globalpos[1]).toString()] = {"type":type, "stand":stand, "special": special, "enemy": enemy, "har": 0}
+                    saveGame("add", (x + globalpos[0]).toString() + "," + (y + globalpos[1]).toString());
                     draw(x,y)
                 }else{
                     console.log(e)
@@ -397,6 +403,7 @@ const drawscreen = (movex,movey) => {
     } else {
         ctx.drawImage(entities["player"]["image"], playerpos[0]*(size/sps)+((size/sps)/8), playerpos[1]*(size/sps)+((size/sps)/8), ((size/sps)/1.3), ((size/sps)/1.3));
     }
+    saveGame("map"); //Progressively add map information to load folder (Helps speed up draw process)
 
 }
 
@@ -998,7 +1005,7 @@ function saveGame(op, mapsec = "0,0"){
     //Add tile information to mapchunk
     if(op === "add"){
         let tile = map[mapsec];
-        mapdata = mapsec.split(",")[0] + "|" + mapsec.split(",")[1] + "|" + tile["type"] + "|" + tile["stand"] + "|" + tile["enemy"] + "|" + tile["har"].toString() + "|" + tile["quest"].toString();
+        mapdata = mapsec.split(",")[0] + "|" + mapsec.split(",")[1] + "|" + tile["type"] + "|" + tile["stand"] + "|" + tile["enemy"][0] + "|" + tile["enemy"][1];
     }
     //Add player info to load file
     if(op === "info") {
@@ -1006,18 +1013,16 @@ function saveGame(op, mapsec = "0,0"){
         infodata += "y|" + globalpos[1] + ".";
         infodata += "money|" + money + ".";
         infodata += "debt|" + debt + ".";
-        //====
-        for(i in toolbelt.weapons){
-            infodata += "weapon|" + toolbelt.weapons[i].name + "|" + toolbelt.weapons[i].damage[0] + "|" + toolbelt.weapons[i].damage[1]
-            +"|" + toolbelt.weapons[i].speed[0] + "|" + toolbelt.weapons[i].speed[1] + "|" + toolbelt.weapons[i].level + "|" + toolbelt.weapons[i].cost[0] + "|" + toolbelt.weapons[i].cost[1]
-            +".";
+        infodata += "player|"+[entities.player.hp['cur'], entities.player.hp['max'], entities.player.ma['cur'], entities.player.ma['max'], entities.player.xp['cur'], entities.player.xp['max'], entities.player.xp['level']].join("|") + ".";
+        infodata += "enemy|" + [entities.enemy.hp['cur'], entities.enemy.hp['max'], entities.enemy.armor['ac'][0], entities.enemy.weapon['name'], entities.enemy.weapon['damage'][0], entities.enemy.weapon['mod']].join("|") + ".";
+        for (i in toolbelt.weapons) {
+            let wep = toolbelt.weapons[i];
+            infodata += "weapon|" + [wep.name, wep.damage[0], wep.damage[1], wep.mod, wep.speed[0], wep.speed[1], wep.level, wep.cost[0], wep.cost[1], wep.wc].join("|") + ".";
         }
         for (i in toolbelt.apparel) {
-            infodata += "apparel|" + toolbelt.apparel[i].name + "|" + toolbelt.apparel[i].ac[0] +
-            "|" + toolbelt.apparel[i].ac[1] + "|" + toolbelt.apparel[i].level + "|" + toolbelt.apparel[i].cost[0] + "|" + toolbelt.apparel[i].cost[1] +
-            ".";
+            let wep = toolbelt.apparel[i];
+            infodata += "apparel|" + [wep.name, wep.ac, wep.level, wep.cost[0], wep.cost[1]].join("|") + ".";
         }
-        //====
         for (i in toolbelt.tools) {
             infodata += "tool|" + toolbelt.tools[i].name + "|" + toolbelt.tools[i].tilebase + "|" + toolbelt.tools[i].efficiency[0] +
                 "|" + toolbelt.tools[i].efficiency[1] + "|" + toolbelt.tools[i].level + "|" + toolbelt.tools[i].cost[0] + "|" + toolbelt.tools[i].cost[1] +
@@ -1102,6 +1107,7 @@ function LoadGame(op, file) {
                     "speed": [parseInt(line[5]), parseInt(line[6])],
                     "level": parseInt(line[7]),
                     "cost": [parseInt(line[8]), parseInt(line[9])],
+                    "wc": line[10]
                 });
             }
             else if (line[0] === "tools") {
@@ -1114,7 +1120,7 @@ function LoadGame(op, file) {
                 });
             }
             else if (line[0] === "apparel") {
-                toolbelt.tools.push({
+                toolbelt.apparel.push({
                     "name": line[1],
                     "ac": parseInt(line[2]),
                     "level": parseInt(line[3]),
@@ -1125,7 +1131,9 @@ function LoadGame(op, file) {
                 entities.player = {
                     "hp": {"cur": parseInt(line[1]), "max": parseInt(line[2])},
                     "ma": {"cur": parseInt(line[3]), "max": parseInt(line[4])},
-                    "xp": {"cur": parseInt(line[5]), "max": parseInt(line[6]), "level": parseInt(line[7])}
+                    "xp": {"cur": parseInt(line[5]), "max": parseInt(line[6]), "level": parseInt(line[7])},
+                    "colour":"#000000",
+                    "image":tileImage("player")
                 };
             }
             else if (line[0] === "enemy") {
@@ -1142,26 +1150,28 @@ function LoadGame(op, file) {
                         "damage": [parseInt(line[5])],
                         "mod": parseInt(line[6]),
                     },
+                    "colour": "#ff0000",
+                    "image": tileImage("enemy"),
                     "hostile": true
                 };
             }
-        };
+            
+        }
+        var checkwep = false;
+        var checksp = false;
+        var wep = [];
+        console.log(toolbelt.apparel);
+        for (i in toolbelt.weapons) {
+            if (toolbelt.weapons[i].wc === "w" && !checkwep){wep[0]=toolbelt.weapons[i]; checkwep = true;}
+            if (toolbelt.weapons[i].wc === "s" && !checksp){wep[1]=toolbelt.weapons[i]; checksp = true;}
+        }
+        entities.player.weapon = wep[0];
+        entities.player.armor = toolbelt.apparel[0];
+        entities.player.spell = wep[1];
+        console.log(wep[0]);
+        console.log(entities.player.armor);
     }
 }
-
-/*
-x|0
-y|0
-debt|0
-money|10000
-item|name|amount|cost|stock|tile
-quest|name|desc|reward|req[0]|req[1]|completed|npc|banked
-weapon|name|damage[0]|damage[1]|mod|speed[0]|speed[1]|level|cost[0]|cost[1]
-tool|name|tilebase|efficiency[0]|efficiency[1]|level|cost[0]|cost[1]
-apparel|name|ac|level|cost[0]|cost[1]
-player|hp[cur]|hp[max]|ma[cur]|ma[max]|xp[cur]|xp[max]|xp[level]
-enemy|hp[cur]|hp[max]|armor[ac]|weapon[name]|weapon[damage]|weapon[mod]
-*/
 
 function array_move(arr, old_index, new_index) {
     if (new_index >= arr.length) {
