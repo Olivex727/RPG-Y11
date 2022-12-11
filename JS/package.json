@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Olivex727/RPG-Y11#readme",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "request": "^2.88.0",
     "simplex-noise": "^2.4.0"
   }
